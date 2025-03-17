@@ -5,217 +5,129 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>MVP Performance Metrics</title>
   
+  <!-- Tailwind CSS (the only external dependency) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
   <style>
-    /* Tailwind-inspired utility classes */
-    :root {
-      --color-primary: #2563EB;
-      --color-primary-light: #60A5FA;
-      --color-primary-dark: #1E40AF;
-      --color-secondary: #475569;
-      --color-secondary-light: #94A3B8;
-      --color-secondary-dark: #334155;
-      --color-success: #059669;
-      --color-success-light: #34D399;
-      --color-border: #E2E8F0;
-      --color-text-primary: #1E293B;
-      --color-text-secondary: #64748B;
-    }
-    
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-    
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-      color: var(--color-text-primary);
-      background: linear-gradient(135deg, #f8fafc, #f1f5f9);
-      min-height: 100vh;
-    }
-    
-    .container {
-      max-width: 1280px;
-      margin: 0 auto;
-      padding: 2rem 1rem;
-    }
-    
-    .title {
-      font-size: 2.25rem;
-      font-weight: 700;
-      color: var(--color-text-primary);
-      margin-bottom: 0.5rem;
-    }
-    
-    .subtitle {
-      font-size: 1rem;
-      color: var(--color-text-secondary);
-      margin-bottom: 2rem;
-    }
-    
-    .grid {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 1.5rem;
-    }
-    
-    @media (min-width: 1024px) {
-      .grid {
-        grid-template-columns: 1fr 1fr;
-      }
-    }
-    
-    .card {
-      background: white;
-      border-radius: 0.75rem;
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-      border: 1px solid var(--color-border);
-      padding: 1.5rem;
-      transition: all 0.3s ease;
-    }
-    
-    .card:hover {
-      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-      border-color: #cbd5e1;
-    }
-    
-    .card-title {
-      font-size: 1.25rem;
-      font-weight: 600;
-      color: var(--color-text-primary);
-      margin-bottom: 0.5rem;
-    }
-    
-    .card-subtitle {
-      font-size: 0.875rem;
-      color: var(--color-text-secondary);
-      margin-bottom: 1.5rem;
-    }
-    
+    /* Custom styles that don't depend on external libraries */
     .chart-container {
-      height: 300px;
       position: relative;
+      height: 300px;
+      margin-bottom: 20px;
     }
     
-    .progress-container {
-      margin-bottom: 1.5rem;
+    .loading-spinner {
+      border: 4px solid #e2e8f0;
+      border-top-color: #2563eb;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto;
     }
     
-    .progress-header {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 0.5rem;
-    }
-    
-    .progress-label {
-      font-size: 0.875rem;
-      font-weight: 500;
-      color: var(--color-text-secondary);
-    }
-    
-    .progress-value {
-      font-size: 0.875rem;
-      font-weight: 700;
-      color: var(--color-primary);
-    }
-    
-    .progress-value.success {
-      color: var(--color-success);
-    }
-    
-    .progress-bar-bg {
-      height: 0.75rem;
-      background-color: #f1f5f9;
-      border-radius: 9999px;
-      overflow: hidden;
-      transition: all 0.3s ease;
-    }
-    
-    .progress-bar-bg:hover {
-      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
     }
     
     .progress-bar {
-      height: 100%;
-      border-radius: 9999px;
       transition: width 1s ease-in-out;
-      width: 0%;
     }
     
-    .progress-bar.primary {
-      background: linear-gradient(to right, var(--color-primary), var(--color-primary-light));
+    .gradient-primary {
+      background: linear-gradient(to right, #2563eb, #60a5fa);
     }
     
-    .progress-bar.success {
-      background: linear-gradient(to right, var(--color-success), var(--color-success-light));
+    .gradient-success {
+      background: linear-gradient(to right, #059669, #34d399);
     }
     
-    .space-y {
-      display: flex;
-      flex-direction: column;
-      gap: 1.5rem;
+    /* Add tooltip styles */
+    .tooltip {
+      position: absolute;
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 10px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.3s;
+      z-index: 10;
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1 class="title">MVP Performance Metrics</h1>
-    <p class="subtitle">Real-time monitoring dashboard</p>
+  <div id="root" class="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-4 md:p-8">
+    <div class="max-w-7xl mx-auto">
+      <h1 class="text-3xl md:text-4xl font-bold text-slate-800 mb-2">MVP Performance Metrics</h1>
+      <p class="text-slate-500 mb-6 md:mb-8">Real-time monitoring dashboard</p>
 
-    <div class="grid">
-      <!-- Notification Time Chart -->
-      <div class="card">
-        <h2 class="card-title">Notification Time Trends</h2>
-        <p class="card-subtitle">Average notification delivery time</p>
-        <div class="chart-container" id="notification-chart"></div>
-      </div>
-
-      <!-- FCR Chart -->
-      <div class="card">
-        <h2 class="card-title">First Call Resolution Rate</h2>
-        <p class="card-subtitle">Percentage of issues resolved in first contact</p>
-        <div class="chart-container" id="fcr-chart"></div>
-      </div>
-
-      <!-- Call Volume Chart -->
-      <div class="card">
-        <h2 class="card-title">Support Call Distribution</h2>
-        <p class="card-subtitle">Weekly breakdown of support calls</p>
-        <div class="chart-container" id="call-volume-chart"></div>
-      </div>
-
-      <!-- KPI Summary -->
-      <div class="card">
-        <h2 class="card-title">Performance Summary</h2>
-        <p class="card-subtitle">Key metrics overview</p>
-        <div class="space-y">
-          <div class="progress-container">
-            <div class="progress-header">
-              <span class="progress-label">Notification Time Reduction</span>
-              <span class="progress-value">66.7%</span>
-            </div>
-            <div class="progress-bar-bg">
-              <div class="progress-bar primary" id="progress-notification"></div>
-            </div>
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
+        <!-- Notification Time Chart -->
+        <div class="bg-white rounded-xl shadow-lg border border-slate-100 p-4 md:p-6 transition-all duration-300 hover:shadow-xl hover:border-slate-200">
+          <h2 class="text-xl font-semibold text-slate-700 mb-2">Notification Time Trends</h2>
+          <p class="text-sm text-slate-500 mb-4 md:mb-6">Average notification delivery time</p>
+          <div class="chart-container">
+            <canvas id="notificationChart"></canvas>
+            <div id="notificationTooltip" class="tooltip"></div>
           </div>
+        </div>
 
-          <div class="progress-container">
-            <div class="progress-header">
-              <span class="progress-label">FCR Improvement</span>
-              <span class="progress-value success">20%</span>
-            </div>
-            <div class="progress-bar-bg">
-              <div class="progress-bar success" id="progress-fcr"></div>
-            </div>
+        <!-- FCR Chart -->
+        <div class="bg-white rounded-xl shadow-lg border border-slate-100 p-4 md:p-6 transition-all duration-300 hover:shadow-xl hover:border-slate-200">
+          <h2 class="text-xl font-semibold text-slate-700 mb-2">First Call Resolution Rate</h2>
+          <p class="text-sm text-slate-500 mb-4 md:mb-6">Percentage of issues resolved in first contact</p>
+          <div class="chart-container">
+            <canvas id="fcrChart"></canvas>
+            <div id="fcrTooltip" class="tooltip"></div>
           </div>
+        </div>
 
-          <div class="progress-container">
-            <div class="progress-header">
-              <span class="progress-label">Call Volume Reduction</span>
-              <span class="progress-value">40%</span>
+        <!-- Call Volume Chart -->
+        <div class="bg-white rounded-xl shadow-lg border border-slate-100 p-4 md:p-6 transition-all duration-300 hover:shadow-xl hover:border-slate-200">
+          <h2 class="text-xl font-semibold text-slate-700 mb-2">Support Call Distribution</h2>
+          <p class="text-sm text-slate-500 mb-4 md:mb-6">Weekly breakdown of support calls</p>
+          <div class="chart-container">
+            <canvas id="callVolumeChart"></canvas>
+            <div id="callVolumeTooltip" class="tooltip"></div>
+          </div>
+        </div>
+
+        <!-- KPI Summary -->
+        <div class="bg-white rounded-xl shadow-lg border border-slate-100 p-4 md:p-6 transition-all duration-300 hover:shadow-xl hover:border-slate-200">
+          <h2 class="text-xl font-semibold text-slate-700 mb-2">Performance Summary</h2>
+          <p class="text-sm text-slate-500 mb-4 md:mb-6">Key metrics overview</p>
+          <div class="space-y-6 md:space-y-8">
+            <div class="group">
+              <div class="flex justify-between mb-2">
+                <span class="text-sm font-medium text-slate-600">Notification Time Reduction</span>
+                <span class="text-sm font-bold text-blue-600">66.7%</span>
+              </div>
+              <div class="h-3 bg-slate-100 rounded-full overflow-hidden transition-all duration-300 group-hover:shadow-inner">
+                <div class="h-full gradient-primary rounded-full transition-all duration-500 progress-bar" style="width: 0%"></div>
+              </div>
             </div>
-            <div class="progress-bar-bg">
-              <div class="progress-bar primary" id="progress-call-volume"></div>
+
+            <div class="group">
+              <div class="flex justify-between mb-2">
+                <span class="text-sm font-medium text-slate-600">FCR Improvement</span>
+                <span class="text-sm font-bold text-emerald-600">20%</span>
+              </div>
+              <div class="h-3 bg-slate-100 rounded-full overflow-hidden transition-all duration-300 group-hover:shadow-inner">
+                <div class="h-full gradient-success rounded-full transition-all duration-500 progress-bar" style="width: 0%"></div>
+              </div>
+            </div>
+
+            <div class="group">
+              <div class="flex justify-between mb-2">
+                <span class="text-sm font-medium text-slate-600">Call Volume Reduction</span>
+                <span class="text-sm font-bold text-indigo-600">40%</span>
+              </div>
+              <div class="h-3 bg-slate-100 rounded-full overflow-hidden transition-all duration-300 group-hover:shadow-inner">
+                <div class="h-full gradient-primary rounded-full transition-all duration-500 progress-bar" style="width: 0%"></div>
+              </div>
             </div>
           </div>
         </div>
@@ -223,8 +135,551 @@
     </div>
   </div>
 
-  <!-- INLINE REACT AND RECHARTS - NO EXTERNAL DEPENDENCIES -->
+  <!-- Pure JavaScript for charts - no external dependencies -->
   <script>
-    // ==================== BUNDLED LIBRARIES ====================
-    // React 18.2.0 (Production)
-    !function(){"use strict";!function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{("undefined"!=typeof window?window:"undefined"!=typeof global?global:"undefined"!=typeof self?self:this).React=e()}}(function(){return function(e){var t={};function n(r){if(t[r])return t[r].exports;var l=t[r]={i:r,l:!1,exports:{}};return e[r].call(l.exports,l,l.exports,n),l.l=!0,l.exports}return n.m=e,n.c=t,n.d=function(e,t,r){n.o(e,t)||Object.defineProperty(e,t,{enumerable:!0,get:r})},n.r=function(e){"undefined"!=typeof Symbol&&Symbol.toStringTag&&Object.defineProperty(e,Symbol.toStringTag,{value:"Module"}),Object.defineProperty(e,"__esModule",{value:!0})},n.t=function(e,t){if(1&t&&(e=n(e)),8&t)return e;if(4&t&&"object"==typeof e&&e&&e.__esModule)return e;var r=Object.create(null);if(n.r(r),Object.defineProperty(r,"default",{enumerable:!0,value:e}),2&t&&"string"!=typeof e)for(var l in e)n.d(r,l,function(t){return e[t]}.bind(null,l));return r},n.n=function(e){var t=e&&e.__esModule?function(){return e.default}:function(){return e};return n.d(t,"a",t),t},n.o=function(e,t){return Object.prototype.hasOwnProperty.call(e,t)},n.p="",n(n.s=21)}([function(e,t,n){"use strict";e.exports=n(22)},function(e,t,n){"use strict";var r=n(3),l=Object.prototype.toString;function a(e){return"[object Array]"===l.call(e)}function i(e){return void 0===e}function o(e){return null!==e&&"object"==typeof e}function u(e){if("[object Object]"!==l.call(e))return!1;var t=Object.getPrototypeOf(e);return null===t||t===Object.prototype}function c(e){return"[object Function]"===l.call(e)}function s(e,t){if(null!=e)if("object"!=typeof e&&(e=[e]),a(e))for(var n=0,r=e.length;n<r;n++)t.call(null,e[n],n,e);else for(var l in e)Object.prototype.hasOwnProperty.call(e,l)&&t.call(null,e[l],l,e)}e.exports={isArray:a,isArrayBuffer:function(e){return"[object ArrayBuffer]"===l.call(e)},isBuffer:function(e){return null!==e&&!i(e)&&null!==e.constructor&&!i(e.constructor)&&"function"==typeof e.constructor.isBuffer&&e.constructor.isBuffer(e)},isFormData:function(e){return"undefined"!=typeof FormData&&e instanceof FormData},isArrayBufferView:function(e){return"undefined"!=typeof ArrayBuffer&&ArrayBuffer.isView?ArrayBuffer.isView(e):e&&e.buffer&&e.buffer instanceof ArrayBuffer},isString:function(e){return"string"==typeof e},isNumber:function(e){return"number"==typeof e},isObject:o,isPlainObject:u,isUndefined:i,isDate:function(e){return"[object Date]"===l.call(e)},isFile:function(e){return"[object File]"===l.call(e)},isBlob:function(e){return"[object Blob]"===l.call(e)},isFunction:c,isStream:function(e){return o(e)&&c(e.pipe)},isURLSearchParams:function(e){return"undefined"!=typeof URLSearchParams&&e instanceof URLSearchParams},isStandardBrowserEnv:function(){return("undefined"==typeof navigator||"ReactNative"!==navigator.product&&"NativeScript"!==navigator.product&&"NS"!==navigator.product)&&("undefined"!=typeof window&&"undefined"!=typeof document)},forEach:s,merge:function e(){var t={};function n(n,r){u(t[r])&&u(n)?t[r]=e(t[r],n):u(n)?t[r]=e({},n):a(n)?t[r]=n.slice():t[r]=n}for(var r=0,l=arguments.length;r<l;r++)s(arguments[r],n);return t},extend:function(e,t,n){return s(t,function(t,l){e[l]=n&&"function"==typeof t?r(t,n):t}),e},trim:function(e){return e.replace(/^\s*/,"").replace(/\s*$/,"")},stripBOM:function(e){return 65279===e.charCodeAt(0)&&(e=e.slice(1)),e}}},function(e,t,n){"use strict";function r(e){this.message=e}r.prototype.toString=function(){return"Cancel"+(this.message?": "+this.message:"")},r.prototype.__CANCEL__=!0,e.exports=r},function(e,t,n){"use strict";e.exports=function(e,t){return function(){for(var n=new Array(arguments.length),r=0;r<n.length;r++)n[r]=arguments[r];return e.apply(t,n)}}},function(e,t,n){"use strict";var r=n(1);function l(e){return encodeURIComponent(e).replace(/%3A/gi,":").replace(/%24/g,"$").replace(/%2C/gi,",").replace(/%20/g,"+").replace(/%5B/gi,"[").replace(/%5D/gi,"]")}e.exports=function(e,t,n){if(!t)return e;var a;if(n)a=n(t);else if(r.isURLSearchParams(t))a=t.toString();else{var i=[];r.forEach(t,function(e,t){null!=e&&(r.isArray(e)?t+="[]":e=[e],r.forEach(e,function(e){r.isDate(e)?e=e.toISOString():r.isObject(e)&&(e=JSON.stringify(e)),i.push(l(t)+"="+l(e))}))}),a=i.join("&")}if(a){var o=e.indexOf("#");-1!==o&&(e=e.slice(0,o)),e+=(-1===e.indexOf("?")?"?":"&")+a}return e}},function(e,t,n){"use strict";e.exports=function(e){return!(!e||!e.__CANCEL__)}},function(e,t,n){"use strict";(function(t){var r=n(1),l=n(29),a={"Content-Type":"application/x-www-form-urlencoded"};function i(e,t){!r.isUndefined(e)&&r.isUndefined(e["Content-Type"])&&(e["Content-Type"]=t)}var o,u={adapter:(("undefined"!=typeof XMLHttpRequest||void 0!==t&&"[object process]"===Object.prototype.toString.call(t))&&(o=n(7)),o),transformRequest:[function(e,t){return l(t,"Accept"),l(t,"Content-Type"),r.isFormData(e)||r.isArrayBuffer(e)||r.isBuffer(e)||r.isStream(e)||r.isFile(e)||r.isBlob(e)?e:r.isArrayBufferView(e)?e.buffer:r.isURLSearchParams(e)?(i(t,"application/x-www-form-urlencoded;charset=utf-8"),e.toString()):r.isObject(e)?(i(t,"application/json;charset=utf-8"),JSON.stringify(e)):e}],transformResponse:[function(e){if("string"==typeof e)try{e=JSON.parse(e)}catch(e){}return e}],timeout:0,xsrfCookieName:"XSRF-TOKEN",xsrfHeaderName:"X-XSRF-TOKEN",maxContentLength:-1,maxBodyLength:-1,validateStatus:function(e){return e>=200&&e<300}};u.headers={common:{Accept:"application/json, text/plain, */*"}},r.forEach(["delete","get","head"],function(e){u.headers[e]={}}),r.forEach(["post","put","patch"],function(e){u.headers[e]=r.merge(a)}),e.exports=u}).call(this,n(28))},function(e,t,n){"use strict";var r=n(1),l=n(30),a=n(32),i=n(4),o=n(33),u=n(36),c=n(37),s=n(8);e.exports=function(e){return new Promise(function(t,n){var f=e.data,d=e.headers;r.isFormData(f)&&delete d["Content-Type"];var p=new XMLHttpRequest;if(e.auth){var m=e.auth.username||"",h=e.auth.password?unescape(encodeURIComponent(e.auth.password)):"";d.Authorization="Basic "+btoa(m+":"+h)}var y=o(e.baseURL,e.url);if(p.open(e.method.toUpperCase(),i(y,e.params,e.paramsSerializer),!0),p.timeout=e.timeout,p.onreadystatechange=function(){if(p&&4===p.readyState&&(0!==p.status||p.responseURL&&0===p.responseURL.indexOf("file:"))){var r="getAllResponseHeaders"in p?u(p.getAllResponseHeaders()):null,a={data:e.responseType&&"text"!==e.responseType?p.response:p.responseText,status:p.status,statusText:p.statusText,headers:r,config:e,request:p};l(t,n,a),p=null}},p.onabort=function(){p&&(n(s("Request aborted",e,"ECONNABORTED",p)),p=null)},p.onerror=function(){n(s("Network Error",e,null,p)),p=null},p.ontimeout=function(){var t="timeout of "+e.timeout+"ms exceeded";e.timeoutErrorMessage&&(t=e.timeoutErrorMessage),n(s(t,e,"ECONNABORTED",p)),p=null},r.isStandardBrowserEnv()){var v=(e.withCredentials||c(y))&&e.xsrfCookieName?a.read(e.xsrfCookieName):void 0;v&&(d[e.xsrfHeaderName]=v)}if("setRequestHeader"in p&&r.forEach(d,function(e,t){void 0===f&&"content-type"===t.toLowerCase()?delete d[t]:p.setRequestHeader(t,e)}),r.isUndefined(e.withCredentials)||(p.withCredentials=!!e.withCredentials),e.responseType)try{p.responseType=e.responseType}catch(t){if("json"!==e.responseType)throw t}"function"==typeof e.onDownloadProgress&&p.addEventListener("progress",e.onDownloadProgress),"function"==typeof e.onUploadProgress&&p.upload&&p.upload.addEventListener("progress",e.onUploadProgress),e.cancelToken&&e.cancelToken.promise.then(function(e){p&&(p.abort(),n(e),p=null)}),f||(f=null),p.send(f)})}},function(e,t,n){"use strict";var r=n(31);e.exports=function(e,t,n,l,a){var i=new Error(e);return r(i,t,n,l,a)}},function(e,t,n){"use strict";var r=n(1);e.exports=function(e,t){t=t||{};var n={},l=["url","method","data"],a=["headers","auth","proxy","params"],i=["baseURL","transformRequest","transformResponse","paramsSerializer","timeout","timeoutMessage","withCredentials","adapter","responseType","xsrfCookieName","xsrfHeaderName","onUploadProgress","onDownloadProgress","decompress","maxContentLength","maxBodyLength","maxRedirects","transport","httpAgent","httpsAgent","cancelToken","socketPath","responseEncoding"],o=["validateStatus"];function u(e,t){return r.isPlainObject(e)&&r.isPlainObject(t)?r.merge(e,t):r.isPlainObject(t)?r.merge({},t):r.isArray(t)?t.slice():t}function c(l){r.isUndefined(t[l])?r.isUndefined(e[l])||(n[l]=u(void 0,e[l])):n[l]=u(e[l],t[l])}r.forEach(l,function(e){r.isUndefined(t[e])||(n[e]=u(void 0,t[e]))}),r.forEach(a,c),r.forEach(i,function(l){r.isUndefined(t[l])?r.isUndefined(e[l])||(n[l]=u(void 0,e[l])):n[l]=u(void 0,t[l])}),r.forEach(o,function(r){r in t?n[r]=u(e[r],t[r]):r in e&&(n[r]=u(void 0,e[r]))});var s=l.concat(a).concat(i).concat(o),f=Object.keys(e).concat(Object.keys(t)).filter(function(e){return-1===s.indexOf(e)});return r.forEach(f,c),n}},function(e,t,n){"use strict";function r(e){this.message=e}r.prototype.toString=function(){return"Cancel"+(this.message?": "+this.message:"")},r.prototype.__CANCEL__=!0,e.exports=r},function(e,t,n){"use strict";e.exports=n(42)},function(e,t,n){"use strict";(function(e){var r=n(13),l=n.n(r);function a(e){return(a="function"==typeof Symbol&&"symbol"==typeof Symbol.iterator?function(e){return typeof e}:function(e){return e&&"function"==typeof Symbol&&e.constructor===Symbol&&e!==Symbol.prototype?"symbol":typeof e})(e)}function i(e,t){if(!(e instanceof t))throw new TypeError("Cannot call a class as a function")}function o(e,t){for(var n=0;n<t.length;n++){var r=t[n];r.enumerable=r.enumerable||!1,r.configurable=!0,"value"in r&&(r.writable=!0),Object.defineProperty(e,r.key,r)}}function u(e,t,n){return t&&o(e.prototype,t),n&&o(e,n),e}function c(e,t,n){return t in e?Object.defineProperty(e,t,{value:n,enumerable:!0,configurable:!0,writable:!0}):e[t]=n,e}function s(){return(s=Object.assign||function(e){for(var t=1;t<arguments.length;t++){var n=arguments[t];for(var r in n)Object.prototype.hasOwnProperty.call(n,r)&&(e[r]=n[r])}return e}).apply(this,arguments)}function f(e,t){var n=Object.keys(e);if(Object.getOwnPropertySymbols){var r=Object.getOwnPropertySymbols(e);t&&(r=r.filter(function(t){return Object.getOwnPropertyDescriptor(e,t).enumerable})),n.push.apply(n,r)}return n}function d(e){for(var t=1;t<arguments.length;t++){var n=null!=arguments[t]?arguments[t]:{};t%2?f(Object(n),!0).forEach(function(t){c(e,t,n[t])}):Object.getOwnPropertyDescriptors?Object.defineProperties(e,Object.getOwnPropertyDescriptors(n)):f(Object(n)).forEach(function(t){Object.defineProperty(e,t,Object.getOwnPropertyDescriptor(n,t))})}return e}function p(e,t){if("function"!=typeof t&&null!==t)throw new TypeError("Super expression must either be null or a function");e.prototype=Object.create(t&&t.prototype,{constructor:{value:e,writable:!0,configurable:!0}}),t&&h(e,t)}function m(e){return(m=Object.setPrototypeOf?Object.getPrototypeOf:function(e){return e.__proto__||Object.getPrototypeOf(e)})(e)}function h(e,t){return(h=Object.setPrototypeOf||function(e,t){return e.__proto__=t,e})(e,t)}function y(e,t){if(null==e)return{};var n,r,l=function(e,t){if(null==e)return{};var n,r,l={},a=Object.keys(e);for(r=0;r<a.length;r++)n=a[r],t.indexOf(n)>=0||(l[n]=e[n]);return l}(e,t);if(Object.getOwnPropertySymbols){var a=Object.getOwnPropertySymbols(e);for(r=0;r<a.length;r++)n=a[r],t.indexOf(n)>=0||Object.prototype.propertyIsEnumerable.call(e,n)&&(l[n]=e[n])}return l}function v(e){if(void 0===e)throw new ReferenceError("this hasn't been initialised - super() hasn't been called");return e}function g(e,t){return!t||"object"!=typeof t&&"function"!=typeof t?v(e):t}function b(e){var t=function(){if("undefined"==typeof Reflect||!Reflect.construct)return!1;if(Reflect.construct.sham)return!1;if("function"==typeof Proxy)return!0;try{return Date.prototype.toString.call(Reflect.construct(Date,[],function(){})),!0}catch(e){return!1}}();return function(){var n,r=m(e);if(t){var l=m(this).constructor;n=Reflect.construct(r,arguments,l)}else n=r.apply(this,arguments);return g(this,n)}}function w(e){return function(e){if(Array.isArray(e))return k(e)}(e)||function(e){if("undefined"!=typeof Symbol&&Symbol.iterator in Object(e))return Array.from(e)}(e)||function(e,t){if(!e)return;if("string"==typeof e)return k(e,t);var n=Object.prototype.toString.call(e).slice(8,-1);"Object"===n&&e.constructor&&(n=e.constructor.name);if("Map"===n||"Set"===n)return Array.from(e);if("Arguments"===n||/^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n))return k(e,t)}(e)||function(){throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.")}()}function k(e,t){(null==t||t>e.length)&&(t=e.length);for(var n=0,r=new Array(t);n<t;n++)r[n]=e[n];return r}var E=function(){},x={},T={},S=null,C={mark:E,measure:E};try{"undefined"!=typeof window&&(x=window),"undefined"!=typeof document&&(T=document),"undefined"!=typeof MutationObserver&&(S=MutationObserver),"undefined"!=typeof performance&&(C=performance)}catch(r){}var _=(x.navigator||{}).userAgent,P=void 0===_?"":_,N=x,z=T,O=S,M=C,I=(N.document,!!z.documentElement&&!!z.head&&"function"==typeof z.addEventListener&&"function"==typeof z.createElement),R=~P.indexOf("MSIE")||~P.indexOf("Trident/"),F="___FONT_AWESOME___",D=16,L="fa",A="svg-inline--fa",U="data-fa-i2svg",j="data-fa-pseudo-element",V="data-fa-pseudo-element-pending",W="data-prefix",B="data-icon",$="fontawesome-i2svg",H="async",Q=["HTML","HEAD","STYLE","SCRIPT"],K=function(){try{return!0}catch(e){return!1}}(),q="classic",Y="sharp",X=[q,Y];function G(e){return new Proxy(e,{get:function(e,t){return t in e?e[t]:e[q]}})}var Z=G((c(n={},q,{fa:"solid",fas:"solid","fa-solid":"solid",far:"regular","fa-regular":"regular",fal:"light","fa-light":"light",fat:"thin","fa-thin":"thin",fad:"duotone","fa-duotone":"duotone",fab:"brands","fa-brands":"brands",fak:"kit","fa-kit":"kit"}),c(n,Y,{fa:"solid",fass:"solid","fa-solid":"solid"}),n)),J=G((c(r={},q,{solid:"fas",regular:"far",light:"fal",thin:"fat",duotone:"fad",brands:"fab",kit:"fak"}),c(r,Y,{solid:"fass"}),r)),ee=G((c(l={},q,{fab:"fa-brands",fad:"fa-duotone",fak:"fa-kit",fal:"fa-light",far:"fa-regular",fas:"fa-solid",fat:"fa-thin"}),c(l,Y,{fass:"fa-solid"}),l)),te=G((c(a={},q,{"fa-brands":"fab
+    // Sample data
+    const notificationTimeData = [
+      { day: '2025-01-01', avg_time: 42, baseline: 45, target: 11 },
+      { day: '2025-01-08', avg_time: 35, baseline: 45, target: 11 },
+      { day: '2025-01-15', avg_time: 28, baseline: 45, target: 11 },
+      { day: '2025-01-22', avg_time: 20, baseline: 45, target: 11 },
+      { day: '2025-01-29', avg_time: 15, baseline: 45, target: 11 },
+    ];
+
+    const fcrData = [
+      { week: 'Week 1', rate: 65, target: 80 },
+      { week: 'Week 2', rate: 70, target: 80 },
+      { week: 'Week 3', rate: 75, target: 80 },
+      { week: 'Week 4', rate: 78, target: 80 },
+    ];
+
+    const callVolumeData = [
+      { week: 'Week 1', total_calls: 1000, outage_calls: 300 },
+      { week: 'Week 2', total_calls: 850, outage_calls: 200 },
+      { week: 'Week 3', total_calls: 700, outage_calls: 150 },
+      { week: 'Week 4', total_calls: 600, outage_calls: 100 },
+    ];
+
+    // Color configuration
+    const colors = {
+      primary: {
+        main: '#2563EB',
+        light: '#60A5FA',
+        dark: '#1E40AF',
+      },
+      secondary: {
+        main: '#475569',
+        light: '#94A3B8',
+        dark: '#334155',
+      },
+      success: {
+        main: '#059669',
+        light: '#34D399',
+      },
+      border: '#E2E8F0',
+      text: {
+        primary: '#1E293B',
+        secondary: '#64748B'
+      }
+    };
+
+    // Helper function to draw a line chart
+    function drawLineChart(canvasId, data, config) {
+      const canvas = document.getElementById(canvasId);
+      const ctx = canvas.getContext('2d');
+      const tooltipEl = document.getElementById(config.tooltipId);
+      
+      // Set canvas dimensions
+      canvas.width = canvas.parentNode.clientWidth;
+      canvas.height = canvas.parentNode.clientHeight;
+      
+      // Calculate chart area
+      const padding = 40;
+      const chartArea = {
+        x: padding,
+        y: padding,
+        width: canvas.width - (padding * 2),
+        height: canvas.height - (padding * 2) - 30 // Extra space for legend
+      };
+      
+      // Find min and max values for Y axis
+      let minY = Infinity;
+      let maxY = -Infinity;
+      
+      config.lines.forEach(line => {
+        data.forEach(item => {
+          const value = item[line.dataKey];
+          if (value < minY) minY = value;
+          if (value > maxY) maxY = value;
+        });
+      });
+      
+      // Add some padding to the min/max values
+      const yPadding = (maxY - minY) * 0.1;
+      minY = Math.max(0, minY - yPadding);
+      maxY = maxY + yPadding;
+      
+      // Draw background grid
+      ctx.strokeStyle = colors.border;
+      ctx.lineWidth = 1;
+      
+      // Horizontal grid lines
+      const ySteps = 5;
+      for (let i = 0; i <= ySteps; i++) {
+        const y = chartArea.y + (chartArea.height * (1 - (i / ySteps)));
+        
+        ctx.beginPath();
+        ctx.moveTo(chartArea.x, y);
+        ctx.lineTo(chartArea.x + chartArea.width, y);
+        ctx.stroke();
+        
+        // Y-axis labels
+        const value = minY + ((maxY - minY) * (i / ySteps));
+        ctx.fillStyle = colors.text.secondary;
+        ctx.font = '12px Arial';
+        ctx.textAlign = 'right';
+        ctx.fillText(Math.round(value), chartArea.x - 10, y + 4);
+      }
+      
+      // X-axis and labels
+      const xStep = chartArea.width / (data.length - 1);
+      data.forEach((item, i) => {
+        const x = chartArea.x + (i * xStep);
+        
+        // X-axis tick
+        ctx.beginPath();
+        ctx.moveTo(x, chartArea.y + chartArea.height);
+        ctx.lineTo(x, chartArea.y + chartArea.height + 5);
+        ctx.stroke();
+        
+        // X-axis label
+        ctx.fillStyle = colors.text.secondary;
+        ctx.font = '12px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText(item[config.xKey], x, chartArea.y + chartArea.height + 20);
+      });
+      
+      // Draw lines
+      config.lines.forEach(line => {
+        ctx.strokeStyle = line.color;
+        ctx.lineWidth = line.width || 2;
+        
+        if (line.dashed) {
+          ctx.setLineDash([5, 5]);
+        } else {
+          ctx.setLineDash([]);
+        }
+        
+        ctx.beginPath();
+        
+        data.forEach((item, i) => {
+          const x = chartArea.x + (i * xStep);
+          const yRatio = (item[line.dataKey] - minY) / (maxY - minY);
+          const y = chartArea.y + chartArea.height - (yRatio * chartArea.height);
+          
+          if (i === 0) {
+            ctx.moveTo(x, y);
+          } else {
+            ctx.lineTo(x, y);
+          }
+          
+          // Draw dots
+          if (line.dots) {
+            ctx.fillStyle = line.color;
+            ctx.beginPath();
+            ctx.arc(x, y, 4, 0, Math.PI * 2);
+            ctx.fill();
+          }
+        });
+        
+        ctx.stroke();
+      });
+      
+      // Draw legend
+      const legendY = chartArea.y + chartArea.height + 30;
+      let legendX = chartArea.x;
+      
+      config.lines.forEach(line => {
+        // Line symbol
+        ctx.strokeStyle = line.color;
+        ctx.lineWidth = 2;
+        
+        if (line.dashed) {
+          ctx.setLineDash([5, 5]);
+        } else {
+          ctx.setLineDash([]);
+        }
+        
+        ctx.beginPath();
+        ctx.moveTo(legendX, legendY);
+        ctx.lineTo(legendX + 20, legendY);
+        ctx.stroke();
+        
+        // Text
+        ctx.fillStyle = colors.text.primary;
+        ctx.font = '12px Arial';
+        ctx.textAlign = 'left';
+        ctx.fillText(line.name, legendX + 25, legendY + 4);
+        
+        legendX += ctx.measureText(line.name).width + 50;
+      });
+      
+      // Handle tooltip
+      let activePoint = null;
+      
+      canvas.addEventListener('mousemove', function(e) {
+        const rect = canvas.getBoundingClientRect();
+        const mouseX = e.clientX - rect.left;
+        const mouseY = e.clientY - rect.top;
+        
+        // Find closest point
+        let closestDistance = Infinity;
+        let closestPoint = null;
+        let closestDataIndex = -1;
+        
+        data.forEach((item, i) => {
+          const x = chartArea.x + (i * xStep);
+          
+          config.lines.forEach(line => {
+            const yRatio = (item[line.dataKey] - minY) / (maxY - minY);
+            const y = chartArea.y + chartArea.height - (yRatio * chartArea.height);
+            
+            const distance = Math.sqrt(Math.pow(mouseX - x, 2) + Math.pow(mouseY - y, 2));
+            
+            if (distance < closestDistance && distance < 30) {
+              closestDistance = distance;
+              closestPoint = { x, y };
+              closestDataIndex = i;
+            }
+          });
+        });
+        
+        if (closestPoint) {
+          // Show tooltip
+          tooltipEl.style.opacity = 1;
+          tooltipEl.style.left = (closestPoint.x + rect.left) + 'px';
+          tooltipEl.style.top = (closestPoint.y + rect.top - 70) + 'px';
+          
+          // Build tooltip content
+          let tooltipContent = `<div class="font-semibold">${data[closestDataIndex][config.xKey]}</div>`;
+          
+          config.lines.forEach(line => {
+            tooltipContent += `<div class="flex items-center mt-1">
+              <span class="inline-block w-3 h-3 rounded-full mr-2" style="background-color: ${line.color}"></span>
+              <span>${line.name}: ${data[closestDataIndex][line.dataKey]}</span>
+            </div>`;
+          });
+          
+          tooltipEl.innerHTML = tooltipContent;
+          
+          activePoint = closestPoint;
+        } else if (activePoint) {
+          // Hide tooltip
+          tooltipEl.style.opacity = 0;
+          activePoint = null;
+        }
+      });
+      
+      canvas.addEventListener('mouseleave', function() {
+        tooltipEl.style.opacity = 0;
+        activePoint = null;
+      });
+    }
+    
+    // Helper function to draw a bar chart
+    function drawBarChart(canvasId, data, config) {
+      const canvas = document.getElementById(canvasId);
+      const ctx = canvas.getContext('2d');
+      const tooltipEl = document.getElementById(config.tooltipId);
+      
+      // Set canvas dimensions
+      canvas.width = canvas.parentNode.clientWidth;
+      canvas.height = canvas.parentNode.clientHeight;
+      
+      // Calculate chart area
+      const padding = 40;
+      const chartArea = {
+        x: padding,
+        y: padding,
+        width: canvas.width - (padding * 2),
+        height: canvas.height - (padding * 2) - 30 // Extra space for legend
+      };
+      
+      // Find max value for Y axis
+      let maxY = 0;
+      
+      config.bars.forEach(bar => {
+        data.forEach(item => {
+          const value = item[bar.dataKey];
+          if (value > maxY) maxY = value;
+        });
+      });
+      
+      // Add some padding to the max value
+      maxY = maxY * 1.1;
+      
+      // Draw background grid
+      ctx.strokeStyle = colors.border;
+      ctx.lineWidth = 1;
+      
+      // Horizontal grid lines
+      const ySteps = 5;
+      for (let i = 0; i <= ySteps; i++) {
+        const y = chartArea.y + (chartArea.height * (1 - (i / ySteps)));
+        
+        ctx.beginPath();
+        ctx.moveTo(chartArea.x, y);
+        ctx.lineTo(chartArea.x + chartArea.width, y);
+        ctx.stroke();
+        
+        // Y-axis labels
+        const value = (maxY * (i / ySteps));
+        ctx.fillStyle = colors.text.secondary;
+        ctx.font = '12px Arial';
+        ctx.textAlign = 'right';
+        ctx.fillText(Math.round(value), chartArea.x - 10, y + 4);
+      }
+      
+      // X-axis and labels
+      const barGroupWidth = chartArea.width / data.length;
+      const barWidth = barGroupWidth * 0.7 / config.bars.length;
+      const barGroupPadding = barGroupWidth * 0.15;
+      
+      data.forEach((item, i) => {
+        const x = chartArea.x + (i * barGroupWidth) + barGroupPadding;
+        
+        // X-axis label
+        ctx.fillStyle = colors.text.secondary;
+        ctx.font = '12px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText(item[config.xKey], x + (barGroupWidth - barGroupPadding * 2) / 2, chartArea.y + chartArea.height + 20);
+        
+        // Draw bars
+        config.bars.forEach((bar, j) => {
+          const barX = x + (j * barWidth);
+          const barHeight = (item[bar.dataKey] / maxY) * chartArea.height;
+          const barY = chartArea.y + chartArea.height - barHeight;
+          
+          // Bar
+          ctx.fillStyle = bar.color;
+          ctx.beginPath();
+          ctx.roundRect(barX, barY, barWidth, barHeight, [4, 4, 0, 0]);
+          ctx.fill();
+        });
+      });
+      
+      // Draw legend
+      const legendY = chartArea.y + chartArea.height + 30;
+      let legendX = chartArea.x;
+      
+      config.bars.forEach(bar => {
+        // Bar symbol
+        ctx.fillStyle = bar.color;
+        ctx.fillRect(legendX, legendY - 6, 15, 12);
+        
+        // Text
+        ctx.fillStyle = colors.text.primary;
+        ctx.font = '12px Arial';
+        ctx.textAlign = 'left';
+        ctx.fillText(bar.name, legendX + 20, legendY + 4);
+        
+        legendX += ctx.measureText(bar.name).width + 45;
+      });
+      
+      // Handle tooltip
+      canvas.addEventListener('mousemove', function(e) {
+        const rect = canvas.getBoundingClientRect();
+        const mouseX = e.clientX - rect.left;
+        const mouseY = e.clientY - rect.top;
+        
+        let activeBar = null;
+        
+        data.forEach((item, i) => {
+          const x = chartArea.x + (i * barGroupWidth) + barGroupPadding;
+          
+          config.bars.forEach((bar, j) => {
+            const barX = x + (j * barWidth);
+            const barHeight = (item[bar.dataKey] / maxY) * chartArea.height;
+            const barY = chartArea.y + chartArea.height - barHeight;
+            
+            if (
+              mouseX >= barX && 
+              mouseX <= barX + barWidth && 
+              mouseY >= barY && 
+              mouseY <= barY + barHeight
+            ) {
+              // Show tooltip
+              tooltipEl.style.opacity = 1;
+              tooltipEl.style.left = (barX + barWidth/2 + rect.left) + 'px';
+              tooltipEl.style.top = (barY + rect.top - 60) + 'px';
+              
+              // Build tooltip content
+              let tooltipContent = `<div class="font-semibold">${item[config.xKey]}</div>
+                <div class="flex items-center mt-1">
+                  <span class="inline-block w-3 h-3 rounded-full mr-2" style="background-color: ${bar.color}"></span>
+                  <span>${bar.name}: ${item[bar.dataKey]}</span>
+                </div>`;
+              
+              tooltipEl.innerHTML = tooltipContent;
+              
+              activeBar = { barX, barY };
+            }
+          });
+        });
+        
+        if (!activeBar) {
+          tooltipEl.style.opacity = 0;
+        }
+      });
+      
+      canvas.addEventListener('mouseleave', function() {
+        tooltipEl.style.opacity = 0;
+      });
+    }
+
+    // Initialize charts when the page loads
+    window.addEventListener('DOMContentLoaded', function() {
+      // Draw notification time chart
+      drawLineChart('notificationChart', notificationTimeData, {
+        xKey: 'day',
+        tooltipId: 'notificationTooltip',
+        lines: [
+          { 
+            dataKey: 'avg_time', 
+            name: 'Current', 
+            color: colors.primary.main,
+            width: 3,
+            dots: true
+          },
+          { 
+            dataKey: 'baseline', 
+            name: 'Baseline', 
+            color: colors.secondary.main,
+            dashed: true
+          },
+          { 
+            dataKey: 'target', 
+            name: 'Target', 
+            color: colors.success.main,
+            dashed: true
+          }
+        ]
+      });
+      
+      // Draw FCR chart
+      drawLineChart('fcrChart', fcrData, {
+        xKey: 'week',
+        tooltipId: 'fcrTooltip',
+        lines: [
+          { 
+            dataKey: 'rate', 
+            name: 'FCR Rate', 
+            color: colors.primary.main,
+            width: 3,
+            dots: true
+          },
+          { 
+            dataKey: 'target', 
+            name: 'Target', 
+            color: colors.success.main,
+            dashed: true
+          }
+        ]
+      });
+      
+      // Draw call volume chart
+      drawBarChart('callVolumeChart', callVolumeData, {
+        xKey: 'week',
+        tooltipId: 'callVolumeTooltip',
+        bars: [
+          { 
+            dataKey: 'total_calls', 
+            name: 'Total Calls', 
+            color: colors.primary.light
+          },
+          { 
+            dataKey: 'outage_calls', 
+            name: 'Outage-Related', 
+            color: colors.secondary.light
+          }
+        ]
+      });
+      
+      // Animate progress bars
+      setTimeout(function() {
+        const progressBars = document.querySelectorAll('.progress-bar');
+        progressBars[0].style.width = '66.7%';
+        progressBars[1].style.width = '20%';
+        progressBars[2].style.width = '40%';
+      }, 500);
+      
+      // Handle window resize
+      window.addEventListener('resize', function() {
+        // Redraw charts on window resize
+        drawLineChart('notificationChart', notificationTimeData, {
+          xKey: 'day',
+          tooltipId: 'notificationTooltip',
+          lines: [
+            { 
+              dataKey: 'avg_time', 
+              name: 'Current', 
+              color: colors.primary.main,
+              width: 3,
+              dots: true
+            },
+            { 
+              dataKey: 'baseline', 
+              name: 'Baseline', 
+              color: colors.secondary.main,
+              dashed: true
+            },
+            { 
+              dataKey: 'target', 
+              name: 'Target', 
+              color: colors.success.main,
+              dashed: true
+            }
+          ]
+        });
+        
+        drawLineChart('fcrChart', fcrData, {
+          xKey: 'week',
+          tooltipId: 'fcrTooltip',
+          lines: [
+            { 
+              dataKey: 'rate', 
+              name: 'FCR Rate', 
+              color: colors.primary.main,
+              width: 3,
+              dots: true
+            },
+            { 
+              dataKey: 'target', 
+              name: 'Target', 
+              color: colors.success.main,
+              dashed: true
+            }
+          ]
+        });
+        
+        drawBarChart('callVolumeChart', callVolumeData, {
+          xKey: 'week',
+          tooltipId: 'callVolumeTooltip',
+          bars: [
+            { 
+              dataKey: 'total_calls', 
+              name: 'Total Calls', 
+              color: colors.primary.light
+            },
+            { 
+              dataKey: 'outage_calls', 
+              name: 'Outage-Related', 
+              color: colors.secondary.light
+            }
+          ]
+        });
+      });
+    });
+  </script>
+</body>
+</html>
