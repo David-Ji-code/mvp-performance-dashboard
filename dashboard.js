@@ -277,3 +277,6 @@ try {
     </div>
   `;
 }
+
+window.dashboardLoaded = true;
+clearTimeout(window.fallbackTimer);
