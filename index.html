@@ -75,5 +75,22 @@
       }, 500); // Short delay to ensure libraries are loaded
     });
   </script>
+
+<script>
+  // Fallback mechanism - if dashboard doesn't load within 5 seconds, load the fallback
+  const fallbackTimer = setTimeout(function() {
+    if (!window.dashboardLoaded) {
+      console.warn('Dashboard failed to load in time, loading fallback...');
+      const fallbackScript = document.createElement('script');
+      fallbackScript.src = 'fallback.js';
+      document.body.appendChild(fallbackScript);
+    }
+  }, 5000);
+  
+  // Add this to dashboard.js at the end:
+  // window.dashboardLoaded = true;
+  // clearTimeout(window.fallbackTimer);
+</script>
+
 </body>
 </html>
