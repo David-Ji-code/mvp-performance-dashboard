@@ -5,18 +5,22 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>MVP Performance Metrics</title>
   
-  <!-- External Dependencies - Load in correct order -->
+  <!-- Core React dependencies -->
   <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-  <!-- Specific version of Recharts to avoid compatibility issues -->
-  <script src="https://unpkg.com/recharts@2.5.0/umd/Recharts.js"></script>
+  
+  <!-- Local Recharts file instead of CDN -->
+  <script src="recharts.js"></script>
+  
+  <!-- Babel for JSX -->
   <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+  
+  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   
   <!-- Custom Styles -->
   <link rel="stylesheet" href="styles.css">
   
-  <!-- Initial loading state -->
   <style>
     .loading-spinner {
       border: 4px solid #e2e8f0;
@@ -45,48 +49,31 @@
     </div>
   </div>
 
-  <!-- Library check script -->
+  <!-- Simple library check -->
   <script>
-    function checkLibraries() {
-      if (typeof React === 'undefined') {
-        console.error('React not loaded');
-        showError('React library failed to load');
-        return false;
-      }
-      
-      if (typeof ReactDOM === 'undefined') {
-        console.error('ReactDOM not loaded');
-        showError('ReactDOM library failed to load');
-        return false;
-      }
-      
-      if (typeof Recharts === 'undefined') {
-        console.error('Recharts not loaded');
-        showError('Recharts library failed to load');
-        return false;
-      }
-      
-      console.log('All libraries loaded successfully');
-      return true;
-    }
-    
-    function showError(message) {
-      document.getElementById('root').innerHTML = `
-        <div style="text-align: center; padding: 2rem;">
-          <h2 style="color: #dc2626; margin-bottom: 1rem;">Error: ${message}</h2>
-          <p style="margin-bottom: 1rem;">Please check your internet connection and try again.</p>
-          <button onclick="location.reload()" style="background-color: #2563EB; color: white; padding: 8px 16px; border-radius: 4px; border: none; cursor: pointer;">
-            Reload Page
-          </button>
-        </div>
-      `;
-    }
-    
-    // Check libraries after a short delay to ensure they've had time to load
-    setTimeout(checkLibraries, 1000);
+    window.addEventListener('DOMContentLoaded', function() {
+      setTimeout(function() {
+        if (typeof Recharts === 'undefined') {
+          console.error('Recharts not loaded');
+          document.getElementById('root').innerHTML = `
+            <div style="text-align: center; padding: 2rem;">
+              <h2 style="color: #dc2626; margin-bottom: 1rem;">Error: Recharts library failed to load</h2>
+              <p style="margin-bottom: 1rem;">Please check your internet connection and try again.</p>
+              <button onclick="location.reload()" style="background-color: #2563EB; color: white; padding: 8px 16px; border-radius: 4px; border: none; cursor: pointer;">
+                Reload Page
+              </button>
+            </div>
+          `;
+        } else {
+          console.log('Recharts loaded successfully');
+          // Load dashboard after confirming Recharts is available
+          const dashboardScript = document.createElement('script');
+          dashboardScript.type = 'text/babel';
+          dashboardScript.src = 'dashboard.js';
+          document.body.appendChild(dashboardScript);
+        }
+      }, 500); // Short delay to ensure libraries are loaded
+    });
   </script>
-  
-  <!-- Load dashboard script with type="text/babel" for JSX transformation -->
-  <script type="text/babel" src="dashboard.js"></script>
 </body>
 </html>
