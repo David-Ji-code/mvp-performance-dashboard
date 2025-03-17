@@ -1,20 +1,14 @@
-// Check if Recharts is loaded
-if (typeof Recharts === 'undefined') {
-  console.error('Recharts library not found. Please check your internet connection.');
+// Safer way to access Recharts components
+const {
+  LineChart, Line, BarChart, Bar, XAxis, YAxis, 
+  CartesianGrid, Tooltip, Legend, ResponsiveContainer
+} = window.Recharts || {};
+
+// Check if Recharts components are available
+if (!LineChart || !BarChart) {
+  console.error('Recharts components not available');
   document.getElementById('root').innerHTML = '<div style="text-align: center; padding: 2rem;"><h2>Failed to load dashboard components</h2><p>Please refresh the page or check your internet connection.</p></div>';
 } else {
-  const { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } = Recharts;
-
-  // Loading Component
-  const LoadingIndicator = () => (
-    <div className="flex items-center justify-center h-screen">
-      <div className="text-center">
-        <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-blue-600 border-r-transparent"></div>
-        <p className="mt-4 text-slate-600">Loading dashboard...</p>
-      </div>
-    </div>
-  );
-
   // Color configuration
   const colors = {
     primary: {
@@ -260,15 +254,20 @@ if (typeof Recharts === 'undefined') {
     );
   };
 
-  // Initial render with loading indicator
-  const root = ReactDOM.createRoot(document.getElementById('root'));
-  root.render(<LoadingIndicator />);
-
-  // Render dashboard when page is fully loaded
-  window.addEventListener('load', () => {
-    setTimeout(() => {
-      root.render(<MetricsDashboard />);
-    }, 500); // Small delay for smoother transition
-  });
+  // Render dashboard
+  try {
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<MetricsDashboard />);
+  } catch (error) {
+    console.error('Error rendering dashboard:', error);
+    document.getElementById('root').innerHTML = `
+      <div style="text-align: center; padding: 2rem;">
+        <h2>Error rendering dashboard</h2>
+        <p>${error.message}</p>
+        <button onclick="location.reload()" style="background-color: #2563EB; color: white; padding: 8px 16px; border-radius: 4px; border: none; margin-top: 16px; cursor: pointer;">
+          Reload Page
+        </button>
+      </div>
+    `;
+  }
 }
-
