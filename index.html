@@ -5,23 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>MVP Performance Metrics</title>
   
-  <!-- Core React dependencies -->
-  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-  
-  <!-- Local Recharts file instead of CDN -->
-  <script src="recharts.js"></script>
-  
-  <!-- Babel for JSX -->
-  <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
-  
-  <!-- Tailwind CSS -->
+  <!-- Tailwind CSS (the only external dependency) -->
   <script src="https://cdn.tailwindcss.com"></script>
   
-  <!-- Custom Styles -->
-  <link rel="stylesheet" href="styles.css">
-  
   <style>
+    /* Custom styles that don't depend on external libraries */
+    .chart-container {
+      position: relative;
+      height: 300px;
+      margin-bottom: 20px;
+    }
+    
     .loading-spinner {
       border: 4px solid #e2e8f0;
       border-top-color: #2563eb;
@@ -36,61 +30,656 @@
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
+    
+    .progress-bar {
+      transition: width 1s ease-in-out;
+    }
+    
+    .gradient-primary {
+      background: linear-gradient(to right, #2563eb, #60a5fa);
+    }
+    
+    .gradient-success {
+      background: linear-gradient(to right, #059669, #34d399);
+    }
+    
+    /* Add tooltip styles */
+    .tooltip {
+      position: absolute;
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 10px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.3s;
+      z-index: 10;
+    }
   </style>
 </head>
 <body>
-  <div id="root">
-    <!-- Initial loading state -->
-    <div style="display: flex; justify-content: center; align-items: center; height: 100vh;">
-      <div style="text-align: center;">
-        <div class="loading-spinner"></div>
-        <p style="margin-top: 16px; color: #64748b;">Loading dashboard...</p>
+  <div id="root" class="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-4 md:p-8">
+    <div class="max-w-7xl mx-auto">
+      <h1 class="text-3xl md:text-4xl font-bold text-slate-800 mb-2">MVP Performance Metrics</h1>
+      <p class="text-slate-500 mb-6 md:mb-8">Real-time monitoring dashboard</p>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
+        <!-- Notification Time Chart -->
+        <div class="bg-white rounded-xl shadow-lg border border-slate-100 p-4 md:p-6 transition-all duration-300 hover:shadow-xl hover:border-slate-200">
+          <h2 class="text-xl font-semibold text-slate-700 mb-2">Notification Time Trends</h2>
+          <p class="text-sm text-slate-500 mb-4 md:mb-6">Average notification delivery time</p>
+          <div class="chart-container">
+            <canvas id="notificationChart"></canvas>
+            <div id="notificationTooltip" class="tooltip"></div>
+          </div>
+        </div>
+
+        <!-- FCR Chart -->
+        <div class="bg-white rounded-xl shadow-lg border border-slate-100 p-4 md:p-6 transition-all duration-300 hover:shadow-xl hover:border-slate-200">
+          <h2 class="text-xl font-semibold text-slate-700 mb-2">First Call Resolution Rate</h2>
+          <p class="text-sm text-slate-500 mb-4 md:mb-6">Percentage of issues resolved in first contact</p>
+          <div class="chart-container">
+            <canvas id="fcrChart"></canvas>
+            <div id="fcrTooltip" class="tooltip"></div>
+          </div>
+        </div>
+
+        <!-- Call Volume Chart -->
+        <div class="bg-white rounded-xl shadow-lg border border-slate-100 p-4 md:p-6 transition-all duration-300 hover:shadow-xl hover:border-slate-200">
+          <h2 class="text-xl font-semibold text-slate-700 mb-2">Support Call Distribution</h2>
+          <p class="text-sm text-slate-500 mb-4 md:mb-6">Weekly breakdown of support calls</p>
+          <div class="chart-container">
+            <canvas id="callVolumeChart"></canvas>
+            <div id="callVolumeTooltip" class="tooltip"></div>
+          </div>
+        </div>
+
+        <!-- KPI Summary -->
+        <div class="bg-white rounded-xl shadow-lg border border-slate-100 p-4 md:p-6 transition-all duration-300 hover:shadow-xl hover:border-slate-200">
+          <h2 class="text-xl font-semibold text-slate-700 mb-2">Performance Summary</h2>
+          <p class="text-sm text-slate-500 mb-4 md:mb-6">Key metrics overview</p>
+          <div class="space-y-6 md:space-y-8">
+            <div class="group">
+              <div class="flex justify-between mb-2">
+                <span class="text-sm font-medium text-slate-600">Notification Time Reduction</span>
+                <span class="text-sm font-bold text-blue-600">66.7%</span>
+              </div>
+              <div class="h-3 bg-slate-100 rounded-full overflow-hidden transition-all duration-300 group-hover:shadow-inner">
+                <div class="h-full gradient-primary rounded-full transition-all duration-500 progress-bar" style="width: 0%"></div>
+              </div>
+            </div>
+
+            <div class="group">
+              <div class="flex justify-between mb-2">
+                <span class="text-sm font-medium text-slate-600">FCR Improvement</span>
+                <span class="text-sm font-bold text-emerald-600">20%</span>
+              </div>
+              <div class="h-3 bg-slate-100 rounded-full overflow-hidden transition-all duration-300 group-hover:shadow-inner">
+                <div class="h-full gradient-success rounded-full transition-all duration-500 progress-bar" style="width: 0%"></div>
+              </div>
+            </div>
+
+            <div class="group">
+              <div class="flex justify-between mb-2">
+                <span class="text-sm font-medium text-slate-600">Call Volume Reduction</span>
+                <span class="text-sm font-bold text-indigo-600">40%</span>
+              </div>
+              <div class="h-3 bg-slate-100 rounded-full overflow-hidden transition-all duration-300 group-hover:shadow-inner">
+                <div class="h-full gradient-primary rounded-full transition-all duration-500 progress-bar" style="width: 0%"></div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- Simple library check -->
+  <!-- Pure JavaScript for charts - no external dependencies -->
   <script>
-    window.addEventListener('DOMContentLoaded', function() {
-      setTimeout(function() {
-        if (typeof Recharts === 'undefined') {
-          console.error('Recharts not loaded');
-          document.getElementById('root').innerHTML = `
-            <div style="text-align: center; padding: 2rem;">
-              <h2 style="color: #dc2626; margin-bottom: 1rem;">Error: Recharts library failed to load</h2>
-              <p style="margin-bottom: 1rem;">Please check your internet connection and try again.</p>
-              <button onclick="location.reload()" style="background-color: #2563EB; color: white; padding: 8px 16px; border-radius: 4px; border: none; cursor: pointer;">
-                Reload Page
-              </button>
-            </div>
-          `;
+    // Sample data
+    const notificationTimeData = [
+      { day: '2025-01-01', avg_time: 42, baseline: 45, target: 11 },
+      { day: '2025-01-08', avg_time: 35, baseline: 45, target: 11 },
+      { day: '2025-01-15', avg_time: 28, baseline: 45, target: 11 },
+      { day: '2025-01-22', avg_time: 20, baseline: 45, target: 11 },
+      { day: '2025-01-29', avg_time: 15, baseline: 45, target: 11 },
+    ];
+
+    const fcrData = [
+      { week: 'Week 1', rate: 65, target: 80 },
+      { week: 'Week 2', rate: 70, target: 80 },
+      { week: 'Week 3', rate: 75, target: 80 },
+      { week: 'Week 4', rate: 78, target: 80 },
+    ];
+
+    const callVolumeData = [
+      { week: 'Week 1', total_calls: 1000, outage_calls: 300 },
+      { week: 'Week 2', total_calls: 850, outage_calls: 200 },
+      { week: 'Week 3', total_calls: 700, outage_calls: 150 },
+      { week: 'Week 4', total_calls: 600, outage_calls: 100 },
+    ];
+
+    // Color configuration
+    const colors = {
+      primary: {
+        main: '#2563EB',
+        light: '#60A5FA',
+        dark: '#1E40AF',
+      },
+      secondary: {
+        main: '#475569',
+        light: '#94A3B8',
+        dark: '#334155',
+      },
+      success: {
+        main: '#059669',
+        light: '#34D399',
+      },
+      border: '#E2E8F0',
+      text: {
+        primary: '#1E293B',
+        secondary: '#64748B'
+      }
+    };
+
+    // Helper function to draw a line chart
+    function drawLineChart(canvasId, data, config) {
+      const canvas = document.getElementById(canvasId);
+      const ctx = canvas.getContext('2d');
+      const tooltipEl = document.getElementById(config.tooltipId);
+      
+      // Set canvas dimensions
+      canvas.width = canvas.parentNode.clientWidth;
+      canvas.height = canvas.parentNode.clientHeight;
+      
+      // Calculate chart area
+      const padding = 40;
+      const chartArea = {
+        x: padding,
+        y: padding,
+        width: canvas.width - (padding * 2),
+        height: canvas.height - (padding * 2) - 30 // Extra space for legend
+      };
+      
+      // Find min and max values for Y axis
+      let minY = Infinity;
+      let maxY = -Infinity;
+      
+      config.lines.forEach(line => {
+        data.forEach(item => {
+          const value = item[line.dataKey];
+          if (value < minY) minY = value;
+          if (value > maxY) maxY = value;
+        });
+      });
+      
+      // Add some padding to the min/max values
+      const yPadding = (maxY - minY) * 0.1;
+      minY = Math.max(0, minY - yPadding);
+      maxY = maxY + yPadding;
+      
+      // Draw background grid
+      ctx.strokeStyle = colors.border;
+      ctx.lineWidth = 1;
+      
+      // Horizontal grid lines
+      const ySteps = 5;
+      for (let i = 0; i <= ySteps; i++) {
+        const y = chartArea.y + (chartArea.height * (1 - (i / ySteps)));
+        
+        ctx.beginPath();
+        ctx.moveTo(chartArea.x, y);
+        ctx.lineTo(chartArea.x + chartArea.width, y);
+        ctx.stroke();
+        
+        // Y-axis labels
+        const value = minY + ((maxY - minY) * (i / ySteps));
+        ctx.fillStyle = colors.text.secondary;
+        ctx.font = '12px Arial';
+        ctx.textAlign = 'right';
+        ctx.fillText(Math.round(value), chartArea.x - 10, y + 4);
+      }
+      
+      // X-axis and labels
+      const xStep = chartArea.width / (data.length - 1);
+      data.forEach((item, i) => {
+        const x = chartArea.x + (i * xStep);
+        
+        // X-axis tick
+        ctx.beginPath();
+        ctx.moveTo(x, chartArea.y + chartArea.height);
+        ctx.lineTo(x, chartArea.y + chartArea.height + 5);
+        ctx.stroke();
+        
+        // X-axis label
+        ctx.fillStyle = colors.text.secondary;
+        ctx.font = '12px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText(item[config.xKey], x, chartArea.y + chartArea.height + 20);
+      });
+      
+      // Draw lines
+      config.lines.forEach(line => {
+        ctx.strokeStyle = line.color;
+        ctx.lineWidth = line.width || 2;
+        
+        if (line.dashed) {
+          ctx.setLineDash([5, 5]);
         } else {
-          console.log('Recharts loaded successfully');
-          // Load dashboard after confirming Recharts is available
-          const dashboardScript = document.createElement('script');
-          dashboardScript.type = 'text/babel';
-          dashboardScript.src = 'dashboard.js';
-          document.body.appendChild(dashboardScript);
+          ctx.setLineDash([]);
         }
-      }, 500); // Short delay to ensure libraries are loaded
+        
+        ctx.beginPath();
+        
+        data.forEach((item, i) => {
+          const x = chartArea.x + (i * xStep);
+          const yRatio = (item[line.dataKey] - minY) / (maxY - minY);
+          const y = chartArea.y + chartArea.height - (yRatio * chartArea.height);
+          
+          if (i === 0) {
+            ctx.moveTo(x, y);
+          } else {
+            ctx.lineTo(x, y);
+          }
+          
+          // Draw dots
+          if (line.dots) {
+            ctx.fillStyle = line.color;
+            ctx.beginPath();
+            ctx.arc(x, y, 4, 0, Math.PI * 2);
+            ctx.fill();
+          }
+        });
+        
+        ctx.stroke();
+      });
+      
+      // Draw legend
+      const legendY = chartArea.y + chartArea.height + 30;
+      let legendX = chartArea.x;
+      
+      config.lines.forEach(line => {
+        // Line symbol
+        ctx.strokeStyle = line.color;
+        ctx.lineWidth = 2;
+        
+        if (line.dashed) {
+          ctx.setLineDash([5, 5]);
+        } else {
+          ctx.setLineDash([]);
+        }
+        
+        ctx.beginPath();
+        ctx.moveTo(legendX, legendY);
+        ctx.lineTo(legendX + 20, legendY);
+        ctx.stroke();
+        
+        // Text
+        ctx.fillStyle = colors.text.primary;
+        ctx.font = '12px Arial';
+        ctx.textAlign = 'left';
+        ctx.fillText(line.name, legendX + 25, legendY + 4);
+        
+        legendX += ctx.measureText(line.name).width + 50;
+      });
+      
+      // Handle tooltip
+      let activePoint = null;
+      
+      canvas.addEventListener('mousemove', function(e) {
+        const rect = canvas.getBoundingClientRect();
+        const mouseX = e.clientX - rect.left;
+        const mouseY = e.clientY - rect.top;
+        
+        // Find closest point
+        let closestDistance = Infinity;
+        let closestPoint = null;
+        let closestDataIndex = -1;
+        
+        data.forEach((item, i) => {
+          const x = chartArea.x + (i * xStep);
+          
+          config.lines.forEach(line => {
+            const yRatio = (item[line.dataKey] - minY) / (maxY - minY);
+            const y = chartArea.y + chartArea.height - (yRatio * chartArea.height);
+            
+            const distance = Math.sqrt(Math.pow(mouseX - x, 2) + Math.pow(mouseY - y, 2));
+            
+            if (distance < closestDistance && distance < 30) {
+              closestDistance = distance;
+              closestPoint = { x, y };
+              closestDataIndex = i;
+            }
+          });
+        });
+        
+        if (closestPoint) {
+          // Show tooltip
+          tooltipEl.style.opacity = 1;
+          tooltipEl.style.left = (closestPoint.x + rect.left) + 'px';
+          tooltipEl.style.top = (closestPoint.y + rect.top - 70) + 'px';
+          
+          // Build tooltip content
+          let tooltipContent = `<div class="font-semibold">${data[closestDataIndex][config.xKey]}</div>`;
+          
+          config.lines.forEach(line => {
+            tooltipContent += `<div class="flex items-center mt-1">
+              <span class="inline-block w-3 h-3 rounded-full mr-2" style="background-color: ${line.color}"></span>
+              <span>${line.name}: ${data[closestDataIndex][line.dataKey]}</span>
+            </div>`;
+          });
+          
+          tooltipEl.innerHTML = tooltipContent;
+          
+          activePoint = closestPoint;
+        } else if (activePoint) {
+          // Hide tooltip
+          tooltipEl.style.opacity = 0;
+          activePoint = null;
+        }
+      });
+      
+      canvas.addEventListener('mouseleave', function() {
+        tooltipEl.style.opacity = 0;
+        activePoint = null;
+      });
+    }
+    
+    // Helper function to draw a bar chart
+    function drawBarChart(canvasId, data, config) {
+      const canvas = document.getElementById(canvasId);
+      const ctx = canvas.getContext('2d');
+      const tooltipEl = document.getElementById(config.tooltipId);
+      
+      // Set canvas dimensions
+      canvas.width = canvas.parentNode.clientWidth;
+      canvas.height = canvas.parentNode.clientHeight;
+      
+      // Calculate chart area
+      const padding = 40;
+      const chartArea = {
+        x: padding,
+        y: padding,
+        width: canvas.width - (padding * 2),
+        height: canvas.height - (padding * 2) - 30 // Extra space for legend
+      };
+      
+      // Find max value for Y axis
+      let maxY = 0;
+      
+      config.bars.forEach(bar => {
+        data.forEach(item => {
+          const value = item[bar.dataKey];
+          if (value > maxY) maxY = value;
+        });
+      });
+      
+      // Add some padding to the max value
+      maxY = maxY * 1.1;
+      
+      // Draw background grid
+      ctx.strokeStyle = colors.border;
+      ctx.lineWidth = 1;
+      
+      // Horizontal grid lines
+      const ySteps = 5;
+      for (let i = 0; i <= ySteps; i++) {
+        const y = chartArea.y + (chartArea.height * (1 - (i / ySteps)));
+        
+        ctx.beginPath();
+        ctx.moveTo(chartArea.x, y);
+        ctx.lineTo(chartArea.x + chartArea.width, y);
+        ctx.stroke();
+        
+        // Y-axis labels
+        const value = (maxY * (i / ySteps));
+        ctx.fillStyle = colors.text.secondary;
+        ctx.font = '12px Arial';
+        ctx.textAlign = 'right';
+        ctx.fillText(Math.round(value), chartArea.x - 10, y + 4);
+      }
+      
+      // X-axis and labels
+      const barGroupWidth = chartArea.width / data.length;
+      const barWidth = barGroupWidth * 0.7 / config.bars.length;
+      const barGroupPadding = barGroupWidth * 0.15;
+      
+      data.forEach((item, i) => {
+        const x = chartArea.x + (i * barGroupWidth) + barGroupPadding;
+        
+        // X-axis label
+        ctx.fillStyle = colors.text.secondary;
+        ctx.font = '12px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText(item[config.xKey], x + (barGroupWidth - barGroupPadding * 2) / 2, chartArea.y + chartArea.height + 20);
+        
+        // Draw bars
+        config.bars.forEach((bar, j) => {
+          const barX = x + (j * barWidth);
+          const barHeight = (item[bar.dataKey] / maxY) * chartArea.height;
+          const barY = chartArea.y + chartArea.height - barHeight;
+          
+          // Bar
+          ctx.fillStyle = bar.color;
+          ctx.beginPath();
+          ctx.roundRect(barX, barY, barWidth, barHeight, [4, 4, 0, 0]);
+          ctx.fill();
+        });
+      });
+      
+      // Draw legend
+      const legendY = chartArea.y + chartArea.height + 30;
+      let legendX = chartArea.x;
+      
+      config.bars.forEach(bar => {
+        // Bar symbol
+        ctx.fillStyle = bar.color;
+        ctx.fillRect(legendX, legendY - 6, 15, 12);
+        
+        // Text
+        ctx.fillStyle = colors.text.primary;
+        ctx.font = '12px Arial';
+        ctx.textAlign = 'left';
+        ctx.fillText(bar.name, legendX + 20, legendY + 4);
+        
+        legendX += ctx.measureText(bar.name).width + 45;
+      });
+      
+      // Handle tooltip
+      canvas.addEventListener('mousemove', function(e) {
+        const rect = canvas.getBoundingClientRect();
+        const mouseX = e.clientX - rect.left;
+        const mouseY = e.clientY - rect.top;
+        
+        let activeBar = null;
+        
+        data.forEach((item, i) => {
+          const x = chartArea.x + (i * barGroupWidth) + barGroupPadding;
+          
+          config.bars.forEach((bar, j) => {
+            const barX = x + (j * barWidth);
+            const barHeight = (item[bar.dataKey] / maxY) * chartArea.height;
+            const barY = chartArea.y + chartArea.height - barHeight;
+            
+            if (
+              mouseX >= barX && 
+              mouseX <= barX + barWidth && 
+              mouseY >= barY && 
+              mouseY <= barY + barHeight
+            ) {
+              // Show tooltip
+              tooltipEl.style.opacity = 1;
+              tooltipEl.style.left = (barX + barWidth/2 + rect.left) + 'px';
+              tooltipEl.style.top = (barY + rect.top - 60) + 'px';
+              
+              // Build tooltip content
+              let tooltipContent = `<div class="font-semibold">${item[config.xKey]}</div>
+                <div class="flex items-center mt-1">
+                  <span class="inline-block w-3 h-3 rounded-full mr-2" style="background-color: ${bar.color}"></span>
+                  <span>${bar.name}: ${item[bar.dataKey]}</span>
+                </div>`;
+              
+              tooltipEl.innerHTML = tooltipContent;
+              
+              activeBar = { barX, barY };
+            }
+          });
+        });
+        
+        if (!activeBar) {
+          tooltipEl.style.opacity = 0;
+        }
+      });
+      
+      canvas.addEventListener('mouseleave', function() {
+        tooltipEl.style.opacity = 0;
+      });
+    }
+
+    // Initialize charts when the page loads
+    window.addEventListener('DOMContentLoaded', function() {
+      // Draw notification time chart
+      drawLineChart('notificationChart', notificationTimeData, {
+        xKey: 'day',
+        tooltipId: 'notificationTooltip',
+        lines: [
+          { 
+            dataKey: 'avg_time', 
+            name: 'Current', 
+            color: colors.primary.main,
+            width: 3,
+            dots: true
+          },
+          { 
+            dataKey: 'baseline', 
+            name: 'Baseline', 
+            color: colors.secondary.main,
+            dashed: true
+          },
+          { 
+            dataKey: 'target', 
+            name: 'Target', 
+            color: colors.success.main,
+            dashed: true
+          }
+        ]
+      });
+      
+      // Draw FCR chart
+      drawLineChart('fcrChart', fcrData, {
+        xKey: 'week',
+        tooltipId: 'fcrTooltip',
+        lines: [
+          { 
+            dataKey: 'rate', 
+            name: 'FCR Rate', 
+            color: colors.primary.main,
+            width: 3,
+            dots: true
+          },
+          { 
+            dataKey: 'target', 
+            name: 'Target', 
+            color: colors.success.main,
+            dashed: true
+          }
+        ]
+      });
+      
+      // Draw call volume chart
+      drawBarChart('callVolumeChart', callVolumeData, {
+        xKey: 'week',
+        tooltipId: 'callVolumeTooltip',
+        bars: [
+          { 
+            dataKey: 'total_calls', 
+            name: 'Total Calls', 
+            color: colors.primary.light
+          },
+          { 
+            dataKey: 'outage_calls', 
+            name: 'Outage-Related', 
+            color: colors.secondary.light
+          }
+        ]
+      });
+      
+      // Animate progress bars
+      setTimeout(function() {
+        const progressBars = document.querySelectorAll('.progress-bar');
+        progressBars[0].style.width = '66.7%';
+        progressBars[1].style.width = '20%';
+        progressBars[2].style.width = '40%';
+      }, 500);
+      
+      // Handle window resize
+      window.addEventListener('resize', function() {
+        // Redraw charts on window resize
+        drawLineChart('notificationChart', notificationTimeData, {
+          xKey: 'day',
+          tooltipId: 'notificationTooltip',
+          lines: [
+            { 
+              dataKey: 'avg_time', 
+              name: 'Current', 
+              color: colors.primary.main,
+              width: 3,
+              dots: true
+            },
+            { 
+              dataKey: 'baseline', 
+              name: 'Baseline', 
+              color: colors.secondary.main,
+              dashed: true
+            },
+            { 
+              dataKey: 'target', 
+              name: 'Target', 
+              color: colors.success.main,
+              dashed: true
+            }
+          ]
+        });
+        
+        drawLineChart('fcrChart', fcrData, {
+          xKey: 'week',
+          tooltipId: 'fcrTooltip',
+          lines: [
+            { 
+              dataKey: 'rate', 
+              name: 'FCR Rate', 
+              color: colors.primary.main,
+              width: 3,
+              dots: true
+            },
+            { 
+              dataKey: 'target', 
+              name: 'Target', 
+              color: colors.success.main,
+              dashed: true
+            }
+          ]
+        });
+        
+        drawBarChart('callVolumeChart', callVolumeData, {
+          xKey: 'week',
+          tooltipId: 'callVolumeTooltip',
+          bars: [
+            { 
+              dataKey: 'total_calls', 
+              name: 'Total Calls', 
+              color: colors.primary.light
+            },
+            { 
+              dataKey: 'outage_calls', 
+              name: 'Outage-Related', 
+              color: colors.secondary.light
+            }
+          ]
+        });
+      });
     });
   </script>
-
-<script>
-  // Fallback mechanism - if dashboard doesn't load within 5 seconds, load the fallback
-  const fallbackTimer = setTimeout(function() {
-    if (!window.dashboardLoaded) {
-      console.warn('Dashboard failed to load in time, loading fallback...');
-      const fallbackScript = document.createElement('script');
-      fallbackScript.src = 'fallback.js';
-      document.body.appendChild(fallbackScript);
-    }
-  }, 5000);
-  
-  // Add this to dashboard.js at the end:
-  // window.dashboardLoaded = true;
-  // clearTimeout(window.fallbackTimer);
-</script>
-
 </body>
 </html>
