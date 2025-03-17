@@ -1,14 +1,26 @@
-// Safer way to access Recharts components
-const {
-  LineChart, Line, BarChart, Bar, XAxis, YAxis, 
-  CartesianGrid, Tooltip, Legend, ResponsiveContainer
-} = window.Recharts || {};
+// Wait for libraries to load
+document.addEventListener('DOMContentLoaded', function() {
+  // Ensure Recharts is available
+  if (typeof Recharts === 'undefined') {
+    console.error('Recharts library not available');
+    document.getElementById('root').innerHTML = `
+      <div style="text-align: center; padding: 2rem;">
+        <h2 style="color: #dc2626; margin-bottom: 1rem;">Failed to load dashboard components</h2>
+        <p style="margin-bottom: 1rem;">Please refresh the page or check your internet connection.</p>
+        <button onclick="location.reload()" style="background-color: #2563EB; color: white; padding: 8px 16px; border-radius: 4px; border: none; cursor: pointer;">
+          Reload Page
+        </button>
+      </div>
+    `;
+    return;
+  }
 
-// Check if Recharts components are available
-if (!LineChart || !BarChart) {
-  console.error('Recharts components not available');
-  document.getElementById('root').innerHTML = '<div style="text-align: center; padding: 2rem;"><h2>Failed to load dashboard components</h2><p>Please refresh the page or check your internet connection.</p></div>';
-} else {
+  // Destructure Recharts components
+  const {
+    LineChart, Line, BarChart, Bar, XAxis, YAxis,
+    CartesianGrid, Tooltip, Legend, ResponsiveContainer
+  } = Recharts;
+
   // Color configuration
   const colors = {
     primary: {
@@ -159,6 +171,14 @@ if (!LineChart || !BarChart) {
                       dot={{ fill: colors.primary.main, strokeWidth: 2 }}
                       activeDot={{ r: 8, stroke: colors.primary.light }}
                     />
+                    <Line
+                      type="monotone"
+                      dataKey="target"
+                      name="Target"
+                      stroke={colors.success.main}
+                      strokeDasharray="5 5"
+                      dot={false}
+                    />
                   </LineChart>
                 </ResponsiveContainer>
               </div>
@@ -254,20 +274,21 @@ if (!LineChart || !BarChart) {
     );
   };
 
-  // Render dashboard
+  // Try to render the dashboard
   try {
     const root = ReactDOM.createRoot(document.getElementById('root'));
     root.render(<MetricsDashboard />);
+    console.log('Dashboard rendered successfully');
   } catch (error) {
     console.error('Error rendering dashboard:', error);
     document.getElementById('root').innerHTML = `
       <div style="text-align: center; padding: 2rem;">
-        <h2>Error rendering dashboard</h2>
-        <p>${error.message}</p>
-        <button onclick="location.reload()" style="background-color: #2563EB; color: white; padding: 8px 16px; border-radius: 4px; border: none; margin-top: 16px; cursor: pointer;">
+        <h2 style="color: #dc2626; margin-bottom: 1rem;">Error rendering dashboard</h2>
+        <p style="margin-bottom: 1rem;">${error.message}</p>
+        <button onclick="location.reload()" style="background-color: #2563EB; color: white; padding: 8px 16px; border-radius: 4px; border: none; cursor: pointer;">
           Reload Page
         </button>
       </div>
     `;
   }
-}
+});
