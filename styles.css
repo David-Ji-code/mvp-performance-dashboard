@@ -70,16 +70,6 @@
   }
 }
 
-/* Loading animation */
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
 /* GitHub Pages specific fixes */
 @media screen and (max-width: 640px) {
   .p-8 {
@@ -94,4 +84,3 @@
     gap: 1rem;
   }
 }
-
