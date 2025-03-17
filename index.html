@@ -17,184 +17,99 @@
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   
   <style>
-    :root {
-      --color-primary: #1A56DB;
-      --color-primary-light: #3B82F6;
-      --color-primary-dark: #1E40AF;
-      --color-secondary: #475569;
-      --color-secondary-light: #64748B;
-      --color-secondary-dark: #334155;
-      --color-success: #047857;
-      --color-success-light: #059669;
-      --color-background: #F8FAFC;
-      --color-surface: #FFFFFF;
-      --color-border: #E2E8F0;
-      --color-text-primary: #1E293B;
-      --color-text-secondary: #64748B;
-    }
-
-    * {
+    /* Base styles */
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background-color: #F8FAFC;
+      color: #1E293B;
       margin: 0;
       padding: 0;
-      box-sizing: border-box;
     }
-
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-      color: var(--color-text-primary);
-      background-color: var(--color-background);
-      min-height: 100vh;
-    }
-
-    .min-h-screen {
-      min-height: 100vh;
-    }
-
-    .bg-slate-50 {
-      background-color: var(--color-background);
-    }
-
-    .p-8 {
+    
+    /* Layout */
+    .container {
+      max-width: 1280px;
+      margin: 0 auto;
       padding: 2rem;
+      min-height: 100vh;
     }
-
-    .max-w-7xl {
-      max-width: 80rem;
-    }
-
-    .mx-auto {
-      margin-left: auto;
-      margin-right: auto;
-    }
-
-    .text-3xl {
-      font-size: 1.875rem;
-      line-height: 2.25rem;
-    }
-
-    .font-semibold {
-      font-weight: 600;
-    }
-
-    .text-slate-800 {
-      color: var(--color-text-primary);
-    }
-
-    .mb-8 {
+    
+    .header {
       margin-bottom: 2rem;
     }
-
+    
+    .title {
+      font-size: 1.875rem;
+      font-weight: 600;
+      color: #1E293B;
+    }
+    
     .grid {
       display: grid;
-    }
-
-    .grid-cols-1 {
-      grid-template-columns: repeat(1, minmax(0, 1fr));
-    }
-
-    .gap-8 {
+      grid-template-columns: 1fr;
       gap: 2rem;
     }
-
-    .bg-white {
-      background-color: var(--color-surface);
+    
+    @media (min-width: 1024px) {
+      .grid {
+        grid-template-columns: 1fr 1fr;
+      }
     }
-
-    .rounded-lg {
+    
+    /* Card styles */
+    .card {
+      background-color: white;
       border-radius: 0.5rem;
-    }
-
-    .shadow-sm {
-      box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-    }
-
-    .border {
-      border-width: 1px;
-      border-style: solid;
-    }
-
-    .border-slate-100 {
-      border-color: var(--color-border);
-    }
-
-    .p-6 {
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+      border: 1px solid #E2E8F0;
       padding: 1.5rem;
     }
-
-    .text-xl {
+    
+    .card-title {
       font-size: 1.25rem;
-      line-height: 1.75rem;
-    }
-
-    .font-medium {
       font-weight: 500;
-    }
-
-    .text-slate-700 {
-      color: var(--color-text-primary);
-    }
-
-    .mb-6 {
+      color: #1E293B;
       margin-bottom: 1.5rem;
     }
-
-    .h-72 {
+    
+    .chart-container {
       height: 18rem;
     }
-
-    .space-y-8 > * + * {
-      margin-top: 2rem;
+    
+    /* Progress bars */
+    .progress-item {
+      margin-bottom: 2rem;
     }
-
-    .flex {
+    
+    .progress-header {
       display: flex;
-    }
-
-    .justify-between {
       justify-content: space-between;
-    }
-
-    .mb-2 {
       margin-bottom: 0.5rem;
     }
-
-    .text-sm {
+    
+    .progress-label {
       font-size: 0.875rem;
-      line-height: 1.25rem;
+      font-weight: 500;
+      color: #64748B;
     }
-
-    .text-slate-600 {
-      color: var(--color-text-secondary);
+    
+    .progress-value {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: #1E293B;
     }
-
-    .h-2 {
+    
+    .progress-bar {
       height: 0.5rem;
-    }
-
-    .bg-slate-100 {
-      background-color: var(--color-border);
-    }
-
-    .rounded-full {
+      background-color: #E2E8F0;
       border-radius: 9999px;
-    }
-
-    .overflow-hidden {
       overflow: hidden;
     }
-
-    .h-full {
+    
+    .progress-fill {
       height: 100%;
-    }
-
-    .bg-gradient-to-r {
-      background-image: linear-gradient(to right, var(--color-primary-light), var(--color-primary));
-    }
-
-    @media (min-width: 1024px) {
-      .lg\:grid-cols-2 {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-      }
+      background-image: linear-gradient(to right, #3B82F6, #1A56DB);
+      border-radius: 9999px;
     }
   </style>
 </head>
@@ -202,17 +117,18 @@
   <div id="root"></div>
   
   <script type="text/babel">
-    // Destructure React components
-    const { useState, useEffect } = React;
-
-    // Destructure Recharts components
+    // Get React components
+    const { useState } = React;
+    const { createRoot } = ReactDOM;
+    
+    // Get Recharts components
     const {
       LineChart, Line, BarChart, Bar, XAxis, YAxis,
       CartesianGrid, Tooltip, Legend, ResponsiveContainer
     } = Recharts;
-
-    // Main dashboard component
-    const MetricsDashboard = () => {
+    
+    // Dashboard component
+    function MetricsDashboard() {
       // Sample data
       const notificationTimeData = [
         { day: '2025-01-01', avg_time: 42, baseline: 45, target: 11 },
@@ -221,273 +137,211 @@
         { day: '2025-01-22', avg_time: 20, baseline: 45, target: 11 },
         { day: '2025-01-29', avg_time: 15, baseline: 45, target: 11 },
       ];
-
+      
       const fcrData = [
         { week: 'Week 1', rate: 65, target: 80 },
         { week: 'Week 2', rate: 70, target: 80 },
         { week: 'Week 3', rate: 75, target: 80 },
         { week: 'Week 4', rate: 78, target: 80 },
       ];
-
+      
       const callVolumeData = [
         { week: 'Week 1', total_calls: 1000, outage_calls: 300 },
         { week: 'Week 2', total_calls: 850, outage_calls: 200 },
         { week: 'Week 3', total_calls: 700, outage_calls: 150 },
         { week: 'Week 4', total_calls: 600, outage_calls: 100 },
       ];
-
-      // Professional color palette
+      
+      // Colors
       const colors = {
-        primary: {
-          main: '#1A56DB',      // Deep blue
-          light: '#3B82F6',     // Light blue
-          dark: '#1E40AF'       // Dark blue
-        },
-        secondary: {
-          main: '#475569',      // Slate
-          light: '#64748B',     // Light slate
-          dark: '#334155'       // Dark slate
-        },
-        success: {
-          main: '#047857',      // Forest green
-          light: '#059669'      // Emerald
-        },
-        background: '#F8FAFC',  // Light gray background
-        surface: '#FFFFFF',     // White surface
-        border: '#E2E8F0',     // Border color
-        text: {
-          primary: '#1E293B',   // Dark slate
-          secondary: '#64748B'  // Medium slate
-        }
+        primary: '#1A56DB',
+        primaryLight: '#3B82F6',
+        secondary: '#475569',
+        secondaryLight: '#64748B',
+        success: '#047857',
+        border: '#E2E8F0',
+        textPrimary: '#1E293B',
+        textSecondary: '#64748B'
       };
-
-      // Custom gradient definitions
-      const gradients = {
-        primary: {
-          id: 'primaryGradient',
-          colors: [
-            { offset: '0%', color: colors.primary.light, opacity: 0.2 },
-            { offset: '100%', color: colors.primary.light, opacity: 0 }
-          ]
-        },
-        success: {
-          id: 'successGradient',
-          colors: [
-            { offset: '0%', color: colors.success.light, opacity: 0.2 },
-            { offset: '100%', color: colors.success.light, opacity: 0 }
-          ]
-        }
-      };
-
+      
       return (
-        <div className="min-h-screen bg-slate-50 p-8">
-          <div className="max-w-7xl mx-auto">
-            <h1 className="text-3xl font-semibold text-slate-800 mb-8">MVP Performance Metrics</h1>
-            
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              {/* Notification Time Chart */}
-              <div className="bg-white rounded-lg shadow-sm border border-slate-100 p-6">
-                <h2 className="text-xl font-medium text-slate-700 mb-6">Notification Time Trends</h2>
-                <div className="h-72">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={notificationTimeData}>
-                      <defs>
-                        <linearGradient id={gradients.primary.id} x1="0" y1="0" x2="0" y2="1">
-                          {gradients.primary.colors.map((stop, index) => (
-                            <stop
-                              key={index}
-                              offset={stop.offset}
-                              stopColor={stop.color}
-                              stopOpacity={stop.opacity}
-                            />
-                          ))}
-                        </linearGradient>
-                      </defs>
-                      <CartesianGrid strokeDasharray="3 3" stroke={colors.border} />
-                      <XAxis 
-                        dataKey="day" 
-                        stroke={colors.text.secondary}
-                        tick={{ fill: colors.text.secondary }}
-                      />
-                      <YAxis 
-                        stroke={colors.text.secondary}
-                        tick={{ fill: colors.text.secondary }}
-                      />
-                      <Tooltip
-                        contentStyle={{
-                          backgroundColor: colors.surface,
-                          border: `1px solid ${colors.border}`,
-                          borderRadius: '6px',
-                          boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
-                        }}
-                      />
-                      <Legend />
-                      <Line
-                        type="monotone"
-                        dataKey="avg_time"
-                        name="Current"
-                        stroke={colors.primary.main}
-                        strokeWidth={2}
-                        dot={{ fill: colors.primary.main, strokeWidth: 2 }}
-                        activeDot={{ r: 6, stroke: colors.primary.main }}
-                        fill={`url(#${gradients.primary.id})`}
-                      />
-                      <Line
-                        type="monotone"
-                        dataKey="baseline"
-                        name="Baseline"
-                        stroke={colors.secondary.main}
-                        strokeDasharray="5 5"
-                        dot={false}
-                      />
-                      <Line
-                        type="monotone"
-                        dataKey="target"
-                        name="Target"
-                        stroke={colors.success.main}
-                        strokeDasharray="5 5"
-                        dot={false}
-                      />
-                    </LineChart>
-                  </ResponsiveContainer>
-                </div>
+        <div className="container">
+          <div className="header">
+            <h1 className="title">MVP Performance Metrics</h1>
+          </div>
+          
+          <div className="grid">
+            {/* Notification Time Chart */}
+            <div className="card">
+              <h2 className="card-title">Notification Time Trends</h2>
+              <div className="chart-container">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={notificationTimeData}>
+                    <defs>
+                      <linearGradient id="primaryGradient" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor={colors.primaryLight} stopOpacity={0.2} />
+                        <stop offset="100%" stopColor={colors.primaryLight} stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke={colors.border} />
+                    <XAxis 
+                      dataKey="day" 
+                      stroke={colors.textSecondary}
+                      tick={{ fill: colors.textSecondary }}
+                    />
+                    <YAxis 
+                      stroke={colors.textSecondary}
+                      tick={{ fill: colors.textSecondary }}
+                    />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: 'white',
+                        border: `1px solid ${colors.border}`,
+                        borderRadius: '6px',
+                      }}
+                    />
+                    <Legend />
+                    <Line
+                      type="monotone"
+                      dataKey="avg_time"
+                      name="Current"
+                      stroke={colors.primary}
+                      strokeWidth={2}
+                      dot={{ fill: colors.primary, strokeWidth: 2 }}
+                      activeDot={{ r: 6, stroke: colors.primary }}
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="baseline"
+                      name="Baseline"
+                      stroke={colors.secondary}
+                      strokeDasharray="5 5"
+                      dot={false}
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="target"
+                      name="Target"
+                      stroke={colors.success}
+                      strokeDasharray="5 5"
+                      dot={false}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
               </div>
+            </div>
 
-              {/* FCR Chart */}
-              <div className="bg-white rounded-lg shadow-sm border border-slate-100 p-6">
-                <h2 className="text-xl font-medium text-slate-700 mb-6">First Call Resolution Rate</h2>
-                <div className="h-72">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={fcrData}>
-                      <defs>
-                        <linearGradient id={gradients.success.id} x1="0" y1="0" x2="0" y2="1">
-                          {gradients.success.colors.map((stop, index) => (
-                            <stop
-                              key={index}
-                              offset={stop.offset}
-                              stopColor={stop.color}
-                              stopOpacity={stop.opacity}
-                            />
-                          ))}
-                        </linearGradient>
-                      </defs>
-                      <CartesianGrid strokeDasharray="3 3" stroke={colors.border} />
-                      <XAxis 
-                        dataKey="week" 
-                        stroke={colors.text.secondary}
-                        tick={{ fill: colors.text.secondary }}
-                      />
-                      <YAxis 
-                        domain={[0, 100]}
-                        stroke={colors.text.secondary}
-                        tick={{ fill: colors.text.secondary }}
-                      />
-                      <Tooltip
-                        contentStyle={{
-                          backgroundColor: colors.surface,
-                          border: `1px solid ${colors.border}`,
-                          borderRadius: '6px',
-                          boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
-                        }}
-                      />
-                      <Legend />
-                      <Line
-                        type="monotone"
-                        dataKey="rate"
-                        name="FCR Rate"
-                        stroke={colors.primary.main}
-                        strokeWidth={2}
-                        dot={{ fill: colors.primary.main, strokeWidth: 2 }}
-                        activeDot={{ r: 6, stroke: colors.primary.main }}
-                      />
-                    </LineChart>
-                  </ResponsiveContainer>
-                </div>
+            {/* FCR Chart */}
+            <div className="card">
+              <h2 className="card-title">First Call Resolution Rate</h2>
+              <div className="chart-container">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={fcrData}>
+                    <CartesianGrid strokeDasharray="3 3" stroke={colors.border} />
+                    <XAxis 
+                      dataKey="week" 
+                      stroke={colors.textSecondary}
+                      tick={{ fill: colors.textSecondary }}
+                    />
+                    <YAxis 
+                      domain={[0, 100]}
+                      stroke={colors.textSecondary}
+                      tick={{ fill: colors.textSecondary }}
+                    />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: 'white',
+                        border: `1px solid ${colors.border}`,
+                        borderRadius: '6px',
+                      }}
+                    />
+                    <Legend />
+                    <Line
+                      type="monotone"
+                      dataKey="rate"
+                      name="FCR Rate"
+                      stroke={colors.primary}
+                      strokeWidth={2}
+                      dot={{ fill: colors.primary, strokeWidth: 2 }}
+                      activeDot={{ r: 6, stroke: colors.primary }}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
               </div>
+            </div>
 
-              {/* Call Volume Chart */}
-              <div className="bg-white rounded-lg shadow-sm border border-slate-100 p-6">
-                <h2 className="text-xl font-medium text-slate-700 mb-6">Support Call Distribution</h2>
-                <div className="h-72">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={callVolumeData}>
-                      <CartesianGrid strokeDasharray="3 3" stroke={colors.border} />
-                      <XAxis 
-                        dataKey="week" 
-                        stroke={colors.text.secondary}
-                        tick={{ fill: colors.text.secondary }}
-                      />
-                      <YAxis 
-                        stroke={colors.text.secondary}
-                        tick={{ fill: colors.text.secondary }}
-                      />
-                      <Tooltip
-                        contentStyle={{
-                          backgroundColor: colors.surface,
-                          border: `1px solid ${colors.border}`,
-                          borderRadius: '6px',
-                          boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
-                        }}
-                      />
-                      <Legend />
-                      <Bar 
-                        dataKey="total_calls" 
-                        name="Total Calls" 
-                        fill={colors.primary.light}
-                        radius={[4, 4, 0, 0]}
-                      />
-                      <Bar 
-                        dataKey="outage_calls" 
-                        name="Outage-Related" 
-                        fill={colors.secondary.light}
-                        radius={[4, 4, 0, 0]}
-                      />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
+            {/* Call Volume Chart */}
+            <div className="card">
+              <h2 className="card-title">Support Call Distribution</h2>
+              <div className="chart-container">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={callVolumeData}>
+                    <CartesianGrid strokeDasharray="3 3" stroke={colors.border} />
+                    <XAxis 
+                      dataKey="week" 
+                      stroke={colors.textSecondary}
+                      tick={{ fill: colors.textSecondary }}
+                    />
+                    <YAxis 
+                      stroke={colors.textSecondary}
+                      tick={{ fill: colors.textSecondary }}
+                    />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: 'white',
+                        border: `1px solid ${colors.border}`,
+                        borderRadius: '6px',
+                      }}
+                    />
+                    <Legend />
+                    <Bar 
+                      dataKey="total_calls" 
+                      name="Total Calls" 
+                      fill={colors.primaryLight}
+                      radius={[4, 4, 0, 0]}
+                    />
+                    <Bar 
+                      dataKey="outage_calls" 
+                      name="Outage-Related" 
+                      fill={colors.secondaryLight}
+                      radius={[4, 4, 0, 0]}
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
               </div>
+            </div>
 
-              {/* KPI Summary */}
-              <div className="bg-white rounded-lg shadow-sm border border-slate-100 p-6">
-                <h2 className="text-xl font-medium text-slate-700 mb-6">Performance Summary</h2>
-                <div className="space-y-8">
-                  <div>
-                    <div className="flex justify-between mb-2">
-                      <span className="text-sm font-medium text-slate-600">Notification Time Reduction</span>
-                      <span className="text-sm font-semibold text-slate-700">66.7%</span>
-                    </div>
-                    <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
-                      <div 
-                        className="h-full bg-gradient-to-r"
-                        style={{ width: '66.7%' }}
-                      />
-                    </div>
+            {/* KPI Summary */}
+            <div className="card">
+              <h2 className="card-title">Performance Summary</h2>
+              <div>
+                <div className="progress-item">
+                  <div className="progress-header">
+                    <span className="progress-label">Notification Time Reduction</span>
+                    <span className="progress-value">66.7%</span>
                   </div>
-
-                  <div>
-                    <div className="flex justify-between mb-2">
-                      <span className="text-sm font-medium text-slate-600">FCR Improvement</span>
-                      <span className="text-sm font-semibold text-slate-700">20%</span>
-                    </div>
-                    <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
-                      <div 
-                        className="h-full bg-gradient-to-r"
-                        style={{ width: '20%' }}
-                      />
-                    </div>
+                  <div className="progress-bar">
+                    <div className="progress-fill" style={{ width: '66.7%' }}></div>
                   </div>
+                </div>
 
-                  <div>
-                    <div className="flex justify-between mb-2">
-                      <span className="text-sm font-medium text-slate-600">Call Volume Reduction</span>
-                      <span className="text-sm font-semibold text-slate-700">40%</span>
-                    </div>
-                    <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
-                      <div 
-                        className="h-full bg-gradient-to-r"
-                        style={{ width: '40%' }}
-                      />
-                    </div>
+                <div className="progress-item">
+                  <div className="progress-header">
+                    <span className="progress-label">FCR Improvement</span>
+                    <span className="progress-value">20%</span>
+                  </div>
+                  <div className="progress-bar">
+                    <div className="progress-fill" style={{ width: '20%' }}></div>
+                  </div>
+                </div>
+
+                <div className="progress-item">
+                  <div className="progress-header">
+                    <span className="progress-label">Call Volume Reduction</span>
+                    <span className="progress-value">40%</span>
+                  </div>
+                  <div className="progress-bar">
+                    <div className="progress-fill" style={{ width: '40%' }}></div>
                   </div>
                 </div>
               </div>
@@ -495,10 +349,10 @@
           </div>
         </div>
       );
-    };
+    }
 
     // Render the app
-    const root = ReactDOM.createRoot(document.getElementById('root'));
+    const root = createRoot(document.getElementById('root'));
     root.render(<MetricsDashboard />);
   </script>
 </body>
