@@ -5,11 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>MVP Performance Metrics</title>
   
-  <!-- Tailwind CSS (the only external dependency) -->
+  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   
   <style>
-    /* Custom styles that don't depend on external libraries */
     .chart-container {
       position: relative;
       height: 300px;
@@ -43,7 +42,6 @@
       background: linear-gradient(to right, #059669, #34d399);
     }
     
-    /* Add tooltip styles */
     .tooltip {
       position: absolute;
       background: white;
@@ -56,6 +54,31 @@
       transition: opacity 0.3s;
       z-index: 10;
     }
+    
+    /* API connection status indicators */
+    .api-status {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 8px;
+      border-radius: 9999px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+    
+    .api-status.connected {
+      background-color: #dcfce7;
+      color: #166534;
+    }
+    
+    .api-status.connecting {
+      background-color: #fef9c3;
+      color: #854d0e;
+    }
+    
+    .api-status.error {
+      background-color: #fee2e2;
+      color: #991b1b;
+    }
   </style>
 </head>
 <body>
@@ -63,6 +86,96 @@
     <div class="max-w-7xl mx-auto">
       <h1 class="text-3xl md:text-4xl font-bold text-slate-800 mb-2">MVP Performance Metrics</h1>
       <p class="text-slate-500 mb-6 md:mb-8">Real-time monitoring dashboard</p>
+      
+      <!-- API Connection Status Bar -->
+      <div class="bg-white rounded-xl shadow-lg border border-slate-100 p-4 mb-6 md:mb-8">
+        <h2 class="text-lg font-semibold text-slate-700 mb-3">API Connections</h2>
+        <div class="flex flex-wrap gap-3">
+          <div class="api-status connected">
+            <svg class="w-4 h-4 mr-1" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Workato
+          </div>
+          <div class="api-status connected">
+            <svg class="w-4 h-4 mr-1" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Google Sheets
+          </div>
+          <div class="api-status connected">
+            <svg class="w-4 h-4 mr-1" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Telegram
+          </div>
+          <div class="api-status connected">
+            <svg class="w-4 h-4 mr-1" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            OpenAI
+          </div>
+          <button id="refreshConnections" class="ml-auto text-sm text-blue-600 hover:text-blue-800 flex items-center">
+            <svg class="w-4 h-4 mr-1" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" 
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Refresh Connections
+          </button>
+        </div>
+      </div>
+
+      <!-- Workflow Status -->
+      <div class="bg-white rounded-xl shadow-lg border border-slate-100 p-4 mb-6 md:mb-8">
+        <div class="flex justify-between items-center mb-3">
+          <h2 class="text-lg font-semibold text-slate-700">Workato Workflow Status</h2>
+          <button id="createWorkflow" class="px-3 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm flex items-center">
+            <svg class="w-4 h-4 mr-1" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 4v16m8-8H4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Create Workflow
+          </button>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-slate-200">
+            <thead>
+              <tr>
+                <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Workflow Name</th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Trigger</th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Last Run</th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Status</th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Actions</th>
+              </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-slate-200">
+              <tr>
+                <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-slate-900">Welcome Message Workflow</td>
+                <td class="px-4 py-3 whitespace-nowrap text-sm text-slate-500">New Contact in Google Sheets</td>
+                <td class="px-4 py-3 whitespace-nowrap text-sm text-slate-500">2025-03-17 06:32 PM</td>
+                <td class="px-4 py-3 whitespace-nowrap text-sm">
+                  <span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">Active</span>
+                </td>
+                <td class="px-4 py-3 whitespace-nowrap text-sm text-slate-500">
+                  <button class="text-blue-600 hover:text-blue-800 mr-3">Edit</button>
+                  <button class="text-blue-600 hover:text-blue-800">Run Now</button>
+                </td>
+              </tr>
+              <tr>
+                <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-slate-900">Notification Time Optimization</td>
+                <td class="px-4 py-3 whitespace-nowrap text-sm text-slate-500">Service Outage Alert</td>
+                <td class="px-4 py-3 whitespace-nowrap text-sm text-slate-500">2025-03-17 05:45 PM</td>
+                <td class="px-4 py-3 whitespace-nowrap text-sm">
+                  <span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">Active</span>
+                </td>
+                <td class="px-4 py-3 whitespace-nowrap text-sm text-slate-500">
+                  <button class="text-blue-600 hover:text-blue-800 mr-3">Edit</button>
+                  <button class="text-blue-600 hover:text-blue-800">Run Now</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
 
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
         <!-- Notification Time Chart -->
@@ -132,6 +245,77 @@
           </div>
         </div>
       </div>
+      
+      <!-- AI-Powered Insights -->
+      <div class="mt-8 bg-white rounded-xl shadow-lg border border-slate-100 p-4 md:p-6">
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="text-xl font-semibold text-slate-700">AI-Powered Insights</h2>
+          <button id="refreshInsights" class="px-3 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm flex items-center">
+            <svg class="w-4 h-4 mr-1" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" 
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Refresh
+          </button>
+        </div>
+        <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-md">
+          <p class="text-blue-700">
+            <strong>OpenAI Analysis:</strong> Based on the current trend, notification time has decreased by 66.7% over the past month. 
+            This improvement correlates with the implementation of the automated welcome workflow using Workato. 
+            Consider applying similar automation to other customer touchpoints to further reduce response times.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal for creating new workflow -->
+  <div id="workflowModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+    <div class="bg-white rounded-lg p-6 w-full max-w-lg">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-lg font-semibold">Create New Workflow</h3>
+        <button id="closeModal" class="text-slate-400 hover:text-slate-600">
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M6 18L18 6M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </div>
+      <form id="workflowForm">
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-slate-700 mb-1">Workflow Name</label>
+          <input type="text" class="w-full px-3 py-2 border border-slate-300 rounded-md" placeholder="Enter workflow name">
+        </div>
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-slate-700 mb-1">Trigger</label>
+          <select class="w-full px-3 py-2 border border-slate-300 rounded-md">
+            <option>New Contact in Google Sheets</option>
+            <option>Updated Contact in Google Sheets</option>
+            <option>Service Outage Alert</option>
+            <option>Customer Feedback Received</option>
+          </select>
+        </div>
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-slate-700 mb-1">Actions</label>
+          <div class="space-y-2">
+            <div class="flex items-center">
+              <input type="checkbox" id="action1" checked class="mr-2">
+              <label for="action1" class="text-sm">Send Telegram Message</label>
+            </div>
+            <div class="flex items-center">
+              <input type="checkbox" id="action2" checked class="mr-2">
+              <label for="action2" class="text-sm">Generate AI Response with OpenAI</label>
+            </div>
+            <div class="flex items-center">
+              <input type="checkbox" id="action3" class="mr-2">
+              <label for="action3" class="text-sm">Update Google Sheet Status</label>
+            </div>
+          </div>
+        </div>
+        <div class="flex justify-end">
+          <button type="button" id="cancelWorkflow" class="px-4 py-2 text-sm text-slate-700 hover:text-slate-900 mr-2">Cancel</button>
+          <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm">Create Workflow</button>
+        </div>
+      </form>
     </div>
   </div>
 
@@ -402,284 +586,4 @@
         x: padding,
         y: padding,
         width: canvas.width - (padding * 2),
-        height: canvas.height - (padding * 2) - 30 // Extra space for legend
-      };
-      
-      // Find max value for Y axis
-      let maxY = 0;
-      
-      config.bars.forEach(bar => {
-        data.forEach(item => {
-          const value = item[bar.dataKey];
-          if (value > maxY) maxY = value;
-        });
-      });
-      
-      // Add some padding to the max value
-      maxY = maxY * 1.1;
-      
-      // Draw background grid
-      ctx.strokeStyle = colors.border;
-      ctx.lineWidth = 1;
-      
-      // Horizontal grid lines
-      const ySteps = 5;
-      for (let i = 0; i <= ySteps; i++) {
-        const y = chartArea.y + (chartArea.height * (1 - (i / ySteps)));
-        
-        ctx.beginPath();
-        ctx.moveTo(chartArea.x, y);
-        ctx.lineTo(chartArea.x + chartArea.width, y);
-        ctx.stroke();
-        
-        // Y-axis labels
-        const value = (maxY * (i / ySteps));
-        ctx.fillStyle = colors.text.secondary;
-        ctx.font = '12px Arial';
-        ctx.textAlign = 'right';
-        ctx.fillText(Math.round(value), chartArea.x - 10, y + 4);
-      }
-      
-      // X-axis and labels
-      const barGroupWidth = chartArea.width / data.length;
-      const barWidth = barGroupWidth * 0.7 / config.bars.length;
-      const barGroupPadding = barGroupWidth * 0.15;
-      
-      data.forEach((item, i) => {
-        const x = chartArea.x + (i * barGroupWidth) + barGroupPadding;
-        
-        // X-axis label
-        ctx.fillStyle = colors.text.secondary;
-        ctx.font = '12px Arial';
-        ctx.textAlign = 'center';
-        ctx.fillText(item[config.xKey], x + (barGroupWidth - barGroupPadding * 2) / 2, chartArea.y + chartArea.height + 20);
-        
-        // Draw bars
-        config.bars.forEach((bar, j) => {
-          const barX = x + (j * barWidth);
-          const barHeight = (item[bar.dataKey] / maxY) * chartArea.height;
-          const barY = chartArea.y + chartArea.height - barHeight;
-          
-          // Bar
-          ctx.fillStyle = bar.color;
-          ctx.beginPath();
-          ctx.roundRect(barX, barY, barWidth, barHeight, [4, 4, 0, 0]);
-          ctx.fill();
-        });
-      });
-      
-      // Draw legend
-      const legendY = chartArea.y + chartArea.height + 30;
-      let legendX = chartArea.x;
-      
-      config.bars.forEach(bar => {
-        // Bar symbol
-        ctx.fillStyle = bar.color;
-        ctx.fillRect(legendX, legendY - 6, 15, 12);
-        
-        // Text
-        ctx.fillStyle = colors.text.primary;
-        ctx.font = '12px Arial';
-        ctx.textAlign = 'left';
-        ctx.fillText(bar.name, legendX + 20, legendY + 4);
-        
-        legendX += ctx.measureText(bar.name).width + 45;
-      });
-      
-      // Handle tooltip
-      canvas.addEventListener('mousemove', function(e) {
-        const rect = canvas.getBoundingClientRect();
-        const mouseX = e.clientX - rect.left;
-        const mouseY = e.clientY - rect.top;
-        
-        let activeBar = null;
-        
-        data.forEach((item, i) => {
-          const x = chartArea.x + (i * barGroupWidth) + barGroupPadding;
-          
-          config.bars.forEach((bar, j) => {
-            const barX = x + (j * barWidth);
-            const barHeight = (item[bar.dataKey] / maxY) * chartArea.height;
-            const barY = chartArea.y + chartArea.height - barHeight;
-            
-            if (
-              mouseX >= barX && 
-              mouseX <= barX + barWidth && 
-              mouseY >= barY && 
-              mouseY <= barY + barHeight
-            ) {
-              // Show tooltip
-              tooltipEl.style.opacity = 1;
-              tooltipEl.style.left = (barX + barWidth/2 + rect.left) + 'px';
-              tooltipEl.style.top = (barY + rect.top - 60) + 'px';
-              
-              // Build tooltip content
-              let tooltipContent = `<div class="font-semibold">${item[config.xKey]}</div>
-                <div class="flex items-center mt-1">
-                  <span class="inline-block w-3 h-3 rounded-full mr-2" style="background-color: ${bar.color}"></span>
-                  <span>${bar.name}: ${item[bar.dataKey]}</span>
-                </div>`;
-              
-              tooltipEl.innerHTML = tooltipContent;
-              
-              activeBar = { barX, barY };
-            }
-          });
-        });
-        
-        if (!activeBar) {
-          tooltipEl.style.opacity = 0;
-        }
-      });
-      
-      canvas.addEventListener('mouseleave', function() {
-        tooltipEl.style.opacity = 0;
-      });
-    }
-
-    // Initialize charts when the page loads
-    window.addEventListener('DOMContentLoaded', function() {
-      // Draw notification time chart
-      drawLineChart('notificationChart', notificationTimeData, {
-        xKey: 'day',
-        tooltipId: 'notificationTooltip',
-        lines: [
-          { 
-            dataKey: 'avg_time', 
-            name: 'Current', 
-            color: colors.primary.main,
-            width: 3,
-            dots: true
-          },
-          { 
-            dataKey: 'baseline', 
-            name: 'Baseline', 
-            color: colors.secondary.main,
-            dashed: true
-          },
-          { 
-            dataKey: 'target', 
-            name: 'Target', 
-            color: colors.success.main,
-            dashed: true
-          }
-        ]
-      });
-      
-      // Draw FCR chart
-      drawLineChart('fcrChart', fcrData, {
-        xKey: 'week',
-        tooltipId: 'fcrTooltip',
-        lines: [
-          { 
-            dataKey: 'rate', 
-            name: 'FCR Rate', 
-            color: colors.primary.main,
-            width: 3,
-            dots: true
-          },
-          { 
-            dataKey: 'target', 
-            name: 'Target', 
-            color: colors.success.main,
-            dashed: true
-          }
-        ]
-      });
-      
-      // Draw call volume chart
-      drawBarChart('callVolumeChart', callVolumeData, {
-        xKey: 'week',
-        tooltipId: 'callVolumeTooltip',
-        bars: [
-          { 
-            dataKey: 'total_calls', 
-            name: 'Total Calls', 
-            color: colors.primary.light
-          },
-          { 
-            dataKey: 'outage_calls', 
-            name: 'Outage-Related', 
-            color: colors.secondary.light
-          }
-        ]
-      });
-      
-      // Animate progress bars
-      setTimeout(function() {
-        const progressBars = document.querySelectorAll('.progress-bar');
-        progressBars[0].style.width = '66.7%';
-        progressBars[1].style.width = '20%';
-        progressBars[2].style.width = '40%';
-      }, 500);
-      
-      // Handle window resize
-      window.addEventListener('resize', function() {
-        // Redraw charts on window resize
-        drawLineChart('notificationChart', notificationTimeData, {
-          xKey: 'day',
-          tooltipId: 'notificationTooltip',
-          lines: [
-            { 
-              dataKey: 'avg_time', 
-              name: 'Current', 
-              color: colors.primary.main,
-              width: 3,
-              dots: true
-            },
-            { 
-              dataKey: 'baseline', 
-              name: 'Baseline', 
-              color: colors.secondary.main,
-              dashed: true
-            },
-            { 
-              dataKey: 'target', 
-              name: 'Target', 
-              color: colors.success.main,
-              dashed: true
-            }
-          ]
-        });
-        
-        drawLineChart('fcrChart', fcrData, {
-          xKey: 'week',
-          tooltipId: 'fcrTooltip',
-          lines: [
-            { 
-              dataKey: 'rate', 
-              name: 'FCR Rate', 
-              color: colors.primary.main,
-              width: 3,
-              dots: true
-            },
-            { 
-              dataKey: 'target', 
-              name: 'Target', 
-              color: colors.success.main,
-              dashed: true
-            }
-          ]
-        });
-        
-        drawBarChart('callVolumeChart', callVolumeData, {
-          xKey: 'week',
-          tooltipId: 'callVolumeTooltip',
-          bars: [
-            { 
-              dataKey: 'total_calls', 
-              name: 'Total Calls', 
-              color: colors.primary.light
-            },
-            { 
-              dataKey: 'outage_calls', 
-              name: 'Outage-Related', 
-              color: colors.secondary.light
-            }
-          ]
-        });
-      });
-    });
-  </script>
-</body>
-</html>
+        height: canvas.height - (padding * 2) - 30 // Extra space for
