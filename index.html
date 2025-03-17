@@ -4,29 +4,71 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>MVP Performance Metrics</title>
-  <!-- Dependencies -->
-  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Load React first -->
   <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-  <script src="https://unpkg.com/recharts/umd/Recharts.min.js"></script>
+  
+  <!-- Load Recharts with specific version to avoid compatibility issues -->
+  <script src="https://unpkg.com/recharts@2.5.0/umd/Recharts.min.js"></script>
+  
+  <!-- Babel for JSX transformation -->
   <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
   <!-- Custom Styles -->
   <link rel="stylesheet" href="./styles.css">
-  <!-- Babel processing helper for GitHub Pages -->
-  <script>
-    // Ensure libraries are loaded
-    window.addEventListener('DOMContentLoaded', function() {
-      if (typeof React === 'undefined' || typeof ReactDOM === 'undefined' || typeof Recharts === 'undefined') {
-        console.error('Required libraries failed to load. Reloading page...');
-        setTimeout(() => window.location.reload(), 2000);
-      }
-    });
-  </script>
 </head>
 <body>
-  <div id="root"></div>
-  <!-- Custom Scripts -->
-  <script type="text/babel" src="./dashboard.js"></script>
+  <div id="root">
+    <!-- Fallback content while loading -->
+    <div style="display: flex; justify-content: center; align-items: center; height: 100vh;">
+      <div style="text-align: center;">
+        <div style="border: 4px solid #e2e8f0; border-top-color: #2563eb; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto;"></div>
+        <p style="margin-top: 16px; color: #64748b;">Loading dashboard...</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add this script to check if libraries loaded properly -->
+  <script>
+    window.addEventListener('DOMContentLoaded', function() {
+      // Check if all required libraries are loaded
+      setTimeout(function() {
+        if (typeof React === 'undefined') {
+          console.error('React failed to load');
+          document.getElementById('root').innerHTML = '<div style="text-align: center; padding: 2rem;"><h2>Error: React library failed to load</h2><p>Please check your internet connection and refresh the page.</p></div>';
+        } else if (typeof ReactDOM === 'undefined') {
+          console.error('ReactDOM failed to load');
+          document.getElementById('root').innerHTML = '<div style="text-align: center; padding: 2rem;"><h2>Error: ReactDOM library failed to load</h2><p>Please check your internet connection and refresh the page.</p></div>';
+        } else if (typeof Recharts === 'undefined') {
+          console.error('Recharts failed to load');
+          document.getElementById('root').innerHTML = '<div style="text-align: center; padding: 2rem;"><h2>Error: Recharts library failed to load</h2><p>Please check your internet connection and refresh the page.</p></div>';
+          
+          // Try to load Recharts again with a different CDN
+          const script = document.createElement('script');
+          script.src = 'https://cdn.jsdelivr.net/npm/recharts@2.5.0/umd/Recharts.min.js';
+          script.onload = function() {
+            console.log('Recharts loaded from alternate CDN');
+            location.reload();
+          };
+          document.head.appendChild(script);
+        }
+      }, 1000);
+    });
+  </script>
+
+  <!-- Load dashboard script with defer to ensure DOM is ready -->
+  <script type="text/babel" src="./dashboard.js" defer></script>
+  
+  <!-- Add spin animation -->
+  <style>
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
 </body>
 </html>
-
