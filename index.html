@@ -3,587 +3,185 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MVP Performance Metrics</title>
-  
-  <!-- Tailwind CSS -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  
-  <style>
-    .chart-container {
-      position: relative;
-      height: 300px;
-      margin-bottom: 20px;
-    }
-    
-    .loading-spinner {
-      border: 4px solid #e2e8f0;
-      border-top-color: #2563eb;
-      border-radius: 50%;
-      width: 40px;
-      height: 40px;
-      animation: spin 1s linear infinite;
-      margin: 0 auto;
-    }
-    
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-    
-    .progress-bar {
-      transition: width 1s ease-in-out;
-    }
-    
-    .gradient-primary {
-      background: linear-gradient(to right, #2563eb, #60a5fa);
-    }
-    
-    .gradient-success {
-      background: linear-gradient(to right, #059669, #34d399);
-    }
-    
-    .tooltip {
-      position: absolute;
-      background: white;
-      border: 1px solid #e2e8f0;
-      border-radius: 8px;
-      padding: 10px;
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-      pointer-events: none;
-      opacity: 0;
-      transition: opacity 0.3s;
-      z-index: 10;
-    }
-    
-    /* API connection status indicators */
-    .api-status {
-      display: inline-flex;
-      align-items: center;
-      padding: 4px 8px;
-      border-radius: 9999px;
-      font-size: 12px;
-      font-weight: 500;
-    }
-    
-    .api-status.connected {
-      background-color: #dcfce7;
-      color: #166534;
-    }
-    
-    .api-status.connecting {
-      background-color: #fef9c3;
-      color: #854d0e;
-    }
-    
-    .api-status.error {
-      background-color: #fee2e2;
-      color: #991b1b;
-    }
-  </style>
+  <title>Dynamic Dashboard</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.16/dist/tailwind.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
-<body>
-  <div id="root" class="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-4 md:p-8">
-    <div class="max-w-7xl mx-auto">
-      <h1 class="text-3xl md:text-4xl font-bold text-slate-800 mb-2">MVP Performance Metrics</h1>
-      <p class="text-slate-500 mb-6 md:mb-8">Real-time monitoring dashboard</p>
-      
-      <!-- API Connection Status Bar -->
-      <div class="bg-white rounded-xl shadow-lg border border-slate-100 p-4 mb-6 md:mb-8">
-        <h2 class="text-lg font-semibold text-slate-700 mb-3">API Connections</h2>
-        <div class="flex flex-wrap gap-3">
-          <div class="api-status connected">
-            <svg class="w-4 h-4 mr-1" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-            Workato
-          </div>
-          <div class="api-status connected">
-            <svg class="w-4 h-4 mr-1" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-            Google Sheets
-          </div>
-          <div class="api-status connected">
-            <svg class="w-4 h-4 mr-1" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-            Telegram
-          </div>
-          <div class="api-status connected">
-            <svg class="w-4 h-4 mr-1" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-            OpenAI
-          </div>
-          <button id="refreshConnections" class="ml-auto text-sm text-blue-600 hover:text-blue-800 flex items-center">
-            <svg class="w-4 h-4 mr-1" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" 
-                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-            Refresh Connections
-          </button>
-        </div>
+<body class="bg-gray-100 font-sans">
+  <div class="container mx-auto py-8">
+    <h1 class="text-3xl font-bold mb-6">Dynamic Dashboard</h1>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div class="bg-white shadow-md rounded-md p-6">
+        <h2 class="text-xl font-bold mb-4">Workflow Status</h2>
+        <div class="api-status workato">Workato - Connecting</div>
+        <table class="w-full" id="workflowTable">
+          <thead>
+            <tr>
+              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Trigger</th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Last Run</th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+        <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-4" id="createWorkflow">Create Workflow</button>
       </div>
 
-      <!-- Workflow Status -->
-      <div class="bg-white rounded-xl shadow-lg border border-slate-100 p-4 mb-6 md:mb-8">
-        <div class="flex justify-between items-center mb-3">
-          <h2 class="text-lg font-semibold text-slate-700">Workato Workflow Status</h2>
-          <button id="createWorkflow" class="px-3 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm flex items-center">
-            <svg class="w-4 h-4 mr-1" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12 4v16m8-8H4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-            Create Workflow
-          </button>
-        </div>
-        <div class="overflow-x-auto">
-          <table class="min-w-full divide-y divide-slate-200">
-            <thead>
-              <tr>
-                <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Workflow Name</th>
-                <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Trigger</th>
-                <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Last Run</th>
-                <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Status</th>
-                <th class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Actions</th>
-              </tr>
-            </thead>
-            <tbody class="bg-white divide-y divide-slate-200">
-              <tr>
-                <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-slate-900">Welcome Message Workflow</td>
-                <td class="px-4 py-3 whitespace-nowrap text-sm text-slate-500">New Contact in Google Sheets</td>
-                <td class="px-4 py-3 whitespace-nowrap text-sm text-slate-500">2025-03-17 06:32 PM</td>
-                <td class="px-4 py-3 whitespace-nowrap text-sm">
-                  <span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">Active</span>
-                </td>
-                <td class="px-4 py-3 whitespace-nowrap text-sm text-slate-500">
-                  <button class="text-blue-600 hover:text-blue-800 mr-3">Edit</button>
-                  <button class="text-blue-600 hover:text-blue-800">Run Now</button>
-                </td>
-              </tr>
-              <tr>
-                <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-slate-900">Notification Time Optimization</td>
-                <td class="px-4 py-3 whitespace-nowrap text-sm text-slate-500">Service Outage Alert</td>
-                <td class="px-4 py-3 whitespace-nowrap text-sm text-slate-500">2025-03-17 05:45 PM</td>
-                <td class="px-4 py-3 whitespace-nowrap text-sm">
-                  <span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">Active</span>
-                </td>
-                <td class="px-4 py-3 whitespace-nowrap text-sm text-slate-500">
-                  <button class="text-blue-600 hover:text-blue-800 mr-3">Edit</button>
-                  <button class="text-blue-600 hover:text-blue-800">Run Now</button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
-        <!-- Notification Time Chart -->
-        <div class="bg-white rounded-xl shadow-lg border border-slate-100 p-4 md:p-6 transition-all duration-300 hover:shadow-xl hover:border-slate-200">
-          <h2 class="text-xl font-semibold text-slate-700 mb-2">Notification Time Trends</h2>
-          <p class="text-sm text-slate-500 mb-4 md:mb-6">Average notification delivery time</p>
-          <div class="chart-container">
+      <div class="bg-white shadow-md rounded-md p-6">
+        <h2 class="text-xl font-bold mb-4">Contact Data</h2>
+        <div class="api-status google-sheets">Google Sheets - Connecting</div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div>
             <canvas id="notificationChart"></canvas>
-            <div id="notificationTooltip" class="tooltip"></div>
+            <div id="notificationTooltip" class="hidden bg-gray-800 text-white p-2 rounded-md"></div>
           </div>
-        </div>
-
-        <!-- FCR Chart -->
-        <div class="bg-white rounded-xl shadow-lg border border-slate-100 p-4 md:p-6 transition-all duration-300 hover:shadow-xl hover:border-slate-200">
-          <h2 class="text-xl font-semibold text-slate-700 mb-2">First Call Resolution Rate</h2>
-          <p class="text-sm text-slate-500 mb-4 md:mb-6">Percentage of issues resolved in first contact</p>
-          <div class="chart-container">
+          <div>
             <canvas id="fcrChart"></canvas>
-            <div id="fcrTooltip" class="tooltip"></div>
+            <div id="fcrTooltip" class="hidden bg-gray-800 text-white p-2 rounded-md"></div>
           </div>
-        </div>
-
-        <!-- Call Volume Chart -->
-        <div class="bg-white rounded-xl shadow-lg border border-slate-100 p-4 md:p-6 transition-all duration-300 hover:shadow-xl hover:border-slate-200">
-          <h2 class="text-xl font-semibold text-slate-700 mb-2">Support Call Distribution</h2>
-          <p class="text-sm text-slate-500 mb-4 md:mb-6">Weekly breakdown of support calls</p>
-          <div class="chart-container">
+          <div>
             <canvas id="callVolumeChart"></canvas>
-            <div id="callVolumeTooltip" class="tooltip"></div>
-          </div>
-        </div>
-
-        <!-- KPI Summary -->
-        <div class="bg-white rounded-xl shadow-lg border border-slate-100 p-4 md:p-6 transition-all duration-300 hover:shadow-xl hover:border-slate-200">
-          <h2 class="text-xl font-semibold text-slate-700 mb-2">Performance Summary</h2>
-          <p class="text-sm text-slate-500 mb-4 md:mb-6">Key metrics overview</p>
-          <div class="space-y-6 md:space-y-8">
-            <div class="group">
-              <div class="flex justify-between mb-2">
-                <span class="text-sm font-medium text-slate-600">Notification Time Reduction</span>
-                <span class="text-sm font-bold text-blue-600">66.7%</span>
-              </div>
-              <div class="h-3 bg-slate-100 rounded-full overflow-hidden transition-all duration-300 group-hover:shadow-inner">
-                <div class="h-full gradient-primary rounded-full transition-all duration-500 progress-bar" style="width: 0%"></div>
-              </div>
-            </div>
-
-            <div class="group">
-              <div class="flex justify-between mb-2">
-                <span class="text-sm font-medium text-slate-600">FCR Improvement</span>
-                <span class="text-sm font-bold text-emerald-600">20%</span>
-              </div>
-              <div class="h-3 bg-slate-100 rounded-full overflow-hidden transition-all duration-300 group-hover:shadow-inner">
-                <div class="h-full gradient-success rounded-full transition-all duration-500 progress-bar" style="width: 0%"></div>
-              </div>
-            </div>
-
-            <div class="group">
-              <div class="flex justify-between mb-2">
-                <span class="text-sm font-medium text-slate-600">Call Volume Reduction</span>
-                <span class="text-sm font-bold text-indigo-600">40%</span>
-              </div>
-              <div class="h-3 bg-slate-100 rounded-full overflow-hidden transition-all duration-300 group-hover:shadow-inner">
-                <div class="h-full gradient-primary rounded-full transition-all duration-500 progress-bar" style="width: 0%"></div>
-              </div>
-            </div>
+            <div id="callVolumeTooltip" class="hidden bg-gray-800 text-white p-2 rounded-md"></div>
           </div>
         </div>
       </div>
-      
-      <!-- AI-Powered Insights -->
-      <div class="mt-8 bg-white rounded-xl shadow-lg border border-slate-100 p-4 md:p-6">
-        <div class="flex justify-between items-center mb-4">
-          <h2 class="text-xl font-semibold text-slate-700">AI-Powered Insights</h2>
-          <button id="refreshInsights" class="px-3 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm flex items-center">
-            <svg class="w-4 h-4 mr-1" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" 
-                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-            Refresh
-          </button>
-        </div>
-        <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-md">
-          <p class="text-blue-700">
-            <strong>OpenAI Analysis:</strong> Based on the current trend, notification time has decreased by 66.7% over the past month. 
-            This improvement correlates with the implementation of the automated welcome workflow using Workato. 
-            Consider applying similar automation to other customer touchpoints to further reduce response times.
-          </p>
+    </div>
+
+    <div class="bg-white shadow-md rounded-md p-6 mt-6">
+      <h2 class="text-xl font-bold mb-4">Insights</h2>
+      <div class="api-status openai">OpenAI - Connecting</div>
+      <div id="insights"></div>
+    </div>
+
+    <div id="workflowModal" class="fixed z-10 inset-0 overflow-y-auto hidden">
+      <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
+        <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+        <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+          <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+            <h3 class="text-lg font-medium leading-6 text-gray-900">Create Workflow</h3>
+            <form id="workflowForm" class="mt-4">
+              <div class="mb-4">
+                <label for="workflowName" class="block text-gray-700 font-bold mb-2">Workflow Name</label>
+                <input type="text" id="workflowName" name="workflowName" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" placeholder="Enter workflow name">
+              </div>
+              <div class="mb-4">
+                <label for="workflowTrigger" class="block text-gray-700 font-bold mb-2">Trigger</label>
+                <select id="workflowTrigger" name="workflowTrigger" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                  <option value="schedule">Schedule</option>
+                  <option value="manual">Manual</option>
+                  <option value="webhook">Webhook</option>
+                </select>
+              </div>
+              <div class="mb-4">
+                <label class="block text-gray-700 font-bold mb-2">Actions</label>
+                <div class="flex items-center">
+                  <input type="checkbox" id="action1" name="action1" class="mr-2">
+                  <label for="action1" class="text-gray-700">Action 1</label>
+                </div>
+                <div class="flex items-center">
+                  <input type="checkbox" id="action2" name="action2" class="mr-2">
+                  <label for="action2" class="text-gray-700">Action 2</label>
+                </div>
+                <div class="flex items-center">
+                  <input type="checkbox" id="action3" name="action3" class="mr-2">
+                  <label for="action3" class="text-gray-700">Action 3</label>
+                </div>
+              </div>
+              <div class="flex justify-end">
+                <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Create Workflow</button>
+              </div>
+            </form>
+          </div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Modal for creating new workflow -->
-  <div id="workflowModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
-    <div class="bg-white rounded-lg p-6 w-full max-w-lg">
-      <div class="flex justify-between items-center mb-4">
-        <h3 class="text-lg font-semibold">Create New Workflow</h3>
-        <button id="closeModal" class="text-slate-400 hover:text-slate-600">
-          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M6 18L18 6M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </button>
-      </div>
-      <form id="workflowForm">
-        <div class="mb-4">
-          <label class="block text-sm font-medium text-slate-700 mb-1">Workflow Name</label>
-          <input type="text" class="w-full px-3 py-2 border border-slate-300 rounded-md" placeholder="Enter workflow name">
-        </div>
-        <div class="mb-4">
-          <label class="block text-sm font-medium text-slate-700 mb-1">Trigger</label>
-          <select class="w-full px-3 py-2 border border-slate-300 rounded-md">
-            <option>New Contact in Google Sheets</option>
-            <option>Updated Contact in Google Sheets</option>
-            <option>Service Outage Alert</option>
-            <option>Customer Feedback Received</option>
-          </select>
-        </div>
-        <div class="mb-4">
-          <label class="block text-sm font-medium text-slate-700 mb-1">Actions</label>
-          <div class="space-y-2">
-            <div class="flex items-center">
-              <input type="checkbox" id="action1" checked class="mr-2">
-              <label for="action1" class="text-sm">Send Telegram Message</label>
-            </div>
-            <div class="flex items-center">
-              <input type="checkbox" id="action2" checked class="mr-2">
-              <label for="action2" class="text-sm">Generate AI Response with OpenAI</label>
-            </div>
-            <div class="flex items-center">
-              <input type="checkbox" id="action3" class="mr-2">
-              <label for="action3" class="text-sm">Update Google Sheet Status</label>
-            </div>
-          </div>
-        </div>
-        <div class="flex justify-end">
-          <button type="button" id="cancelWorkflow" class="px-4 py-2 text-sm text-slate-700 hover:text-slate-900 mr-2">Cancel</button>
-          <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm">Create Workflow</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- Pure JavaScript for charts - no external dependencies -->
   <script>
-    // Sample data
-    const notificationTimeData = [
-      { day: '2025-01-01', avg_time: 42, baseline: 45, target: 11 },
-      { day: '2025-01-08', avg_time: 35, baseline: 45, target: 11 },
-      { day: '2025-01-15', avg_time: 28, baseline: 45, target: 11 },
-      { day: '2025-01-22', avg_time: 20, baseline: 45, target: 11 },
-      { day: '2025-01-29', avg_time: 15, baseline: 45, target: 11 },
-    ];
-
-    const fcrData = [
-      { week: 'Week 1', rate: 65, target: 80 },
-      { week: 'Week 2', rate: 70, target: 80 },
-      { week: 'Week 3', rate: 75, target: 80 },
-      { week: 'Week 4', rate: 78, target: 80 },
-    ];
-
-    const callVolumeData = [
-      { week: 'Week 1', total_calls: 1000, outage_calls: 300 },
-      { week: 'Week 2', total_calls: 850, outage_calls: 200 },
-      { week: 'Week 3', total_calls: 700, outage_calls: 150 },
-      { week: 'Week 4', total_calls: 600, outage_calls: 100 },
-    ];
-
-    // Color configuration
-    const colors = {
-      primary: {
-        main: '#2563EB',
-        light: '#60A5FA',
-        dark: '#1E40AF',
-      },
-      secondary: {
-        main: '#475569',
-        light: '#94A3B8',
-        dark: '#334155',
-      },
-      success: {
-        main: '#059669',
-        light: '#34D399',
-      },
-      border: '#E2E8F0',
-      text: {
-        primary: '#1E293B',
-        secondary: '#64748B'
+    // Workato API integration
+    async function getWorkflowStatus() {
+      try {
+        const response = await fetch('/api/workato/workflows');
+        const workflows = await response.json();
+        updateWorkflowTable(workflows);
+        updateAPIStatus('Workato', 'connected');
+      } catch (error) {
+        console.error('Error fetching workflow status:', error);
+        updateAPIStatus('Workato', 'error');
       }
-    };
-
-    // Helper function to draw a line chart
-    function drawLineChart(canvasId, data, config) {
-      const canvas = document.getElementById(canvasId);
-      const ctx = canvas.getContext('2d');
-      const tooltipEl = document.getElementById(config.tooltipId);
-      
-      // Set canvas dimensions
-      canvas.width = canvas.parentNode.clientWidth;
-      canvas.height = canvas.parentNode.clientHeight;
-      
-      // Calculate chart area
-      const padding = 40;
-      const chartArea = {
-        x: padding,
-        y: padding,
-        width: canvas.width - (padding * 2),
-        height: canvas.height - (padding * 2) - 30 // Extra space for legend
-      };
-      
-      // Find min and max values for Y axis
-      let minY = Infinity;
-      let maxY = -Infinity;
-      
-      config.lines.forEach(line => {
-        data.forEach(item => {
-          const value = item[line.dataKey];
-          if (value < minY) minY = value;
-          if (value > maxY) maxY = value;
-        });
-      });
-      
-      // Add some padding to the min/max values
-      const yPadding = (maxY - minY) * 0.1;
-      minY = Math.max(0, minY - yPadding);
-      maxY = maxY + yPadding;
-      
-      // Draw background grid
-      ctx.strokeStyle = colors.border;
-      ctx.lineWidth = 1;
-      
-      // Horizontal grid lines
-      const ySteps = 5;
-      for (let i = 0; i <= ySteps; i++) {
-        const y = chartArea.y + (chartArea.height * (1 - (i / ySteps)));
-        
-        ctx.beginPath();
-        ctx.moveTo(chartArea.x, y);
-        ctx.lineTo(chartArea.x + chartArea.width, y);
-        ctx.stroke();
-        
-        // Y-axis labels
-        const value = minY + ((maxY - minY) * (i / ySteps));
-        ctx.fillStyle = colors.text.secondary;
-        ctx.font = '12px Arial';
-        ctx.textAlign = 'right';
-        ctx.fillText(Math.round(value), chartArea.x - 10, y + 4);
-      }
-      
-      // X-axis and labels
-      const xStep = chartArea.width / (data.length - 1);
-      data.forEach((item, i) => {
-        const x = chartArea.x + (i * xStep);
-        
-        // X-axis tick
-        ctx.beginPath();
-        ctx.moveTo(x, chartArea.y + chartArea.height);
-        ctx.lineTo(x, chartArea.y + chartArea.height + 5);
-        ctx.stroke();
-        
-        // X-axis label
-        ctx.fillStyle = colors.text.secondary;
-        ctx.font = '12px Arial';
-        ctx.textAlign = 'center';
-        ctx.fillText(item[config.xKey], x, chartArea.y + chartArea.height + 20);
-      });
-      
-      // Draw lines
-      config.lines.forEach(line => {
-        ctx.strokeStyle = line.color;
-        ctx.lineWidth = line.width || 2;
-        
-        if (line.dashed) {
-          ctx.setLineDash([5, 5]);
-        } else {
-          ctx.setLineDash([]);
-        }
-        
-        ctx.beginPath();
-        
-        data.forEach((item, i) => {
-          const x = chartArea.x + (i * xStep);
-          const yRatio = (item[line.dataKey] - minY) / (maxY - minY);
-          const y = chartArea.y + chartArea.height - (yRatio * chartArea.height);
-          
-          if (i === 0) {
-            ctx.moveTo(x, y);
-          } else {
-            ctx.lineTo(x, y);
-          }
-          
-          // Draw dots
-          if (line.dots) {
-            ctx.fillStyle = line.color;
-            ctx.beginPath();
-            ctx.arc(x, y, 4, 0, Math.PI * 2);
-            ctx.fill();
-          }
-        });
-        
-        ctx.stroke();
-      });
-      
-      // Draw legend
-      const legendY = chartArea.y + chartArea.height + 30;
-      let legendX = chartArea.x;
-      
-      config.lines.forEach(line => {
-        // Line symbol
-        ctx.strokeStyle = line.color;
-        ctx.lineWidth = 2;
-        
-        if (line.dashed) {
-          ctx.setLineDash([5, 5]);
-        } else {
-          ctx.setLineDash([]);
-        }
-        
-        ctx.beginPath();
-        ctx.moveTo(legendX, legendY);
-        ctx.lineTo(legendX + 20, legendY);
-        ctx.stroke();
-        
-        // Text
-        ctx.fillStyle = colors.text.primary;
-        ctx.font = '12px Arial';
-        ctx.textAlign = 'left';
-        ctx.fillText(line.name, legendX + 25, legendY + 4);
-        
-        legendX += ctx.measureText(line.name).width + 50;
-      });
-      
-      // Handle tooltip
-      let activePoint = null;
-      
-      canvas.addEventListener('mousemove', function(e) {
-        const rect = canvas.getBoundingClientRect();
-        const mouseX = e.clientX - rect.left;
-        const mouseY = e.clientY - rect.top;
-        
-        // Find closest point
-        let closestDistance = Infinity;
-        let closestPoint = null;
-        let closestDataIndex = -1;
-        
-        data.forEach((item, i) => {
-          const x = chartArea.x + (i * xStep);
-          
-          config.lines.forEach(line => {
-            const yRatio = (item[line.dataKey] - minY) / (maxY - minY);
-            const y = chartArea.y + chartArea.height - (yRatio * chartArea.height);
-            
-            const distance = Math.sqrt(Math.pow(mouseX - x, 2) + Math.pow(mouseY - y, 2));
-            
-            if (distance < closestDistance && distance < 30) {
-              closestDistance = distance;
-              closestPoint = { x, y };
-              closestDataIndex = i;
-            }
-          });
-        });
-        
-        if (closestPoint) {
-          // Show tooltip
-          tooltipEl.style.opacity = 1;
-          tooltipEl.style.left = (closestPoint.x + rect.left) + 'px';
-          tooltipEl.style.top = (closestPoint.y + rect.top - 70) + 'px';
-          
-          // Build tooltip content
-          let tooltipContent = `<div class="font-semibold">${data[closestDataIndex][config.xKey]}</div>`;
-          
-          config.lines.forEach(line => {
-            tooltipContent += `<div class="flex items-center mt-1">
-              <span class="inline-block w-3 h-3 rounded-full mr-2" style="background-color: ${line.color}"></span>
-              <span>${line.name}: ${data[closestDataIndex][line.dataKey]}</span>
-            </div>`;
-          });
-          
-          tooltipEl.innerHTML = tooltipContent;
-          
-          activePoint = closestPoint;
-        } else if (activePoint) {
-          // Hide tooltip
-          tooltipEl.style.opacity = 0;
-          activePoint = null;
-        }
-      });
-      
-      canvas.addEventListener('mouseleave', function() {
-        tooltipEl.style.opacity = 0;
-        activePoint = null;
-      });
     }
-    
-    // Helper function to draw a bar chart
-    function drawBarChart(canvasId, data, config) {
-      const canvas = document.getElementById(canvasId);
-      const ctx = canvas.getContext('2d');
-      const tooltipEl = document.getElementById(config.tooltipId);
-      
-      // Set canvas dimensions
-      canvas.width = canvas.parentNode.clientWidth;
-      canvas.height = canvas.parentNode.clientHeight;
-      
-      // Calculate chart area
-      const padding = 40;
-      const chartArea = {
-        x: padding,
-        y: padding,
-        width: canvas.width - (padding * 2),
-        height: canvas.height - (padding * 2) - 30 // Extra space for
+
+    function updateWorkflowTable(workflows) {
+      // Update the HTML table with the fetched workflow data
+    }
+
+    // Google Sheets API integration
+    async function getContactData() {
+      try {
+        const response = await fetch('/api/google-sheets/contacts');
+        const contactData = await response.json();
+        updateChartData(contactData);
+        updateAPIStatus('Google Sheets', 'connected');
+      } catch (error) {
+        console.error('Error fetching contact data:', error);
+        updateAPIStatus('Google Sheets', 'error');
+      }
+    }
+
+    function updateChartData(contactData) {
+      // Update the chart data with the fetched contact data
+    }
+
+    // OpenAI API integration
+    async function getInsights() {
+      try {
+        const response = await fetch('/api/openai/insights', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            notificationTimeData,
+            fcrData,
+            callVolumeData
+          })
+        });
+        const insights = await response.json();
+        updateInsightsSection(insights);
+        updateAPIStatus('OpenAI', 'connected');
+      } catch (error) {
+        console.error('Error generating insights:', error);
+        updateAPIStatus('OpenAI', 'error');
+      }
+    }
+
+    function updateInsightsSection(insights) {
+      // Update the insights section with the generated insights
+    }
+
+    function updateAPIStatus(apiName, status) {
+      // Update the API status indicators in the HTML
+    }
+
+    // Event listeners
+    document.getElementById('createWorkflow').addEventListener('click', () => {
+      // Show the workflow creation modal
+    });
+
+    document.getElementById('workflowForm').addEventListener('submit', async (event) => {
+      event.preventDefault();
+
+      // Handle workflow creation form submission
+    });
+
+    // Initial data fetching
+    getWorkflowStatus();
+    getContactData();
+    getInsights();
+  </script>
+</body>
+</html>
