@@ -252,6 +252,7 @@
             </form>
         </div>
     </div>
+    
     <!-- JavaScript Code -->
     <script>
         // Utility Functions
@@ -578,464 +579,463 @@
                     </td>
                     <td class="px-3 py-3 whitespace-nowrap">
                         <div class="text-sm text-gray-500">${formattedDate} (${daysAgo} days ago)</div>
-                </td>
-                <td class="px-3 py-3 whitespace-nowrap">
-                    <span class="px-2 py-1 text-xs rounded-full ${statusClass} border">
-                        ${contact.status}
-                    </span>
-                </td>
-                <td class="px-3 py-3 whitespace-nowrap text-sm text-gray-500">
-                    <button class="text-blue-600 hover:text-blue-800 mr-2" onclick="viewContactDetails(${contact.id})">View</button>
-                    <button class="text-red-600 hover:text-red-800">Delete</button>
-                </td>
-            `;
-            
-            tableBody.appendChild(row);
-            
-            // Add click event to view contact details
-            row.addEventListener('click', () => {
-                viewContactDetails(contact.id);
-            });
-        });
-        
-        // Add row hover effect
-        const rows = tableBody.querySelectorAll('tr');
-        rows.forEach(row => {
-            row.addEventListener('mouseenter', () => {
-                row.classList.add('bg-gray-50', 'cursor-pointer');
-            });
-            row.addEventListener('mouseleave', () => {
-                row.classList.remove('bg-gray-50');
-            });
-        });
-    }
-
-    function viewContactDetails(contactId) {
-        const contact = contactData.find(c => c.id === contactId);
-        if (!contact) return;
-        
-        // Update contact details section
-        const detailsContainer = document.getElementById('contactDetails');
-        detailsContainer.innerHTML = `
-            <div class="flex items-center mb-4">
-                <div class="w-12 h-12 rounded-full bg-blue-500 flex items-center justify-center text-white text-xl font-bold">
-                    ${contact.name.charAt(0)}
-                </div>
-                <div class="ml-4">
-                    <h3 class="font-bold text-lg">${contact.name}</h3>
-                    <p class="text-gray-600">${contact.company}</p>
-                </div>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <div>
-                    <p class="text-sm text-gray-500">Email</p>
-                    <p class="font-medium">${contact.email}</p>
-                </div>
-                <div>
-                    <p class="text-sm text-gray-500">Phone</p>
-                    <p class="font-medium">${contact.phone}</p>
-                </div>
-                <div class="col-span-1 md:col-span-2">
-                    <p class="text-sm text-gray-500">Notes</p>
-                    <p>${contact.notes}</p>
-                </div>
-            </div>
-        `;
-        
-        // Update activities list
-        const activitiesList = document.getElementById('contactActivities');
-        activitiesList.innerHTML = '';
-        
-        if (contact.activities && contact.activities.length > 0) {
-            contact.activities.forEach(activity => {
-                const activityItem = document.createElement('li');
-                const formattedDate = moment(activity.date).format('MMM D, YYYY h:mm A');
-                
-                let icon;
-                switch (activity.type) {
-                    case 'email':
-                        icon = '<svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>';
-                        break;
-                    case 'call':
-                        icon = '<svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path></svg>';
-                        break;
-                    case 'meeting':
-                        icon = '<svg class="w-4 h-4 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>';
-                        break;
-                    default:
-                        icon = '<svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>';
-                }
-                
-                activityItem.innerHTML = `
-                    <div class="flex items-start">
-                        <div class="flex-shrink-0 mt-0.5">
-                            ${icon}
-                        </div>
-                        <div class="ml-2">
-                            <p class="text-sm font-medium">${activity.description}</p>
-                            <p class="text-xs text-gray-500">${formattedDate}</p>
-                        </div>
-                    </div>
+                    </td>
+                    <td class="px-3 py-3 whitespace-nowrap">
+                        <span class="px-2 py-1 text-xs rounded-full ${statusClass} border">
+                            ${contact.status}
+                        </span>
+                    </td>
+                    <td class="px-3 py-3 whitespace-nowrap text-sm text-gray-500">
+                        <button class="text-blue-600 hover:text-blue-800 mr-2" onclick="viewContactDetails(${contact.id})">View</button>
+                        <button class="text-red-600 hover:text-red-800">Delete</button>
+                    </td>
                 `;
                 
-                activitiesList.appendChild(activityItem);
+                tableBody.appendChild(row);
+                
+                // Add click event to view contact details
+                row.addEventListener('click', () => {
+                    viewContactDetails(contact.id);
+                });
             });
-        } else {
-            activitiesList.innerHTML = '<li class="text-gray-500">No recent activities</li>';
+            
+            // Add row hover effect
+            const rows = tableBody.querySelectorAll('tr');
+            rows.forEach(row => {
+                row.addEventListener('mouseenter', () => {
+                    row.classList.add('bg-gray-50', 'cursor-pointer');
+                });
+                row.addEventListener('mouseleave', () => {
+                    row.classList.remove('bg-gray-50');
+                });
+            });
         }
-        
-        // Enable quick action buttons
-        const quickActionButtons = document.querySelectorAll('#contactDetails + div + div button');
-        quickActionButtons.forEach(button => {
-            button.disabled = false;
-        });
-        
-        // Highlight the selected contact in the table
-        const rows = document.querySelectorAll('#contactTableBody tr');
-        rows.forEach(row => {
-            if (parseInt(row.dataset.contactId) === contactId) {
-                row.classList.add('bg-blue-50');
-            } else {
-                row.classList.remove('bg-blue-50');
-            }
-        });
-    }
 
-    // Search contacts functionality
-    function searchContacts() {
-        const searchInput = document.getElementById('contactSearch').value.toLowerCase();
-        const tableBody = document.getElementById('contactTableBody');
-        const rows = tableBody.querySelectorAll('tr');
-        
-        rows.forEach(row => {
-            const nameCell = row.querySelector('td:first-child div');
-            if (nameCell) {
-                const name = nameCell.textContent.toLowerCase();
-                if (name.includes(searchInput)) {
-                    row.style.display = '';
-                } else {
-                    row.style.display = 'none';
-                }
-            }
-        });
-    }
-
-    // Refresh contacts functionality
-    function refreshContacts() {
-        const refreshButton = document.querySelector('button[onclick="refreshContacts()"]');
-        
-        // Show loading state
-        refreshButton.innerHTML = `
-            <svg class="animate-spin w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-            Refreshing...
-        `;
-        
-        // Simulate API call delay
-        setTimeout(() => {
-            populateContactTable();
+        function viewContactDetails(contactId) {
+            const contact = contactData.find(c => c.id === contactId);
+            if (!contact) return;
             
-            refreshButton.innerHTML = `
-                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-                </svg>
-                Refresh
-            `;
-            
-            // Show success notification
-            showNotification('Contacts refreshed successfully!', 'success');
-        }, 1000);
-    }
-
-    // Data Visualization Section
-    function createContactVisualization() {
-        const container = document.getElementById('visualizationContainer');
-        container.innerHTML = '';
-        
-        // Create canvas for Chart.js
-        const canvas = document.createElement('canvas');
-        canvas.id = 'contactChart';
-        canvas.style.width = '100%';
-        canvas.style.height = '100%';
-        container.appendChild(canvas);
-        
-        // Sample data for visualization
-        const labels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
-        const newContacts = [12, 19, 15, 25, 22, 30];
-        const activeContacts = [15, 20, 25, 27, 32, 35];
-        const inactiveContacts = [5, 8, 10, 8, 6, 5];
-        
-        // Create chart
-        new Chart(canvas, {
-            type: 'line',
-            data: {
-                labels: labels,
-                datasets: [
-                    {
-                        label: 'New Contacts',
-                        data: newContacts,
-                        borderColor: 'rgb(59, 130, 246)',
-                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                        tension: 0.3,
-                        fill: true
-                    },
-                    {
-                        label: 'Active Contacts',
-                        data: activeContacts,
-                        borderColor: 'rgb(16, 185, 129)',
-                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
-                        tension: 0.3,
-                        fill: true
-                    },
-                    {
-                        label: 'Inactive Contacts',
-                        data: inactiveContacts,
-                        borderColor: 'rgb(239, 68, 68)',
-                        backgroundColor: 'rgba(239, 68, 68, 0.1)',
-                        tension: 0.3,
-                        fill: true
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'top',
-                    },
-                    title: {
-                        display: true,
-                        text: 'Contact Growth Trends'
-                    },
-                    tooltip: {
-                        mode: 'index',
-                        intersect: false
-                    }
-                },
-                hover: {
-                    mode: 'nearest',
-                    intersect: true
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        title: {
-                            display: true,
-                            text: 'Number of Contacts'
-                        }
-                    },
-                    x: {
-                        title: {
-                            display: true,
-                            text: 'Month (2025)'
-                        }
-                    }
-                }
-            }
-        });
-    }
-
-    // AI-Generated Insights Section
-    function generateInsights() {
-        const insightsContainer = document.getElementById('insightsContainer');
-        
-        // Sample AI-generated insights
-        const insights = [
-            {
-                title: 'Contact Engagement Analysis',
-                content: 'Based on your contact data, 65% of your contacts have been engaged within the last 30 days. This is a 15% improvement from the previous month.',
-                type: 'info'
-            },
-            {
-                title: 'Workflow Optimization',
-                content: 'The "Email Follow-up" workflow has a 78% success rate in receiving responses. Consider implementing similar automation for other contact types.',
-                type: 'success'
-            },
-            {
-                title: 'Attention Required',
-                content: '8 contacts have been inactive for more than 60 days. Consider reaching out with a personalized message to re-engage them.',
-                type: 'warning'
-            }
-        ];
-        
-        // Clear previous insights
-        insightsContainer.innerHTML = '';
-        
-        // Create insights cards
-        insights.forEach(insight => {
-            const card = document.createElement('div');
-            
-            // Set card style based on insight type
-            let borderColor, bgColor, iconColor, icon;
-            switch (insight.type) {
-                case 'info':
-                    borderColor = 'border-blue-200';
-                    bgColor = 'bg-blue-50';
-                    iconColor = 'text-blue-500';
-                    icon = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>';
-                    break;
-                case 'success':
-                    borderColor = 'border-green-200';
-                    bgColor = 'bg-green-50';
-                    iconColor = 'text-green-500';
-                    icon = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>';
-                    break;
-                case 'warning':
-                    borderColor = 'border-yellow-200';
-                    bgColor = 'bg-yellow-50';
-                    iconColor = 'text-yellow-500';
-                    icon = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>';
-                    break;
-            }
-            
-            card.className = `mb-4 p-4 border ${borderColor} ${bgColor} rounded-lg`;
-            card.innerHTML = `
-                <div class="flex items-center mb-2">
-                    <div class="flex-shrink-0 ${iconColor}">
-                        ${icon}
+            // Update contact details section
+            const detailsContainer = document.getElementById('contactDetails');
+            detailsContainer.innerHTML = `
+                <div class="flex items-center mb-4">
+                    <div class="w-12 h-12 rounded-full bg-blue-500 flex items-center justify-center text-white text-xl font-bold">
+                        ${contact.name.charAt(0)}
                     </div>
-                    <h4 class="ml-2 font-semibold">${insight.title}</h4>
+                    <div class="ml-4">
+                        <h3 class="font-bold text-lg">${contact.name}</h3>
+                        <p class="text-gray-600">${contact.company}</p>
+                    </div>
                 </div>
-                <p>${insight.content}</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div>
+                        <p class="text-sm text-gray-500">Email</p>
+                        <p class="font-medium">${contact.email}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500">Phone</p>
+                        <p class="font-medium">${contact.phone}</p>
+                    </div>
+                    <div class="col-span-1 md:col-span-2">
+                        <p class="text-sm text-gray-500">Notes</p>
+                        <p>${contact.notes}</p>
+                    </div>
+                </div>
             `;
             
-            insightsContainer.appendChild(card);
+            // Update activities list
+            const activitiesList = document.getElementById('contactActivities');
+            activitiesList.innerHTML = '';
             
-            // Add fade-in animation
-            card.style.opacity = '0';
+            if (contact.activities && contact.activities.length > 0) {
+                contact.activities.forEach(activity => {
+                    const activityItem = document.createElement('li');
+                    const formattedDate = moment(activity.date).format('MMM D, YYYY h:mm A');
+                    
+                    let icon;
+                    switch (activity.type) {
+                        case 'email':
+                            icon = '<svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>';
+                            break;
+                        case 'call':
+                            icon = '<svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path></svg>';
+                            break;
+                        case 'meeting':
+                            icon = '<svg class="w-4 h-4 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>';
+                            break;
+                        default:
+                            icon = '<svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>';
+                    }
+                    
+                    activityItem.innerHTML = `
+                        <div class="flex items-start">
+                            <div class="flex-shrink-0 mt-0.5">
+                                ${icon}
+                            </div>
+                            <div class="ml-2">
+                                <p class="text-sm font-medium">${activity.description}</p>
+                                <p class="text-xs text-gray-500">${formattedDate}</p>
+                            </div>
+                        </div>
+                    `;
+                    
+                    activitiesList.appendChild(activityItem);
+                });
+            } else {
+                activitiesList.innerHTML = '<li class="text-gray-500">No recent activities</li>';
+            }
+            
+            // Enable quick action buttons
+            const quickActionButtons = document.querySelectorAll('#contactDetails + div + div button');
+            quickActionButtons.forEach(button => {
+                button.disabled = false;
+            });
+            
+            // Highlight the selected contact in the table
+            const rows = document.querySelectorAll('#contactTableBody tr');
+            rows.forEach(row => {
+                if (parseInt(row.dataset.contactId) === contactId) {
+                    row.classList.add('bg-blue-50');
+                } else {
+                    row.classList.remove('bg-blue-50');
+                }
+            });
+        }
+
+        // Search contacts functionality
+        function searchContacts() {
+            const searchInput = document.getElementById('contactSearch').value.toLowerCase();
+            const tableBody = document.getElementById('contactTableBody');
+            const rows = tableBody.querySelectorAll('tr');
+            
+            rows.forEach(row => {
+                const nameCell = row.querySelector('td:first-child div');
+                if (nameCell) {
+                    const name = nameCell.textContent.toLowerCase();
+                    if (name.includes(searchInput)) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                }
+            });
+        }
+
+        // Refresh contacts functionality
+        function refreshContacts() {
+            const refreshButton = document.querySelector('button[onclick="refreshContacts()"]');
+            
+            // Show loading state
+            refreshButton.innerHTML = `
+                <svg class="animate-spin w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Refreshing...
+            `;
+            
+            // Simulate API call delay
             setTimeout(() => {
-                card.style.transition = 'opacity 0.5s ease-in-out';
-                card.style.opacity = '1';
-            }, 300 * insightsContainer.children.length);
-        });
-        
-        // Add data visualization to insights
-        const visualContainer = document.createElement('div');
-        visualContainer.className = 'mt-6';
-        visualContainer.innerHTML = `
-            <h4 class="font-semibold mb-2">Contact Engagement Distribution</h4>
-            <div id="insightChart" style="height: 200px;"></div>
-        `;
-        insightsContainer.appendChild(visualContainer);
-        
-        // Create donut chart for insights
-        setTimeout(() => {
-            const canvas = document.createElement('canvas');
-            canvas.id = 'insightDonutChart';
-            document.getElementById('insightChart').appendChild(canvas);
+                populateContactTable();
+                
+                refreshButton.innerHTML = `
+                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                    </svg>
+                    Refresh
+                `;
+                
+                // Show success notification
+                showNotification('Contacts refreshed successfully!', 'success');
+            }, 1000);
+        }
+
+        // Data Visualization Section
+        function createContactVisualization() {
+            const container = document.getElementById('visualizationContainer');
+            container.innerHTML = '';
             
+            // Create canvas for Chart.js
+            const canvas = document.createElement('canvas');
+            canvas.id = 'contactChart';
+            canvas.style.width = '100%';
+            canvas.style.height = '100%';
+            container.appendChild(canvas);
+            
+            // Sample data for visualization
+            const labels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
+            const newContacts = [12, 19, 15, 25, 22, 30];
+            const activeContacts = [15, 20, 25, 27, 32, 35];
+            const inactiveContacts = [5, 8, 10, 8, 6, 5];
+            
+            // Create chart
             new Chart(canvas, {
-                type: 'doughnut',
+                type: 'line',
                 data: {
-                    labels: ['Active (< 30 days)', 'Semi-active (30-60 days)', 'Inactive (> 60 days)'],
-                    datasets: [{
-                        data: [65, 27, 8],
-                        backgroundColor: [
-                            'rgba(16, 185, 129, 0.7)',
-                            'rgba(245, 158, 11, 0.7)',
-                            'rgba(239, 68, 68, 0.7)'
-                        ],
-                        borderColor: [
-                            'rgb(16, 185, 129)',
-                            'rgb(245, 158, 11)',
-                            'rgb(239, 68, 68)'
-                        ],
-                        borderWidth: 1
-                    }]
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'New Contacts',
+                            data: newContacts,
+                            borderColor: 'rgb(59, 130, 246)',
+                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                            tension: 0.3,
+                            fill: true
+                        },
+                        {
+                            label: 'Active Contacts',
+                            data: activeContacts,
+                            borderColor: 'rgb(16, 185, 129)',
+                            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                            tension: 0.3,
+                            fill: true
+                        },
+                        {
+                            label: 'Inactive Contacts',
+                            data: inactiveContacts,
+                            borderColor: 'rgb(239, 68, 68)',
+                            backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                            tension: 0.3,
+                            fill: true
+                        }
+                    ]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
                         legend: {
-                            position: 'right',
+                            position: 'top',
+                        },
+                        title: {
+                            display: true,
+                            text: 'Contact Growth Trends'
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false
+                        }
+                    },
+                    hover: {
+                        mode: 'nearest',
+                        intersect: true
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Number of Contacts'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Month (2025)'
+                            }
                         }
                     }
                 }
             });
-        }, 1000);
-    }
+        }
 
-    // Initialize event listeners for buttons
-    document.addEventListener('DOMContentLoaded', function() {
-        // Initialize tables
-        populateWorkflowTable();
-        populateContactTable();
-        
-        // Setup workflow generation button
-        const generateWorkflowButton = document.querySelector('button:contains("Generate Workflow")');
-        if (generateWorkflowButton) {
-            generateWorkflowButton.addEventListener('click', function() {
-                const textarea = this.previousElementSibling;
-                if (textarea.value.trim() !== '') {
-                    // Show loading state
-                    this.innerHTML = `
-                        <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                        Generating...
-                    `;
-                    
-                    // Simulate API call delay
-                    setTimeout(() => {
-                        // Add new workflow
-                        workflowData.push({
-                            name: 'New ' + textarea.value.split(' ').slice(0, 3).join(' ') + '...',
-                            trigger: 'Custom',
-                            lastRun: new Date().toISOString(),
-                            status: 'Active'
-                        });
-                        
-                        populateWorkflowTable();
-                        this.textContent = 'Generate Workflow';
-                        textarea.value = '';
-                        
-                        // Show success notification
-                        showNotification('Workflow generated successfully!', 'success');
-                    }, 1500);
-                } else {
-                    // Show error notification
-                    showNotification('Please enter a workflow description', 'error');
+        // AI-Generated Insights Section
+        function generateInsights() {
+            const insightsContainer = document.getElementById('insightsContainer');
+            
+            // Sample AI-generated insights
+            const insights = [
+                {
+                    title: 'Contact Engagement Analysis',
+                    content: 'Based on your contact data, 65% of your contacts have been engaged within the last 30 days. This is a 15% improvement from the previous month.',
+                    type: 'info'
+                },
+                {
+                    title: 'Workflow Optimization',
+                    content: 'The "Email Follow-up" workflow has a 78% success rate in receiving responses. Consider implementing similar automation for other contact types.',
+                    type: 'success'
+                },
+                {
+                    title: 'Attention Required',
+                    content: '8 contacts have been inactive for more than 60 days. Consider reaching out with a personalized message to re-engage them.',
+                    type: 'warning'
                 }
-            });
-        }
-        
-        // Setup data visualization button
-        const generateDataButton = document.querySelector('button:contains("Generate Data")');
-        if (generateDataButton) {
-            generateDataButton.addEventListener('click', function() {
-                const textarea = this.previousElementSibling;
-                if (textarea.value.trim() !== '') {
-                    // Show loading state
-                    this.innerHTML = `
-                        <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                        Generating...
-                    `;
-                    
-                    // Simulate API call delay
-                    setTimeout(() => {
-                        createContactVisualization();
-                        this.textContent = 'Generate Data';
-                        
-                        // Show success notification
-                        showNotification('Visualization generated successfully!', 'success');
-                    }, 1500);
-                } else {
-                    // Show error notification
-                    showNotification('Please enter a data description', 'error');
+            ];
+            
+            // Clear previous insights
+            insightsContainer.innerHTML = '';
+            
+            // Create insights cards
+            insights.forEach(insight => {
+                const card = document.createElement('div');
+                
+                // Set card style based on insight type
+                let borderColor, bgColor, iconColor, icon;
+                switch (insight.type) {
+                    case 'info':
+                        borderColor = 'border-blue-200';
+                        bgColor = 'bg-blue-50';
+                        iconColor = 'text-blue-500';
+                        icon = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>';
+                        break;
+                    case 'success':
+                        borderColor = 'border-green-200';
+                        bgColor = 'bg-green-50';
+                        iconColor = 'text-green-500';
+                        icon = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>';
+                        break;
+                    case 'warning':
+                        borderColor = 'border-yellow-200';
+                        bgColor = 'bg-yellow-50';
+                        iconColor = 'text-yellow-500';
+                        icon = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>';
+                        break;
                 }
+                
+                card.className = `mb-4 p-4 border ${borderColor} ${bgColor} rounded-lg`;
+                card.innerHTML = `
+                    <div class="flex items-center mb-2">
+                        <div class="flex-shrink-0 ${iconColor}">
+                            ${icon}
+                        </div>
+                        <h4 class="ml-2 font-semibold">${insight.title}</h4>
+                    </div>
+                    <p>${insight.content}</p>
+                `;
+                
+                insightsContainer.appendChild(card);
+                
+                // Add fade-in animation
+                card.style.opacity = '0';
+                setTimeout(() => {
+                    card.style.transition = 'opacity 0.5s ease-in-out';
+                    card.style.opacity = '1';
+                }, 300 * insightsContainer.children.length);
             });
+            
+            // Add data visualization to insights
+            const visualContainer = document.createElement('div');
+            visualContainer.className = 'mt-6';
+            visualContainer.innerHTML = `
+                <h4 class="font-semibold mb-2">Contact Engagement Distribution</h4>
+                <div id="insightChart" style="height: 200px;"></div>
+            `;
+            insightsContainer.appendChild(visualContainer);
+            
+            // Create donut chart for insights
+            setTimeout(() => {
+                const canvas = document.createElement('canvas');
+                canvas.id = 'insightDonutChart';
+                document.getElementById('insightChart').appendChild(canvas);
+                
+                new Chart(canvas, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Active (< 30 days)', 'Semi-active (30-60 days)', 'Inactive (> 60 days)'],
+                        datasets: [{
+                            data: [65, 27, 8],
+                            backgroundColor: [
+                                'rgba(16, 185, 129, 0.7)',
+                                'rgba(245, 158, 11, 0.7)',
+                                'rgba(239, 68, 68, 0.7)'
+                            ],
+                            borderColor: [
+                                'rgb(16, 185, 129)',
+                                'rgb(245, 158, 11)',
+                                'rgb(239, 68, 68)'
+                            ],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'right',
+                            }
+                        }
+                    }
+                });
+            }, 1000);
         }
-    });
+
+        // Initialize event listeners for buttons
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize tables
+            populateWorkflowTable();
+            populateContactTable();
+            
+            // Setup workflow generation button
+            const generateWorkflowButton = document.querySelector('button:contains("Generate Workflow")');
+            if (generateWorkflowButton) {
+                generateWorkflowButton.addEventListener('click', function() {
+                    const textarea = this.previousElementSibling;
+                    if (textarea.value.trim() !== '') {
+                        // Show loading state
+                        this.innerHTML = `
+                            <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            Generating...
+                        `;
+                        
+                        // Simulate API call delay
+                        setTimeout(() => {
+                            // Add new workflow
+                            workflowData.push({
+                                name: 'New ' + textarea.value.split(' ').slice(0, 3).join(' ') + '...',
+                                trigger: 'Custom',
+                                lastRun: new Date().toISOString(),
+                                status: 'Active'
+                            });
+                            
+                            populateWorkflowTable();
+                            this.textContent = 'Generate Workflow';
+                            textarea.value = '';
+                            
+                            // Show success notification
+                            showNotification('Workflow generated successfully!', 'success');
+                        }, 1500);
+                    } else {
+                        // Show error notification
+                        showNotification('Please enter a workflow description', 'error');
+                    }
+                });
+            }
+            
+            // Setup data visualization button
+            const generateDataButton = document.querySelector('button:contains("Generate Data")');
+            if (generateDataButton) {
+                generateDataButton.addEventListener('click', function() {
+                    const textarea = this.previousElementSibling;
+                    if (textarea.value.trim() !== '') {
+                        // Show loading state
+                        this.innerHTML = `
+                            <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            Generating...
+                        `;
+                        
+                        // Simulate API call delay
+                        setTimeout(() => {
+                            createContactVisualization();
+                            this.textContent = 'Generate Data';
+                            
+                            // Show success notification
+                            showNotification('Visualization generated successfully!', 'success');
+                        }, 1500);
+                    } else {
+                        // Show error notification
+                        showNotification('Please enter a data description', 'error');
+                    }
+                });
+            }
+        });
     </script>
 </body>
 </html>
 
-                                                             
