@@ -290,268 +290,335 @@
     </div>
 
     <!-- JavaScript -->
-    <script>
-        // Simulated threat data
-        const threatData = {
-            vectors: [
-                { id: "V001", name: "DDoS Attack", count: 156, severity: "CRITICAL" },
-                { id: "V002", name: "Malware Infection", count: 89, severity: "HIGH" },
-                { id: "V003", name: "Security Breach", count: 234, severity: "SEVERE" },
-                { id: "V004", name: "Hardware Failure", count: 167, severity: "CRITICAL" }
-            ],
-            timeline: generateThreatTimeline(),
-            locations: generateThreatLocations()
-        };
+    // Add this just before the closing </body> tag:
+<script>
+    // Simulated threat data
+    const threatData = {
+        vectors: [
+            { id: "V001", name: "DDoS Attack", count: 156, severity: "CRITICAL" },
+            { id: "V002", name: "Malware Infection", count: 89, severity: "HIGH" },
+            { id: "V003", name: "Security Breach", count: 234, severity: "SEVERE" },
+            { id: "V004", name: "Hardware Failure", count: 167, severity: "CRITICAL" }
+        ],
+        timeline: generateThreatTimeline(),
+        locations: generateThreatLocations()
+    };
 
-        // Generate random threat timeline
-        function generateThreatTimeline() {
-            const timeline = [];
-            const now = new Date();
-            for (let i = 30; i >= 0; i--) {
-                const date = new Date(now);
-                date.setDate(date.getDate() - i);
-                timeline.push({
-                    date: date.toISOString().split('T')[0],
-                    ddos: Math.floor(Math.random() * 100) + 50,
-                    malware: Math.floor(Math.random() * 80) + 30,
-                    breach: Math.floor(Math.random() * 120) + 40,
-                    hardware: Math.floor(Math.random() * 90) + 60
-                });
+    // Generate random threat timeline
+    function generateThreatTimeline() {
+        const timeline = [];
+        const now = new Date();
+        for (let i = 30; i >= 0; i--) {
+            const date = new Date(now);
+            date.setDate(date.getDate() - i);
+            timeline.push({
+                date: date.toISOString().split('T')[0],
+                ddos: Math.floor(Math.random() * 100) + 50,
+                malware: Math.floor(Math.random() * 80) + 30,
+                breach: Math.floor(Math.random() * 120) + 40,
+                hardware: Math.floor(Math.random() * 90) + 60
+            });
+        }
+        return timeline;
+    }
+
+    // Generate random threat locations
+    function generateThreatLocations() {
+        return [
+            { lat: 40.7128, lon: -74.0060, name: "New York", severity: "CRITICAL" },
+            { lat: 51.5074, lon: -0.1278, name: "London", severity: "SEVERE" },
+            { lat: 35.6762, lon: 139.6503, name: "Tokyo", severity: "HIGH" },
+            { lat: 1.3521, lon: 103.8198, name: "Singapore", severity: "CRITICAL" },
+            { lat: -33.8688, lon: 151.2093, name: "Sydney", severity: "SEVERE" }
+        ];
+    }
+
+    // Initialize charts
+    function initializeCharts() {
+        initializeAttackVectorsChart();
+        initializeDegradationChart();
+        initializeThreatMapChart();
+    }
+
+    // Attack Vectors Chart
+    function initializeAttackVectorsChart() {
+        const ctx = document.getElementById('attackVectorsChart');
+        if (!ctx) return;
+
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: threatData.timeline.slice(-7).map(t => t.date),
+                datasets: [{
+                    label: 'DDoS Attacks',
+                    data: threatData.timeline.slice(-7).map(t => t.ddos),
+                    borderColor: '#ef4444',
+                    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                }, {
+                    label: 'Malware',
+                    data: threatData.timeline.slice(-7).map(t => t.malware),
+                    borderColor: '#8b5cf6',
+                    backgroundColor: 'rgba(139, 92, 246, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        labels: {
+                            color: '#ef4444'
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(239, 68, 68, 0.1)'
+                        },
+                        ticks: {
+                            color: '#ef4444'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            color: 'rgba(239, 68, 68, 0.1)'
+                        },
+                        ticks: {
+                            color: '#ef4444'
+                        }
+                    }
+                }
             }
-            return timeline;
-        }
-
-        // Generate random threat locations
-        function generateThreatLocations() {
-            const locations = [
-                { lat: 40.7128, lon: -74.0060, name: "New York", severity: "CRITICAL" },
-                { lat: 51.5074, lon: -0.1278, name: "London", severity: "SEVERE" },
-                { lat: 35.6762, lon: 139.6503, name: "Tokyo", severity: "HIGH" },
-                { lat: 1.3521, lon: 103.8198, name: "Singapore", severity: "CRITICAL" },
-                { lat: -33.8688, lon: 151.2093, name: "Sydney", severity: "SEVERE" }
-            ];
-            return locations;
-        }
-
-        // Initialize charts
-        function initializeCharts() {
-            initializeAttackVectorsChart();
-            initializeDegradationChart();
-            initializeThreatMapChart();
-        }
-
-        // Attack Vectors Chart
-        function initializeAttackVectorsChart() {
-            const ctx = document.getElementById('attackVectorsChart').getContext('2d');
-            new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: threatData.timeline.map(t => t.date),
-                    datasets: [{
-                        label: 'DDoS Attacks',
-                        data: threatData.timeline.map(t => t.ddos),
-                        borderColor: '#ef4444',
-                        backgroundColor: 'rgba(239, 68, 68, 0.1)',
-                        tension: 0.4
-                    }, {
-                        label: 'Malware',
-                        data: threatData.timeline.map(t => t.malware),
-                        borderColor: '#8b5cf6',
-                        backgroundColor: 'rgba(139, 92, 246, 0.1)',
-                        tension: 0.4
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        legend: {
-                            labels: {
-                                color: '#ef4444'
-                            }
-                        }
-                    },
-                    scales: {
-                        y: {
-                            grid: {
-                                color: 'rgba(239, 68, 68, 0.1)'
-                            },
-                            ticks: {
-                                color: '#ef4444'
-                            }
-                        },
-                        x: {
-                            grid: {
-                                color: 'rgba(239, 68, 68, 0.1)'
-                            },
-                            ticks: {
-                                color: '#ef4444'
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
-        // System Degradation Chart
-        function initializeDegradationChart() {
-            const ctx = document.getElementById('degradationChart').getContext('2d');
-            new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: ['System A', 'System B', 'System C', 'System D'],
-                    datasets: [{
-                        label: 'Degradation Level',
-                        data: [87, 65, 92, 78],
-                        backgroundColor: [
-                            'rgba(239, 68, 68, 0.8)',
-                            'rgba(139, 92, 246, 0.8)',
-                            'rgba(234, 179, 8, 0.8)',
-                            'rgba(147, 51, 234, 0.8)'
-                        ]
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        legend: {
-                            labels: {
-                                color: '#8b5cf6'
-                            }
-                        }
-                    },
-                    scales: {
-                        y: {
-                            grid: {
-                                color: 'rgba(139, 92, 246, 0.1)'
-                            },
-                            ticks: {
-                                color: '#8b5cf6'
-                            }
-                        },
-                        x: {
-                            grid: {
-                                color: 'rgba(139, 92, 246, 0.1)'
-                            },
-                            ticks: {
-                                color: '#8b5cf6'
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
-        // Initialize dashboard
-        document.addEventListener('DOMContentLoaded', function() {
-            initializeCharts();
-            populateThreatTable();
-            startRealTimeUpdates();
         });
+    }
 
-        // Populate threat table
-        function populateThreatTable() {
-            const tbody = document.getElementById('threatTableBody');
-            tbody.innerHTML = '';
+    // System Degradation Chart
+    function initializeDegradationChart() {
+        const ctx = document.getElementById('degradationChart');
+        if (!ctx) return;
 
-            const threats = generateThreats(10);
-            threats.forEach(threat => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td class="px-3 py-2 text-red-500">${threat.id}</td>
-                    <td class="px-3 py-2 text-red-500">${threat.vector}</td>
-                    <td class="px-3 py-2 text-red-500">${threat.impact}</td>
-                    <td class="px-3 py-2 text-red-500">${threat.time}</td>
-                    <td class="px-3 py-2">
-                        <span class="px-2 py-1 text-xs rounded-full ${getStatusClass(threat.status)}">
-                            ${threat.status}
-                        </span>
-                    </td>
-                    <td class="px-3 py-2">
-                        <button class="text-red-500 hover:text-red-400">RESPOND</button>
-                    </td>
-                `;
-                tbody.appendChild(tr);
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['System A', 'System B', 'System C', 'System D'],
+                datasets: [{
+                    label: 'Degradation Level',
+                    data: [87, 65, 92, 78],
+                    backgroundColor: [
+                        'rgba(239, 68, 68, 0.8)',
+                        'rgba(139, 92, 246, 0.8)',
+                        'rgba(234, 179, 8, 0.8)',
+                        'rgba(147, 51, 234, 0.8)'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        labels: {
+                            color: '#8b5cf6'
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(139, 92, 246, 0.1)'
+                        },
+                        ticks: {
+                            color: '#8b5cf6'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            color: 'rgba(139, 92, 246, 0.1)'
+                        },
+                        ticks: {
+                            color: '#8b5cf6'
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // Threat Map Chart
+    function initializeThreatMapChart() {
+        const ctx = document.getElementById('threatMapChart');
+        if (!ctx) return;
+
+        new Chart(ctx, {
+            type: 'bubble',
+            data: {
+                datasets: [{
+                    label: 'Threat Locations',
+                    data: threatData.locations.map(loc => ({
+                        x: loc.lon,
+                        y: loc.lat,
+                        r: loc.severity === 'CRITICAL' ? 15 : 10
+                    })),
+                    backgroundColor: 'rgba(239, 68, 68, 0.6)',
+                    borderColor: 'rgba(239, 68, 68, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: false,
+                        grid: {
+                            color: 'rgba(239, 68, 68, 0.1)'
+                        },
+                        ticks: {
+                            color: '#ef4444'
+                        }
+                    },
+                    x: {
+                        beginAtZero: false,
+                        grid: {
+                            color: 'rgba(239, 68, 68, 0.1)'
+                        },
+                        ticks: {
+                            color: '#ef4444'
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // Update metrics randomly
+    function updateMetrics() {
+        document.getElementById('criticalFaults').textContent = Math.floor(Math.random() * 100 + 150);
+        document.getElementById('systemFailures').textContent = Math.floor(Math.random() * 200 + 300);
+        document.getElementById('systemHealth').textContent = Math.floor(Math.random() * 30) + '%';
+    }
+
+    // Populate threat table
+    function populateThreatTable() {
+        const tbody = document.getElementById('threatTableBody');
+        if (!tbody) return;
+
+        tbody.innerHTML = '';
+        const threats = generateThreats(10);
+        threats.forEach(threat => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td class="px-3 py-2 text-red-500">${threat.id}</td>
+                <td class="px-3 py-2 text-red-500">${threat.vector}</td>
+                <td class="px-3 py-2 text-red-500">${threat.impact}</td>
+                <td class="px-3 py-2 text-red-500">${threat.time}</td>
+                <td class="px-3 py-2">
+                    <span class="px-2 py-1 text-xs rounded-full ${getStatusClass(threat.status)}">
+                        ${threat.status}
+                    </span>
+                </td>
+                <td class="px-3 py-2">
+                    <button class="text-red-500 hover:text-red-400">RESPOND</button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    // Generate random threats
+    function generateThreats(count) {
+        const threats = [];
+        const vectors = ['DDoS', 'MALWARE', 'BREACH', 'HARDWARE'];
+        const impacts = ['CRITICAL', 'SEVERE', 'HIGH'];
+        const statuses = ['ACTIVE', 'CONTAINED', 'SPREADING'];
+
+        for (let i = 0; i < count; i++) {
+            threats.push({
+                id: `T${String(i + 1).padStart(3, '0')}`,
+                vector: vectors[Math.floor(Math.random() * vectors.length)],
+                impact: impacts[Math.floor(Math.random() * impacts.length)],
+                time: new Date().toLocaleTimeString(),
+                status: statuses[Math.floor(Math.random() * statuses.length)]
             });
         }
+        return threats;
+    }
 
-        // Generate random threats
-        function generateThreats(count) {
-            const threats = [];
-            const vectors = ['DDoS', 'MALWARE', 'BREACH', 'HARDWARE'];
-            const impacts = ['CRITICAL', 'SEVERE', 'HIGH'];
-            const statuses = ['ACTIVE', 'CONTAINED', 'SPREADING'];
-
-            for (let i = 0; i < count; i++) {
-                threats.push({
-                    id: `T${String(i + 1).padStart(3, '0')}`,
-                    vector: vectors[Math.floor(Math.random() * vectors.length)],
-                    impact: impacts[Math.floor(Math.random() * impacts.length)],
-                    time: new Date().toLocaleTimeString(),
-                    status: statuses[Math.floor(Math.random() * statuses.length)]
-                });
-            }
-            return threats;
+    // Get status class for styling
+    function getStatusClass(status) {
+        switch (status) {
+            case 'ACTIVE': return 'bg-red-900/50 text-red-500';
+            case 'CONTAINED': return 'bg-green-900/50 text-green-500';
+            case 'SPREADING': return 'bg-yellow-900/50 text-yellow-500';
+            default: return 'bg-gray-900/50 text-gray-500';
         }
+    }
 
-        // Get status class for styling
-        function getStatusClass(status) {
-            switch (status) {
-                case 'ACTIVE': return 'bg-red-900/50 text-red-500';
-                case 'CONTAINED': return 'bg-green-900/50 text-green-500';
-                case 'SPREADING': return 'bg-yellow-900/50 text-yellow-500';
-                default: return 'bg-gray-900/50 text-gray-500';
-            }
-        }
+    // Show notification
+    function showNotification(message, type = 'error') {
+        const container = document.getElementById('notificationContainer');
+        if (!container) return;
 
-        // Real-time updates simulation
-        function startRealTimeUpdates() {
-            setInterval(() => {
-                updateMetrics();
-                updateCharts();
-                showRandomAlert();
-            }, 5000);
-        }
+        const notification = document.createElement('div');
+        notification.className = `mb-4 p-4 rounded-lg border ${type === 'error' ? 'bg-red-900/50 border-red-600 text-red-500' : 'bg-yellow-900/50 border-yellow-600 text-yellow-500'} animate-pulse`;
+        notification.textContent = message;
+        container.appendChild(notification);
+        setTimeout(() => notification.remove(), 3000);
+    }
 
-        // Show random alert
-        function showRandomAlert() {
-            if (Math.random() < 0.3) {
-                const alerts = [
-                    "⚠️ NEW CRITICAL THREAT DETECTED",
-                    "🚨 SYSTEM DEGRADATION INCREASING",
-                    "⚡ UNUSUAL NETWORK ACTIVITY DETECTED",
-                    "💀 MULTIPLE SYSTEMS COMPROMISED"
-                ];
-                showNotification(alerts[Math.floor(Math.random() * alerts.length)], 'error');
-            }
-        }
+    // Modal functions
+    function showEmergencyModal() {
+        const modal = document.getElementById('emergencyModal');
+        if (modal) modal.classList.remove('hidden');
+    }
 
-        // Show notification
-        function showNotification(message, type = 'error') {
-            const container = document.getElementById('notificationContainer');
-            const notification = document.createElement('div');
-            notification.className = `mb-4 p-4 rounded-lg border ${type === 'error' ? 'bg-red-900/50 border-red-600 text-red-500' : 'bg-yellow-900/50 border-yellow-600 text-yellow-500'} animate-pulse`;
-            notification.textContent = message;
-            container.appendChild(notification);
-            setTimeout(() => notification.remove(), 3000);
-        }
+    function hideEmergencyModal() {
+        const modal = document.getElementById('emergencyModal');
+        if (modal) modal.classList.add('hidden');
+    }
 
-        // Modal functions
-        function showEmergencyModal() {
-            document.getElementById('emergencyModal').classList.remove('hidden');
-        }
+    function reportEmergency() {
+        const vector = document.getElementById('threatVector').value;
+        const impact = document.getElementById('impactLevel').value;
+        showNotification(`🚨 CRITICAL ALERT: ${vector} - ${impact}`, 'error');
+        hideEmergencyModal();
+        populateThreatTable();
+    }
 
-        function hideEmergencyModal() {
-            document.getElementById('emergencyModal').classList.add('hidden');
-        }
+    // Initialize dashboard
+    document.addEventListener('DOMContentLoaded', function() {
+        initializeCharts();
+        populateThreatTable();
+        updateMetrics();
+        
+        // Start real-time updates
+        setInterval(() => {
+            updateMetrics();
+            showRandomAlert();
+        }, 5000);
+    });
 
-        function reportEmergency() {
-            const vector = document.getElementById('threatVector').value;
-            const impact = document.getElementById('impactLevel').value;
-            showNotification(`🚨 CRITICAL ALERT: ${vector} - ${impact}`, 'error');
-            hideEmergencyModal();
-            populateThreatTable();
+    // Show random alert
+    function showRandomAlert() {
+        if (Math.random() < 0.3) {
+            const alerts = [
+                "⚠️ NEW CRITICAL THREAT DETECTED",
+                "🚨 SYSTEM DEGRADATION INCREASING",
+                "⚡ UNUSUAL NETWORK ACTIVITY DETECTED",
+                "💀 MULTIPLE SYSTEMS COMPROMISED"
+            ];
+            showNotification(alerts[Math.floor(Math.random() * alerts.length)], 'error');
         }
-    </script>
+    }
+</script>
+
 </body>
 </html>
 
