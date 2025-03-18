@@ -1,1417 +1,365 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Monica Dashboard</title>
-    <!-- Required Libraries -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/moment@2.29.4/moment.min.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        @keyframes pulse {
-            0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4); }
-            70% { box-shadow: 0 0 0 10px rgba(59, 130, 246, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
-        }
-        
-        .pulse-animation {
-            animation: pulse 1.5s ease-in-out;
-        }
-
-        #notificationContainer {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 1000;
-        }
-        
-        .chart-container {
-            position: relative;
-            height: 300px;
-            width: 100%;
-        }
-        
-        .data-card {
-            transition: all 0.3s ease;
-        }
-        
-        .data-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MVP Performance Metrics</title>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <style>
+    .chart-container {
+      position: relative;
+      height: 300px;
+      margin-bottom: 20px;
+    }
+    
+    .tooltip {
+      position: absolute;
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 10px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.3s;
+      z-index: 10;
+    }
+  </style>
 </head>
-<body class="bg-gray-50">
-    <div id="notificationContainer"></div>
-    
-    <div class="container mx-auto p-4">
-        <h1 class="text-2xl font-bold mb-6">Monica Dashboard</h1>
-        
-        <!-- Dashboard Overview Section -->
-        <div class="mb-6 grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div class="bg-white p-4 rounded-lg border border-gray-200 shadow-sm data-card">
-                <div class="flex justify-between items-center">
-                    <h3 class="text-gray-500 text-sm">Total Contacts</h3>
-                    <span class="text-blue-500">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
-                        </svg>
-                    </span>
-                </div>
-                <div class="mt-2">
-                    <h2 class="text-3xl font-bold" id="totalContacts">0</h2>
-                    <p class="text-green-600 text-sm flex items-center mt-1">
-                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
-                        </svg>
-                        <span id="contactGrowth">0%</span> this month
-                    </p>
-                </div>
-            </div>
-            
-            <div class="bg-white p-4 rounded-lg border border-gray-200 shadow-sm data-card">
-                <div class="flex justify-between items-center">
-                    <h3 class="text-gray-500 text-sm">Active Workflows</h3>
-                    <span class="text-purple-500">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
-                        </svg>
-                    </span>
-                </div>
-                <div class="mt-2">
-                    <h2 class="text-3xl font-bold" id="activeWorkflows">0</h2>
-                    <p class="text-sm text-gray-500 mt-1">
-                        <span id="workflowsRunToday" class="font-medium">0</span> runs today
-                    </p>
-                </div>
-            </div>
-            
-            <div class="bg-white p-4 rounded-lg border border-gray-200 shadow-sm data-card">
-                <div class="flex justify-between items-center">
-                    <h3 class="text-gray-500 text-sm">Engagement Rate</h3>
-                    <span class="text-green-500">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>
-                    </span>
-                </div>
-                <div class="mt-2">
-                    <h2 class="text-3xl font-bold" id="engagementRate">0%</h2>
-                    <p class="text-green-600 text-sm flex items-center mt-1">
-                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
-                        </svg>
-                        <span id="engagementGrowth">0%</span> vs last month
-                    </p>
-                </div>
-            </div>
-            
-            <div class="bg-white p-4 rounded-lg border border-gray-200 shadow-sm data-card">
-                <div class="flex justify-between items-center">
-                    <h3 class="text-gray-500 text-sm">Tasks Completed</h3>
-                    <span class="text-indigo-500">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
-                        </svg>
-                    </span>
-                </div>
-                <div class="mt-2">
-                    <h2 class="text-3xl font-bold" id="tasksCompleted">0</h2>
-                    <div class="w-full bg-gray-200 rounded-full h-2.5 mt-2">
-                        <div class="bg-indigo-600 h-2.5 rounded-full" id="taskProgressBar" style="width: 0%"></div>
-                    </div>
-                    <p class="text-sm text-gray-500 mt-1">
-                        <span id="taskCompletionRate">0%</span> completion rate
-                    </p>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Data Visualization Section -->
-        <div class="mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
-                <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-lg font-semibold">Contact Growth</h2>
-                    <div class="flex space-x-2">
-                        <button class="px-3 py-1 text-sm rounded-md border border-gray-300 hover:bg-gray-50" onclick="updateChart('weekly')">Weekly</button>
-                        <button class="px-3 py-1 text-sm rounded-md border border-gray-300 hover:bg-gray-50" onclick="updateChart('monthly')">Monthly</button>
-                        <button class="px-3 py-1 text-sm rounded-md border border-gray-300 hover:bg-gray-50" onclick="updateChart('yearly')">Yearly</button>
-                    </div>
-                </div>
-                <div class="chart-container">
-                    <canvas id="contactGrowthChart"></canvas>
-                </div>
-            </div>
-            
-            <div class="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
-                <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-lg font-semibold">Engagement Analytics</h2>
-                    <div class="flex space-x-2">
-                        <button class="px-3 py-1 text-sm rounded-md border border-gray-300 hover:bg-gray-50" onclick="updateEngagementChart('email')">Email</button>
-                        <button class="px-3 py-1 text-sm rounded-md border border-gray-300 hover:bg-gray-50" onclick="updateEngagementChart('call')">Calls</button>
-                        <button class="px-3 py-1 text-sm rounded-md border border-gray-300 hover:bg-gray-50" onclick="updateEngagementChart('meeting')">Meetings</button>
-                    </div>
-                </div>
-                <div class="chart-container">
-                    <canvas id="engagementChart"></canvas>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Contact Distribution Section -->
-        <div class="mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div class="bg-white p-4 rounded-lg border border-gray-200 shadow-sm col-span-1">
-                <h2 class="text-lg font-semibold mb-4">Contact Status</h2>
-                <div class="chart-container" style="height: 250px;">
-                    <canvas id="contactStatusChart"></canvas>
-                </div>
-            </div>
-            
-            <div class="bg-white p-4 rounded-lg border border-gray-200 shadow-sm col-span-2">
-                <h2 class="text-lg font-semibold mb-4">Activity Timeline</h2>
-                <div class="chart-container">
-                    <canvas id="activityTimelineChart"></canvas>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Contact Management Section -->
-        <div class="mb-6">
-            <div class="flex justify-between items-center mb-3">
-                <h2 class="text-lg font-semibold">Recent Contacts</h2>
-                <div class="flex space-x-2">
-                    <div class="relative">
-                        <input id="contactSearch" type="text" placeholder="Search contacts..." class="pl-8 pr-3 py-1 border rounded-md" onkeyup="searchContacts()">
-                        <svg class="w-4 h-4 text-gray-400 absolute left-2 top-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                        </svg>
-                    </div>
-                    <button onclick="showAddContactModal()" class="px-3 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm flex items-center">
-                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                        </svg>
-                        Add Contact
-                    </button>
-                </div>
-            </div>
-            
-            <div class="overflow-x-auto bg-white rounded-lg border border-gray-200 shadow-sm">
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-50">
-                        <tr>
-                            <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                            <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Last Contact</th>
-                            <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                            <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody class="bg-white divide-y divide-gray-200" id="contactTableBody">
-                        <!-- Contact data will appear here -->
-                        <tr>
-                            <td colspan="4" class="px-3 py-4 text-center text-gray-500">Loading contacts...</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-            
-            <div class="mt-3 flex justify-between">
-                <button onclick="refreshContacts()" class="px-3 py-1 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 text-sm flex items-center">
-                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-                    </svg>
-                    Refresh
-                </button>
-                <div class="text-sm text-gray-500">
-                    Showing <span id="contactCount">0</span> contacts
-                </div>
-            </div>
-        </div>
-        
-        <!-- Workflow Management Section -->
-        <div class="mb-6">
-            <div class="flex justify-between items-center mb-3">
-                <h2 class="text-lg font-semibold">Active Workflows</h2>
-                <button onclick="generateWorkflow()" class="px-3 py-1 bg-purple-600 text-white rounded-md hover:bg-purple-700 text-sm flex items-center">
-                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                    </svg>
-                    New Workflow
-                </button>
-            </div>
-            
-            <div class="overflow-x-auto bg-white rounded-lg border border-gray-200 shadow-sm">
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-50">
-                        <tr>
-                            <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                            <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Trigger</th>
-                            <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Last Run</th>
-                            <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                            <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody class="bg-white divide-y divide-gray-200" id="workflowTableBody">
-                        <!-- Workflow data will appear here -->
-                    </tbody>
-                </table>
-            </div>
-        </div>
-        
-        <!-- Data Insights Section -->
-        <div class="mb-6">
-            <h2 class="text-lg font-semibold mb-3">Data Insights</h2>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4" id="insightsContainer">
-                <!-- Insights will be generated here -->
-            </div>
-            <div class="mt-4 text-center">
-                <button onclick="generateInsights()" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm flex items-center mx-auto">
-                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-                    </svg>
-                    Generate New Insights
-                </button>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Modal for Add Contact -->
-    <div id="addContactModal" class="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center hidden z-50">
-        <div class="bg-white rounded-lg p-6 max-w-md w-full">
-            <h3 class="text-lg font-semibold mb-4">Add New Contact</h3>
-            <form id="addContactForm" class="space-y-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">First Name</label>
-                    <input type="text" id="firstName" class="w-full p-2 border rounded-lg">
-                </div>
-                
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
-                    <input type="text" id="lastName" class="w-full p-2 border rounded-lg">
-                </div>
-                
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                    <input type="email" id="email" class="w-full p-2 border rounded-lg">
-                </div>
-                
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Phone</label>
-                    <input type="tel" id="phone" class="w-full p-2 border rounded-lg">
-                </div>
-                
-                <div class="flex justify-end space-x-2">
-                    <button type="button" onclick="hideAddContactModal()" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300">Cancel</button>
-                    <button type="button" onclick="addContact()" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">Add Contact</button>
-                </div>
-            </form>
-        </div>
-    </div>
-    
-    <!-- JavaScript Code -->
-    <script>
-        // Utility Functions
-        function showNotification(message, type = 'info') {
-            const container = document.getElementById('notificationContainer');
-            const notification = document.createElement('div');
-            
-            // Set notification style based on type
-            let bgColor, borderColor, textColor;
-            switch (type) {
-                case 'success':
-                    bgColor = 'bg-green-100';
-                    borderColor = 'border-green-400';
-                    textColor = 'text-green-800';
-                    break;
-                case 'error':
-                    bgColor = 'bg-red-100';
-                    borderColor = 'border-red-400';
-                    textColor = 'text-red-800';
-                    break;
-                default:
-                    bgColor = 'bg-blue-100';
-                    borderColor = 'border-blue-400';
-                    textColor = 'text-blue-800';
-            }
-            
-            notification.className = `${bgColor} ${borderColor} ${textColor} border px-4 py-3 rounded mb-2`;
-            notification.innerHTML = message;
-            
-            container.appendChild(notification);
-            
-            // Remove notification after 3 seconds
-            setTimeout(() => {
-                notification.style.opacity = '0';
-                notification.style.transition = 'opacity 0.5s ease';
-                setTimeout(() => {
-                    container.removeChild(notification);
-                }, 500);
-            }, 3000);
-        }
-        
-        function showAddContactModal() {
-            document.getElementById('addContactModal').classList.remove('hidden');
-        }
-        
-        function hideAddContactModal() {
-            document.getElementById('addContactModal').classList.add('hidden');
-            document.getElementById('addContactForm').reset();
-        }
-        
-        function getRandomInt(min, max) {
-            return Math.floor(Math.random() * (max - min + 1)) + min;
-        }
-        
-        function getRandomColor(opacity = 1) {
-            const colors = [
-                `rgba(59, 130, 246, ${opacity})`,   // blue
-                `rgba(16, 185, 129, ${opacity})`,   // green
-                `rgba(239, 68, 68, ${opacity})`,    // red
-                `rgba(245, 158, 11, ${opacity})`,   // amber
-                `rgba(139, 92, 246, ${opacity})`,   // purple
-                `rgba(236, 72, 153, ${opacity})`,   // pink
-                `rgba(14, 165, 233, ${opacity})`,   // sky
-                `rgba(168, 85, 247, ${opacity})`,   // violet
-                `rgba(249, 115, 22, ${opacity})`,   // orange
-                `rgba(20, 184, 166, ${opacity})`    // teal
-            ];
-            return colors[Math.floor(Math.random() * colors.length)];
-        }
+<body>
+  <div id="root" class="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-4 md:p-8">
+    <div class="max-w-7xl mx-auto">
+      <h1 class="text-3xl md:text-4xl font-bold text-slate-800 mb-2">MVP Performance Metrics</h1>
+      <p class="text-slate-500 mb-6 md:mb-8">Real-time monitoring dashboard</p>
 
-        // Sample Data Generation
-        function generateContactData(count = 20) {
-            const firstNames = ['John', 'Sarah', 'Michael', 'Emma', 'David', 'Lisa', 'Robert', 'Jennifer', 'William', 'Maria', 'James', 'Linda', 'Thomas', 'Elizabeth', 'Daniel', 'Patricia', 'Matthew', 'Susan', 'Anthony', 'Jessica'];
-            const lastNames = ['Smith', 'Johnson', 'Williams', 'Brown', 'Jones', 'Garcia', 'Miller', 'Davis', 'Rodriguez', 'Martinez', 'Wilson', 'Anderson', 'Taylor', 'Thomas', 'Moore', 'Jackson', 'Martin', 'Lee', 'Thompson', 'White'];
-            const companies = ['Acme Inc.', 'TechCorp', 'Global Solutions', 'Innovative Systems', 'NextGen Tech', 'Digital Dynamics', 'Strategic Partners', 'Elite Enterprises', 'Prime Industries', 'Visionary Ventures'];
-            const statuses = ['Active', 'Inactive', 'New Lead', 'Qualified', 'Proposal', 'Negotiation', 'Closed Won', 'Closed Lost'];
-            const activityTypes = ['email', 'call', 'meeting', 'note', 'task'];
-            
-            const contacts = [];
-            
-            for (let i = 1; i <= count; i++) {
-                const firstName = firstNames[Math.floor(Math.random() * firstNames.length)];
-                const lastName = lastNames[Math.floor(Math.random() * lastNames.length)];
-                const company = companies[Math.floor(Math.random() * companies.length)];
-                const status = statuses[Math.floor(Math.random() * statuses.length)];
-                
-                // Generate random date within the last 30 days
-                const lastContactDays = Math.floor(Math.random() * 30);
-                const lastContact = new Date();
-                lastContact.setDate(lastContact.getDate() - lastContactDays);
-                
-                // Generate random activities (0-5 per contact)
-                const activityCount = Math.floor(Math.random() * 6);
-                const activities = [];
-                
-                for (let j = 0; j < activityCount; j++) {
-                    const activityType = activityTypes[Math.floor(Math.random() * activityTypes.length)];
-                    const activityDays = Math.floor(Math.random() * 30);
-                    const activityDate = new Date();
-                    activityDate.setDate(activityDate.getDate() - activityDays);
-                    
-                    let description;
-                    switch (activityType) {
-                        case 'email':
-                            description = `Sent ${Math.random() > 0.5 ? 'follow-up' : 'introduction'} email`;
-                            break;
-                        case 'call':
-                            description = `${Math.random() > 0.5 ? 'Scheduled' : 'Had'} phone call to discuss ${Math.random() > 0.5 ? 'project details' : 'next steps'}`;
-                            break;
-                        case 'meeting':
-                            description = `${Math.random() > 0.5 ? 'Virtual' : 'In-person'} meeting about ${Math.random() > 0.5 ? 'product demo' : 'proposal'}`;
-                            break;
-                        case 'note':
-                            description = `Added note about ${Math.random() > 0.5 ? 'client preferences' : 'contact information'}`;
-                            break;
-                        case 'task':
-                            description = `Created ${Math.random() > 0.5 ? 'follow-up' : 'research'} task`;
-                            break;
-                    }
-                    
-                    activities.push({
-                        type: activityType,
-                        date: activityDate.toISOString(),
-                        description
-                    });
-                }
-                
-                // Sort activities by date (newest first)
-                activities.sort((a, b) => new Date(b.date) - new Date(a.date));
-                
-                contacts.push({
-                    id: i,
-                    name: `${firstName} ${lastName}`,
-                    email: `${firstName.toLowerCase()}.${lastName.toLowerCase()}@example.com`,
-                    phone: `+1 (${getRandomInt(100, 999)}) ${getRandomInt(100, 999)}-${getRandomInt(1000, 9999)}`,
-                    company,
-                    status,
-                    lastContact: lastContact.toISOString(),
-                    notes: Math.random() > 0.7 ? `Important contact for ${Math.random() > 0.5 ? 'new project' : 'ongoing partnership'}` : '',
-                    activities
-                });
-            }
-            
-            return contacts;
-        }
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
+        <!-- Notification Time Chart -->
+        <div class="bg-white rounded-xl shadow-lg border border-slate-100 p-4 md:p-6 transition-all duration-300 hover:shadow-xl hover:border-slate-200">
+          <h2 class="text-xl font-semibold text-slate-700 mb-2">Notification Time Trends</h2>
+          <p class="text-sm text-slate-500 mb-4 md:mb-6">Average notification delivery time</p>
+          <div class="chart-container">
+            <canvas id="notificationChart"></canvas>
+            <div id="notificationTooltip" class="tooltip"></div>
+          </div>
+        </div>
 
-        function generateWorkflowData() {
-            const workflowNames = ['Email Follow-up', 'Weekly Report', 'Data Backup', 'Customer Survey', 'Lead Nurturing', 'Birthday Wishes', 'Renewal Reminder', 'Welcome Sequence', 'Feedback Collection', 'Engagement Recovery'];
-            const triggerTypes = ['Contact Added', 'Schedule (Daily)', 'Schedule (Weekly)', 'Schedule (Monthly)', 'Contact Status Change', 'Form Submission', 'Website Visit', 'Email Opened', 'Custom Trigger'];
-            
-            const workflows = [];
-            
-            for (let i = 1; i <= 8; i++) {
-                const name = workflowNames[i - 1];
-                const trigger = triggerTypes[Math.floor(Math.random() * triggerTypes.length)];
-                
-                // Generate random date within the last 7 days
-                const lastRunDays = Math.floor(Math.random() * 7);
-                const lastRun = new Date();
-                lastRun.setDate(lastRun.getDate() - lastRunDays);
-                
-                // 80% chance of being active
-                const status = Math.random() > 0.2 ? 'Active' : 'Paused';
-                
-                workflows.push({
-                    id: i,
-                    name,
-                    trigger,
-                    lastRun: lastRun.toISOString(),
-                    status,
-                    runCount: getRandomInt(5, 50)
-                });
-            }
-            
-            return workflows;
-        }
-        
-        function generateTimeSeriesData(days = 30, trend = 'up', volatility = 'medium') {
-            const data = [];
-            let value = getRandomInt(10, 30);
-            
-            for (let i = days; i >= 0; i--) {
-                const date = new Date();
-                date.setDate(date.getDate() - i);
-                
-                // Apply trend
-                let trendFactor;
-                switch (trend) {
-                    case 'up':
-                        trendFactor = 0.05;
-                        break;
-                    case 'down':
-                        trendFactor = -0.05;
-                        break;
-                    default:
-                        trendFactor = 0;
-                }
-                
-                // Apply volatility
-                let volatilityFactor;
-                switch (volatility) {
-                    case 'high':
-                        volatilityFactor = 0.2;
-                        break;
-                    case 'low':
-                        volatilityFactor = 0.05;
-                        break;
-                    default:
-                        volatilityFactor = 0.1;
-                }
-                
-                // Calculate new value with trend and random volatility
-                const randomFactor = (Math.random() - 0.5) * 2 * volatilityFactor;
-                value = Math.max(0, value * (1 + trendFactor + randomFactor));
-                
-                data.push({
-                    date: date.toISOString().split('T')[0],
-                    value: Math.round(value)
-                });
-            }
-            
-            return data;
-        }
-        
-        // Chart Variables
-        let contactGrowthChart;
-        let engagementChart;
-        let contactStatusChart;
-        let activityTimelineChart;
-        
-        // Data Variables
-        let contactData = [];
-        let workflowData = [];
-        let timeSeriesData = {
-            contactGrowth: {
-                weekly: generateTimeSeriesData(7, 'up', 'low'),
-                monthly: generateTimeSeriesData(30, 'up', 'medium'),
-                yearly: generateTimeSeriesData(365, 'up', 'high')
-            },
-            engagement: {
-                email: generateTimeSeriesData(30, 'up', 'medium'),
-                call: generateTimeSeriesData(30, 'down', 'high'),
-                meeting: generateTimeSeriesData(30, 'up', 'low')
-            },
-            activities: generateTimeSeriesData(14, 'up', 'high')
-        };
-        
-        // Initialize Dashboard
-        function initializeDashboard() {
-            // Generate sample data
-            contactData = generateContactData(25);
-            workflowData = generateWorkflowData();
-            
-            // Update dashboard metrics
-            updateDashboardMetrics();
-            
-            // Populate tables
-            populateContactTable();
-            populateWorkflowTable();
-            
-            // Initialize charts
-            initializeCharts();
-            
-            // Generate initial insights
-            generateInsights();
-            
-            // Show success notification
-            showNotification('Dashboard data loaded successfully!', 'success');
-        }
-        
-        function updateDashboardMetrics() {
-            // Update total contacts
-            document.getElementById('totalContacts').textContent = contactData.length;
-            document.getElementById('contactGrowth').textContent = '12%';
-            document.getElementById('contactCount').textContent = contactData.length;
-            
-            // Update active workflows
-            const activeWorkflows = workflowData.filter(w => w.status === 'Active').length;
-            document.getElementById('activeWorkflows').textContent = activeWorkflows;
-            document.getElementById('workflowsRunToday').textContent = getRandomInt(3, 15);
-            
-            // Update engagement rate
-            document.getElementById('engagementRate').textContent = `${getRandomInt(65, 85)}%`;
-            document.getElementById('engagementGrowth').textContent = `${getRandomInt(5, 15)}%`;
-            
-            // Update tasks completed
-            const tasksCompleted = getRandomInt(18, 28);
-            const totalTasks = getRandomInt(30, 40);
-            const completionRate = Math.round((tasksCompleted / totalTasks) * 100);
-            
-            document.getElementById('tasksCompleted').textContent = tasksCompleted;
-            document.getElementById('taskCompletionRate').textContent = `${completionRate}%`;
-            document.getElementById('taskProgressBar').style.width = `${completionRate}%`;
-        }
-        
-        function initializeCharts() {
-            // Initialize Contact Growth Chart
-            const contactGrowthCtx = document.getElementById('contactGrowthChart').getContext('2d');
-            contactGrowthChart = createLineChart(
-                contactGrowthCtx, 
-                'Contact Growth', 
-                timeSeriesData.contactGrowth.monthly.map(d => d.date), 
-                [
-                    {
-                        label: 'New Contacts',
-                        data: timeSeriesData.contactGrowth.monthly.map(d => d.value),
-                        borderColor: 'rgb(59, 130, 246)',
-                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                        fill: true
-                    }
-                ]
-            );
-            
-            // Initialize Engagement Chart
-            const engagementCtx = document.getElementById('engagementChart').getContext('2d');
-            engagementChart = createLineChart(
-                engagementCtx, 
-                'Engagement Rate', 
-                timeSeriesData.engagement.email.map(d => d.date), 
-                [
-                    {
-                        label: 'Email Engagement',
-                        data: timeSeriesData.engagement.email.map(d => d.value),
-                        borderColor: 'rgb(59, 130, 246)',
-                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                        fill: false
-                    }
-                ]
-            );
-            
-            // Initialize Contact Status Chart
-            const contactStatusCtx = document.getElementById('contactStatusChart').getContext('2d');
-            const statusCounts = {};
-            contactData.forEach(contact => {
-                statusCounts[contact.status] = (statusCounts[contact.status] || 0) + 1;
-            });
-            
-            const statusLabels = Object.keys(statusCounts);
-            const statusData = Object.values(statusCounts);
-            const statusColors = statusLabels.map(() => getRandomColor(0.7));
-            
-            contactStatusChart = new Chart(contactStatusCtx, {
-                type: 'doughnut',
-                data: {
-                    labels: statusLabels,
-                    datasets: [{
-                        data: statusData,
-                        backgroundColor: statusColors,
-                        borderColor: statusColors.map(color => color.replace(/[\d\.]+\)$/, '1)')),
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'right',
-                            labels: {
-                                boxWidth: 12,
-                                font: {
-                                    size: 11
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-            
-            // Initialize Activity Timeline Chart
-            const activityTimelineCtx = document.getElementById('activityTimelineChart').getContext('2d');
-            
-            // Get last 14 days
-            const dates = [];
-            for (let i = 13; i >= 0; i--) {
-                const date = new Date();
-                date.setDate(date.getDate() - i);
-                dates.push(date.toISOString().split('T')[0]);
-            }
-            
-            // Count activities by type for each day
-            const activityTypes = ['email', 'call', 'meeting', 'note', 'task'];
-            const activityData = {};
-            
-            activityTypes.forEach(type => {
-                activityData[type] = Array(14).fill(0);
-            });
-            
-            contactData.forEach(contact => {
-                contact.activities.forEach(activity => {
-                    const activityDate = activity.date.split('T')[0];
-                    const dateIndex = dates.indexOf(activityDate);
-                    if (dateIndex !== -1) {
-                        activityData[activity.type][dateIndex]++;
-                    }
-                });
-            });
-            
-            const datasets = activityTypes.map((type, index) => {
-                const colors = [
-                    'rgb(59, 130, 246)',  // blue
-                    'rgb(16, 185, 129)',  // green
-                    'rgb(139, 92, 246)',  // purple
-                    'rgb(249, 115, 22)',  // orange
-                    'rgb(236, 72, 153)'   // pink
-                ];
-                
-                return {
-                    label: type.charAt(0).toUpperCase() + type.slice(1) + 's',
-                    data: activityData[type],
-                    backgroundColor: colors[index],
-                    borderColor: colors[index],
-                    borderWidth: 1
-                };
-            });
-            
-            activityTimelineChart = new Chart(activityTimelineCtx, {
-                type: 'bar',
-                data: {
-                    labels: dates.map(date => {
-                        const d = new Date(date);
-                        return `${d.getMonth() + 1}/${d.getDate()}`;
-                    }),
-                    datasets
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'top',
-                        },
-                        title: {
-                            display: true,
-                            text: 'Activity Timeline (Last 14 Days)'
-                        }
-                    },
-                    scales: {
-                        x: {
-                            stacked: true,
-                        },
-                        y: {
-                            stacked: true,
-                            beginAtZero: true,
-                            title: {
-                                display: true,
-                                text: 'Number of Activities'
-                            }
-                        }
-                    }
-                }
-            });
-        }
-        
-        function createLineChart(ctx, title, labels, datasets) {
-            return new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels,
-                    datasets
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'top',
-                        },
-                        title: {
-                            display: true,
-                            text: title
-                        },
-                        tooltip: {
-                            mode: 'index',
-                            intersect: false
-                        }
-                    },
-                    hover: {
-                        mode: 'nearest',
-                        intersect: true
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            title: {
-                                display: true,
-                                text: 'Count'
-                            }
-                        }
-                    }
-                }
-            });
-        }
-        
-        function updateChart(timeframe) {
-            const data = timeSeriesData.contactGrowth[timeframe];
-            
-            contactGrowthChart.data.labels = data.map(d => d.date);
-            contactGrowthChart.data.datasets[0].data = data.map(d => d.value);
-            
-            // Add second dataset for comparison if it's monthly or yearly
-            if (timeframe !== 'weekly') {
-                const prevPeriodData = data.map(d => Math.round(d.value * (0.8 + Math.random() * 0.3)));
-                
-                if (contactGrowthChart.data.datasets.length < 2) {
-                    contactGrowthChart.data.datasets.push({
-                        label: 'Previous Period',
-                        data: prevPeriodData,
-                        borderColor: 'rgb(156, 163, 175)',
-                        backgroundColor: 'rgba(156, 163, 175, 0.1)',
-                        borderDash: [5, 5],
-                        fill: false
-                    });
-                } else {
-                    contactGrowthChart.data.datasets[1].data = prevPeriodData;
-                }
-            } else if (contactGrowthChart.data.datasets.length > 1) {
-                // Remove comparison dataset for weekly view
-                contactGrowthChart.data.datasets.pop();
-            }
-            
-            contactGrowthChart.update();
-            
-            // Update buttons to show active state
-            const buttons = document.querySelectorAll('button[onclick^="updateChart"]');
-            buttons.forEach(button => {
-                if (button.getAttribute('onclick').includes(timeframe)) {
-                    button.classList.add('bg-blue-100', 'text-blue-700', 'border-blue-300');
-                } else {
-                    button.classList.remove('bg-blue-100', 'text-blue-700', 'border-blue-300');
-                }
-            });
-        }
-        
-        function updateEngagementChart(type) {
-            const data = timeSeriesData.engagement[type];
-            
-            engagementChart.data.labels = data.map(d => d.date);
-            engagementChart.data.datasets[0].data = data.map(d => d.value);
-            
-            // Update dataset styling based on type
-            let color;
-            switch (type) {
-                case 'email':
-                    color = 'rgb(59, 130, 246)'; // blue
-                    engagementChart.data.datasets[0].label = 'Email Engagement';
-                    break;
-                case 'call':
-                    color = 'rgb(16, 185, 129)'; // green
-                    engagementChart.data.datasets[0].label = 'Call Engagement';
-                    break;
-                case 'meeting':
-                    color = 'rgb(139, 92, 246)'; // purple
-                    engagementChart.data.datasets[0].label = 'Meeting Engagement';
-                    break;
-            }
-            
-            engagementChart.data.datasets[0].borderColor = color;
-            engagementChart.data.datasets[0].backgroundColor = color.replace('rgb', 'rgba').replace(')', ', 0.1)');
-            
-            engagementChart.update();
-            
-            // Update buttons to show active state
-            const buttons = document.querySelectorAll('button[onclick^="updateEngagementChart"]');
-            buttons.forEach(button => {
-                if (button.getAttribute('onclick').includes(type)) {
-                    button.classList.add('bg-blue-100', 'text-blue-700', 'border-blue-300');
-                } else {
-                    button.classList.remove('bg-blue-100', 'text-blue-700', 'border-blue-300');
-                }
-            });
-        }
-        
-        function populateContactTable() {
-            const tableBody = document.getElementById('contactTableBody');
-            tableBody.innerHTML = '';
-            
-            // Sort contacts by last contact date (newest first)
-            const sortedContacts = [...contactData].sort((a, b) => new Date(b.lastContact) - new Date(a.lastContact));
-            
-            sortedContacts.forEach(contact => {
-                const row = document.createElement('tr');
-                row.dataset.contactId = contact.id;
-                
-                // Format the date
-                const formattedDate = moment(contact.lastContact).format('MMM D, YYYY');
-                const daysAgo = moment().diff(moment(contact.lastContact), 'days');
-                
-                // Create status badge with appropriate color
-                let statusClass;
-                switch (contact.status) {
-                    case 'Active':
-                    case 'Qualified':
-                    case 'Closed Won':
-                        statusClass = 'bg-green-100 text-green-800 border-green-200';
-                        break;
-                    case 'Inactive':
-                    case 'Closed Lost':
-                        statusClass = 'bg-gray-100 text-gray-800 border-gray-200';
-                        break;
-                    case 'New Lead':
-                        statusClass = 'bg-blue-100 text-blue-800 border-blue-200';
-                        break;
-                    case 'Proposal':
-                    case 'Negotiation':
-                        statusClass = 'bg-yellow-100 text-yellow-800 border-yellow-200';
-                        break;
-                    default:
-                        statusClass = 'bg-gray-100 text-gray-800 border-gray-200';
-                }
-                
-                row.innerHTML = `
-                    <td class="px-3 py-3 whitespace-nowrap">
-                        <div class="flex items-center">
-                            <div class="flex-shrink-0 h-8 w-8 rounded-full bg-blue-500 flex items-center justify-center text-white font-medium">
-                                ${contact.name.charAt(0)}
-                            </div>
-                            <div class="ml-3">
-                                <div class="font-medium text-gray-900">${contact.name}</div>
-                                <div class="text-xs text-gray-500">${contact.company}</div>
-                            </div>
-                        </div>
-                    </td>
-                    <td class="px-3 py-3 whitespace-nowrap">
-                        <div class="text-sm text-gray-500">${formattedDate} (${daysAgo} days ago)</div>
-                    </td>
-                    <td class="px-3 py-3 whitespace-nowrap">
-                        <span class="px-2 py-1 text-xs rounded-full ${statusClass} border">
-                            ${contact.status}
-                        </span>
-                    </td>
-                    <td class="px-3 py-3 whitespace-nowrap text-sm text-gray-500">
-                        <button class="text-blue-600 hover:text-blue-800 mr-2" onclick="viewContactDetails(${contact.id})">View</button>
-                        <button class="text-red-600 hover:text-red-800" onclick="deleteContact(${contact.id})">Delete</button>
-                    </td>
-                `;
-                
-                tableBody.appendChild(row);
-            });
-            
-            // Add row hover effect
-            const rows = tableBody.querySelectorAll('tr');
-            rows.forEach(row => {
-                row.addEventListener('mouseenter', () => {
-                    row.classList.add('bg-gray-50', 'cursor-pointer');
-                });
-                row.addEventListener('mouseleave', () => {
-                    row.classList.remove('bg-gray-50');
-                });
-            });
-        }
-        
-        function populateWorkflowTable() {
-            const tableBody = document.getElementById('workflowTableBody');
-            tableBody.innerHTML = '';
-            
-            workflowData.forEach(workflow => {
-                const row = document.createElement('tr');
-                
-                // Format the date
-                const formattedDate = moment(workflow.lastRun).format('MMM D, YYYY h:mm A');
-                
-                // Create status badge with appropriate color
-                const statusClass = workflow.status === 'Active' 
-                    ? 'bg-green-100 text-green-800 border-green-200' 
-                    : 'bg-yellow-100 text-yellow-800 border-yellow-200';
-                
-                row.innerHTML = `
-                    <td class="px-3 py-3 whitespace-nowrap">
-                        <div class="font-medium text-gray-900">${workflow.name}</div>
-                    </td>
-                    <td class="px-3 py-3 whitespace-nowrap">
-                        <div class="text-sm text-gray-500">${workflow.trigger}</div>
-                    </td>
-                    <td class="px-3 py-3 whitespace-nowrap">
-                        <div class="text-sm text-gray-500">${formattedDate}</div>
-                    </td>
-                    <td class="px-3 py-3 whitespace-nowrap">
-                        <span class="px-2 py-1 text-xs rounded-full ${statusClass} border">
-                            ${workflow.status}
-                        </span>
-                    </td>
-                    <td class="px-3 py-3 whitespace-nowrap text-sm text-gray-500">
-                        <button class="text-blue-600 hover:text-blue-800 mr-2" onclick="toggleWorkflowStatus(${workflow.id})">
-                            ${workflow.status === 'Active' ? 'Pause' : 'Activate'}
-                        </button>
-                        <button class="text-red-600 hover:text-red-800" onclick="deleteWorkflow(${workflow.id})">Delete</button>
-                    </td>
-                `;
-                
-                tableBody.appendChild(row);
-            });
-            
-            // Add row hover effect
-            const rows = tableBody.querySelectorAll('tr');
-            rows.forEach(row => {
-                row.addEventListener('mouseenter', () => {
-                    row.classList.add('bg-gray-50');
-                });
-                row.addEventListener('mouseleave', () => {
-                    row.classList.remove('bg-gray-50');
-                });
-            });
-        }
-        
-        function toggleWorkflowStatus(workflowId) {
-            const workflow = workflowData.find(w => w.id === workflowId);
-            if (workflow) {
-                workflow.status = workflow.status === 'Active' ? 'Paused' : 'Active';
-                populateWorkflowTable();
-                updateDashboardMetrics();
-                
-                showNotification(`Workflow "${workflow.name}" ${workflow.status === 'Active' ? 'activated' : 'paused'} successfully!`, 'success');
-            }
-        }
-        
-        function deleteWorkflow(workflowId) {
-            const workflowIndex = workflowData.findIndex(w => w.id === workflowId);
-            if (workflowIndex !== -1) {
-                const workflowName = workflowData[workflowIndex].name;
-                workflowData.splice(workflowIndex, 1);
-                populateWorkflowTable();
-                updateDashboardMetrics();
-                
-                showNotification(`Workflow "${workflowName}" deleted successfully!`, 'success');
-            }
-        }
-        
-        function deleteContact(contactId) {
-            const contactIndex = contactData.findIndex(c => c.id === contactId);
-            if (contactIndex !== -1) {
-                const contactName = contactData[contactIndex].name;
-                contactData.splice(contactIndex, 1);
-                populateContactTable();
-                updateDashboardMetrics();
-                
-                // Update contact status chart
-                updateContactStatusChart();
-                
-                showNotification(`Contact "${contactName}" deleted successfully!`, 'success');
-            }
-        }
-        
-        function updateContactStatusChart() {
-            const statusCounts = {};
-            contactData.forEach(contact => {
-                statusCounts[contact.status] = (statusCounts[contact.status] || 0) + 1;
-            });
-            
-            const statusLabels = Object.keys(statusCounts);
-            const statusData = Object.values(statusCounts);
-            
-            contactStatusChart.data.labels = statusLabels;
-            contactStatusChart.data.datasets[0].data = statusData;
-            
-            contactStatusChart.update();
-        }
-        
-        function addContact() {
-            const firstName = document.getElementById('firstName').value;
-            const lastName = document.getElementById('lastName').value;
-            const email = document.getElementById('email').value;
-            const phone = document.getElementById('phone').value;
-            
-            if (!firstName || !lastName || !email) {
-                showNotification('Please fill in all required fields', 'error');
-                return;
-            }
-            
-            // Create new contact
-            const newContact = {
-                id: contactData.length > 0 ? Math.max(...contactData.map(c => c.id)) + 1 : 1,
-                name: `${firstName} ${lastName}`,
-                email: email,
-                phone: phone || `+1 (${getRandomInt(100, 999)}) ${getRandomInt(100, 999)}-${getRandomInt(1000, 9999)}`,
-                company: 'New Company',
-                status: 'New Lead',
-                lastContact: new Date().toISOString(),
-                notes: '',
-                activities: []
-            };
-            
-            contactData.push(newContact);
-            populateContactTable();
-            updateDashboardMetrics();
-            updateContactStatusChart();
-            hideAddContactModal();
-            
-            showNotification('Contact added successfully!', 'success');
-        }
-        
-        function searchContacts() {
-            const searchInput = document.getElementById('contactSearch').value.toLowerCase();
-            const tableBody = document.getElementById('contactTableBody');
-            const rows = tableBody.querySelectorAll('tr');
-            
-            rows.forEach(row => {
-                const nameCell = row.querySelector('td:first-child div.font-medium');
-                const companyCell = row.querySelector('td:first-child div.text-xs');
-                
-                if (nameCell && companyCell) {
-                    const name = nameCell.textContent.toLowerCase();
-                    const company = companyCell.textContent.toLowerCase();
-                    
-                    if (name.includes(searchInput) || company.includes(searchInput)) {
-                        row.style.display = '';
-                    } else {
-                        row.style.display = 'none';
-                    }
-                }
-            });
-            
-            // Update count of displayed contacts
-            const visibleRows = [...rows].filter(row => row.style.display !== 'none').length;
-            document.getElementById('contactCount').textContent = visibleRows;
-        }
-        
-        function refreshContacts() {
-            const refreshButton = document.querySelector('button[onclick="refreshContacts()"]');
-            
-            // Show loading state
-            refreshButton.innerHTML = `
-                <svg class="animate-spin w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                Refreshing...
-            `;
-            
-            // Simulate API call delay
-            setTimeout(() => {
-                // Generate new contact data
-                contactData = generateContactData(25);
-                populateContactTable();
-                updateDashboardMetrics();
-                updateContactStatusChart();
-                
-                refreshButton.innerHTML = `
-                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-                    </svg>
-                    Refresh
-                `;
-                
-                // Show success notification
-                showNotification('Contacts refreshed successfully!', 'success');
-            }, 1000);
-        }
-        
-        function generateWorkflow() {
-            const workflowNames = [
-                'Customer Onboarding',
-                'Lead Qualification',
-                'Feedback Collection',
-                'Renewal Process',
-                'Re-engagement Campaign',
-                'Upsell Opportunity',
-                'Support Escalation',
-                'NPS Survey'
-            ];
-            
-            const triggerTypes = [
-                'Contact Added',
-                'Status Change',
-                'Schedule (Weekly)',
-                'Form Submission',
-                'Custom Trigger'
-            ];
-            
-            // Get a random workflow name that doesn't exist yet
-            let newName;
-            do {
-                newName = workflowNames[Math.floor(Math.random() * workflowNames.length)];
-            } while (workflowData.some(w => w.name === newName));
-            
-            // Create new workflow
-            const newWorkflow = {
-                id: workflowData.length > 0 ? Math.max(...workflowData.map(w => w.id)) + 1 : 1,
-                name: newName,
-                trigger: triggerTypes[Math.floor(Math.random() * triggerTypes.length)],
-                lastRun: new Date().toISOString(),
-                status: 'Active',
-                runCount: 0
-            };
-            
-            workflowData.push(newWorkflow);
-            populateWorkflowTable();
-            updateDashboardMetrics();
-            
-            showNotification(`New workflow "${newName}" created successfully!`, 'success');
-        }
-        
-        function generateInsights() {
-            const insightsContainer = document.getElementById('insightsContainer');
-            
-            // Show loading state
-            insightsContainer.innerHTML = `
-                <div class="col-span-1 md:col-span-3 flex justify-center items-center p-8">
-                    <svg class="animate-spin w-8 h-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    <span class="ml-3 text-gray-600">Generating insights...</span>
-                </div>
-            `;
-            
-            // Generate insights based on data
-            setTimeout(() => {
-                insightsContainer.innerHTML = '';
-                
-                // Calculate active vs inactive contacts
-                const activeContacts = contactData.filter(c => c.status === 'Active' || c.status === 'New Lead' || c.status === 'Qualified').length;
-                const totalContacts = contactData.length;
-                const activeRate = Math.round((activeContacts / totalContacts) * 100);
-                
-                // Calculate contacts without recent activity
-                const inactiveThreshold = new Date();
-                inactiveThreshold.setDate(inactiveThreshold.getDate() - 30);
-                const inactiveContacts = contactData.filter(c => new Date(c.lastContact) < inactiveThreshold).length;
-                
-                // Calculate most common status
-                const statusCounts = {};
-                contactData.forEach(contact => {
-                    statusCounts[contact.status] = (statusCounts[contact.status] || 0) + 1;
-                });
-                const mostCommonStatus = Object.keys(statusCounts).reduce((a, b) => statusCounts[a] > statusCounts[b] ? a : b);
-                
-                // Create insight cards
-                const insights = [
-                    {
-                        title: 'Contact Engagement',
-                        content: `${activeRate}% of your contacts are currently active. ${inactiveContacts} contacts haven't been engaged in the last 30 days.`,
-                        type: activeRate > 70 ? 'success' : activeRate > 50 ? 'info' : 'warning',
-                        icon: 'users'
-                    },
-                    {
-                        title: 'Workflow Performance',
-                        content: `Your "${workflowData[0].name}" workflow has been the most active this month with ${workflowData[0].runCount} runs.`,
-                        type: 'info',
-                        icon: 'workflow'
-                    },
-                    {
-                        title: 'Contact Distribution',
-                        content: `Most of your contacts are in the "${mostCommonStatus}" stage. Consider focusing on moving these contacts to the next stage.`,
-                        type: 'info',
-                        icon: 'chart'
-                    }
-                ];
-                
-                // Add insights that need attention
-                if (inactiveContacts > 5) {
-                    insights.push({
-                        title: 'Attention Required',
-                        content: `${inactiveContacts} contacts have been inactive for over 30 days. Consider running a re-engagement campaign.`,
-                        type: 'warning',
-                        icon: 'alert'
-                    });
-                }
-                
-                // Create insight cards
-                insights.forEach(insight => {
-                    const card = document.createElement('div');
-                    
-                    // Set card style based on insight type
-                    let borderColor, bgColor, iconColor, iconSvg;
-                    
-                    switch (insight.type) {
-                        case 'success':
-                            borderColor = 'border-green-200';
-                            bgColor = 'bg-green-50';
-                            iconColor = 'text-green-500';
-                            break;
-                        case 'warning':
-                            borderColor = 'border-yellow-200';
-                            bgColor = 'bg-yellow-50';
-                            iconColor = 'text-yellow-500';
-                            break;
-                        default:
-                            borderColor = 'border-blue-200';
-                            bgColor = 'bg-blue-50';
-                            iconColor = 'text-blue-500';
-                    }
-                    
-                    // Set icon based on insight category
-                    switch (insight.icon) {
-                        case 'users':
-                            iconSvg = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>';
-                            break;
-                        case 'workflow':
-                            iconSvg = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>';
-                            break;
-                        case 'chart':
-                            iconSvg = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>';
-                            break;
-                        case 'alert':
-                            iconSvg = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>';
-                            break;
-                        default:
-                            iconSvg = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>';
-                    }
-                    
-                    card.className = `p-4 border ${borderColor} ${bgColor} rounded-lg data-card`;
-                    card.innerHTML = `
-                        <div class="flex items-center mb-2">
-                            <div class="flex-shrink-0 ${iconColor}">
-                                ${iconSvg}
-                            </div>
-                            <h4 class="ml-2 font-semibold">${insight.title}</h4>
-                        </div>
-                        <p class="text-gray-600">${insight.content}</p>
-                    `;
-                    
-                    insightsContainer.appendChild(card);
-                    
-                    // Add fade-in animation
-                    card.style.opacity = '0';
-                    setTimeout(() => {
-                        card.style.transition = 'opacity 0.5s ease-in-out';
-                        card.style.opacity = '1';
-                    }, 100 * insightsContainer.children.length);
-                });
-                
-                // Add data visualization insight
-                if (insightsContainer.children.length < 3) {
-                    const visualInsight = document.createElement('div');
-                    visualInsight.className = 'p-4 border border-blue-200 bg-blue-50 rounded-lg data-card';
-                    visualInsight.innerHTML = `
-                        <div class="flex items-center mb-2">
-                            <div class="flex-shrink-0 text-blue-500">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
-                                </svg>
-                            </div>
-                            <h4 class="ml-2 font-semibold">Contact Growth Trend</h4>
-                        </div>
-                        <p class="text-gray-600 mb-3">Your contact growth has increased by 12% over the past month. Continue your current acquisition strategies.</p>
-                        <div id="miniChart" style="height: 100px;"></div>
-                    `;
-                    
-                    insightsContainer.appendChild(visualInsight);
-                    
-                    // Add fade-in animation
-                    visualInsight.style.opacity = '0';
-                    setTimeout(() => {
-                        visualInsight.style.transition = 'opacity 0.5s ease-in-out';
-                        visualInsight.style.opacity = '1';
-                        
-                        // Create mini chart
-                        setTimeout(() => {
-                            const miniChartCanvas = document.createElement('canvas');
-                            document.getElementById('miniChart').appendChild(miniChartCanvas);
-                            
-                            new Chart(miniChartCanvas, {
-                                type: 'line',
-                                data: {
-                                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-                                    datasets: [{
-                                        label: 'Contacts',
-                                        data: [12, 19, 15, 25, 22, 30],
-                                        borderColor: 'rgb(59, 130, 246)',
-                                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                                        tension: 0.3,
-                                        fill: true
-                                    }]
-                                },
-                                options: {
-                                    responsive: true,
-                                    maintainAspectRatio: false,
-                                    plugins: {
-                                        legend: {
-                                            display: false
-                                        }
-                                    },
-                                    scales: {
-                                        x: {
-                                            display: true,
-                                            grid: {
-                                                display: false
-                                            }
-                                        },
-                                        y: {
-                                            display: true,
-                                            beginAtZero: true,
-                                            grid: {
-                                                display: false
-                                            }
-                                        }
-                                    }
-                                }
-                            });
-                        }, 300);
-                    }, 100 * insightsContainer.children.length);
-                }
-                
-                // Show success notification
-                showNotification('Insights generated successfully!', 'success');
-            }, 1500);
-        }
-        
-        // Initialize dashboard on load
-        window.addEventListener('DOMContentLoaded', function() {
-            initializeDashboard();
+        <!-- FCR Chart -->
+        <div class="bg-white rounded-xl shadow-lg border border-slate-100 p-4 md:p-6 transition-all duration-300 hover:shadow-xl hover:border-slate-200">
+          <h2 class="text-xl font-semibold text-slate-700 mb-2">First Call Resolution Rate</h2>
+          <p class="text-sm text-slate-500 mb-4 md:mb-6">Percentage of issues resolved in first contact</p>
+          <div class="chart-container">
+            <canvas id="fcrChart"></canvas>
+            <div id="fcrTooltip" class="tooltip"></div>
+          </div>
+        </div>
+
+        <!-- Call Volume Chart -->
+        <div class="bg-white rounded-xl shadow-lg border border-slate-100 p-4 md:p-6 transition-all duration-300 hover:shadow-xl hover:border-slate-200">
+          <h2 class="text-xl font-semibold text-slate-700 mb-2">Support Call Distribution</h2>
+          <p class="text-sm text-slate-500 mb-4 md:mb-6">Weekly breakdown of support calls</p>
+          <div class="chart-container">
+            <canvas id="callVolumeChart"></canvas>
+            <div id="callVolumeTooltip" class="tooltip"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pure JavaScript for charts - no external dependencies -->
+  <script>
+    // Sample data
+    const notificationTimeData = [
+      { day: '2025-01-01', avg_time: 42, baseline: 45, target: 11 },
+      { day: '2025-01-08', avg_time: 35, baseline: 45, target: 11 },
+      { day: '2025-01-15', avg_time: 28, baseline: 45, target: 11 },
+      { day: '2025-01-22', avg_time: 20, baseline: 45, target: 11 },
+      { day: '2025-01-29', avg_time: 15, baseline: 45, target: 11 },
+    ];
+
+    const fcrData = [
+      { week: 'Week 1', rate: 65, target: 80 },
+      { week: 'Week 2', rate: 70, target: 80 },
+      { week: 'Week 3', rate: 75, target: 80 },
+      { week: 'Week 4', rate: 78, target: 80 },
+    ];
+
+    const callVolumeData = [
+      { week: 'Week 1', total_calls: 1000, outage_calls: 300 },
+      { week: 'Week 2', total_calls: 850, outage_calls: 200 },
+      { week: 'Week 3', total_calls: 700, outage_calls: 150 },
+      { week: 'Week 4', total_calls: 600, outage_calls: 100 },
+    ];
+
+    // Color configuration
+    const colors = {
+      primary: {
+        main: '#2563EB',
+        light: '#60A5FA',
+        dark: '#1E40AF',
+      },
+      secondary: {
+        main: '#475569',
+        light: '#94A3B8',
+        dark: '#334155',
+      },
+      success: {
+        main: '#059669',
+        light: '#34D399',
+      },
+      border: '#E2E8F0',
+      text: {
+        primary: '#1E293B',
+        secondary: '#64748B'
+      }
+    };
+
+    // Helper function to draw a line chart
+    function drawLineChart(canvasId, data, config) {
+      const canvas = document.getElementById(canvasId);
+      const ctx = canvas.getContext('2d');
+      const tooltipEl = document.getElementById(config.tooltipId);
+      
+      // Set canvas dimensions
+      canvas.width = canvas.parentNode.clientWidth;
+      canvas.height = canvas.parentNode.clientHeight;
+      
+      // Calculate chart area
+      const padding = 40;
+      const chartArea = {
+        x: padding,
+        y: padding,
+        width: canvas.width - (padding * 2),
+        height: canvas.height - (padding * 2) - 30 // Extra space for legend
+      };
+      
+      // Find min and max values for Y axis
+      let minY = Infinity;
+      let maxY = -Infinity;
+      
+      config.lines.forEach(line => {
+        data.forEach(item => {
+          const value = item[line.dataKey];
+          if (value < minY) minY = value;
+          if (value > maxY) maxY = value;
         });
-    </script>
-</body>
-</html>
-
+      });
+      
+      // Add some padding to the min/max values
+      const yPadding = (maxY - minY) * 0.1;
+      minY = Math.max(0, minY - yPadding);
+      maxY = maxY + yPadding;
+      
+      // Draw background grid
+      ctx.strokeStyle = colors.border;
+      ctx.lineWidth = 1;
+      
+      // Horizontal grid lines
+      const ySteps = 5;
+      for (let i = 0; i <= ySteps; i++) {
+        const y = chartArea.y + (chartArea.height * (1 - (i / ySteps)));
+        
+        ctx.beginPath();
+        ctx.moveTo(chartArea.x, y);
+        ctx.lineTo(chartArea.x + chartArea.width, y);
+        ctx.stroke();
+        
+        // Y-axis labels
+        const value = minY + ((maxY - minY) * (i / ySteps));
+        ctx.fillStyle = colors.text.secondary;
+        ctx.font = '12px Arial';
+        ctx.textAlign = 'right';
+        ctx.fillText(Math.round(value), chartArea.x - 10, y + 4);
+      }
+      
+      // X-axis and labels
+      const xStep = chartArea.width / (data.length - 1);
+      data.forEach((item, i) => {
+        const x = chartArea.x + (i * xStep);
+        
+        // X-axis tick
+        ctx.beginPath();
+        ctx.moveTo(x, chartArea.y + chartArea.height);
+        ctx.lineTo(x, chartArea.y + chartArea.height + 5);
+        ctx.stroke();
+        
+        // X-axis label
+        ctx.fillStyle = colors.text.secondary;
+        ctx.font = '12px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText(item[config.xKey], x, chartArea.y + chartArea.height + 20);
+      });
+      
+      // Draw lines
+      config.lines.forEach(line => {
+        ctx.strokeStyle = line.color;
+        ctx.lineWidth = line.width || 2;
+        
+        if (line.dashed) {
+          ctx.setLineDash([5, 5]);
+        } else {
+          ctx.setLineDash([]);
+        }
+        
+        ctx.beginPath();
+        
+        data.forEach((item, i) => {
+          const x = chartArea.x + (i * xStep);
+          const yRatio = (item[line.dataKey] - minY) / (maxY - minY);
+          const y = chartArea.y + chartArea.height - (yRatio * chartArea.height);
+          
+          if (i === 0) {
+            ctx.moveTo(x, y);
+          } else {
+            ctx.lineTo(x, y);
+          }
+          
+          // Draw dots
+          if (line.dots) {
+            ctx.fillStyle = line.color;
+            ctx.beginPath();
+            ctx.arc(x, y, 4, 0, Math.PI * 2);
+            ctx.fill();
+          }
+        });
+        
+        ctx.stroke();
+      });
+      
+      // Draw legend
+      const legendY = chartArea.y + chartArea.height + 30;
+      let legendX = chartArea.x;
+      
+      config.lines.forEach(line => {
+        // Line symbol
+        ctx.strokeStyle = line.color;
+        ctx.lineWidth = 2;
+        
+        if (line.dashed) {
+          ctx.setLineDash([5, 5]);
+        } else {
+          ctx.setLineDash([]);
+        }
+        
+        ctx.beginPath();
+        ctx.moveTo(legendX, legendY);
+        ctx.lineTo(legendX + 20, legendY);
+        ctx.stroke();
+        
+        // Text
+        ctx.fillStyle = colors.text.primary;
+        ctx.font = '12px Arial';
+        ctx.textAlign = 'left';
+        ctx.fillText(line.name, legendX + 25, legendY + 4);
+        
+        legendX += ctx.measureText(line.name).width + 50;
+      });
+      
+      // Handle tooltip
+      let activePoint = null;
+      
+      canvas.addEventListener('mousemove', function(e) {
+        const rect = canvas.getBoundingClientRect();
+        const mouseX = e.clientX - rect.left;
+        const mouseY = e.clientY - rect.top;
+        
+        // Find closest point
+        let closestDistance = Infinity;
+        let closestPoint = null;
+        let closestDataIndex = -1;
+        
+        data.forEach((item, i) => {
+          const x = chartArea.x + (i * xStep);
+          
+          config.lines.forEach(line => {
+            const yRatio = (item[line.dataKey] - minY) / (maxY - minY);
+            const y = chartArea.y + chartArea.height - (yRatio * chartArea.height);
+            
+            const distance = Math.sqrt(Math.pow(mouseX - x, 2) + Math.pow(mouseY - y, 2));
+            
+            if (distance < closestDistance && distance < 30) {
+              closestDistance = distance;
+              closestPoint = { x, y };
+              closestDataIndex = i;
+            }
+          });
+        });
+        
+        if (closestPoint) {
+          // Show tooltip
+          tooltipEl.style.opacity = 1;
+          tooltipEl.style.left = (closestPoint.x + rect.left) + 'px';
+          tooltipEl.style.top = (closestPoint.y + rect.top - 70) + 'px';
+          
+          // Build tooltip content
+          let tooltipContent = `<div class="font-semibold">${data[closestDataIndex][config.xKey]}</div>`;
+          
+          config.lines.forEach(line => {
+            tooltipContent += `<div class="flex items-center mt-1">
+              <span class="inline-block w-3 h-3 rounded-full mr-2" style="background-color: ${line.color}"></span>
+              <span>${line.name}: ${data[closestDataIndex][line.dataKey]}</span>
+            </div>`;
+          });
+          
+          tooltipEl.innerHTML = tooltipContent;
+          
+          activePoint = closestPoint;
+        } else if (activePoint) {
+          // Hide tooltip
+          tooltipEl.style.opacity = 0;
+          activePoint = null;
+        }
+      });
+      
+      canvas.addEventListener('mouseleave', function() {
+        tooltipEl.style.opacity = 0;
+        activePoint = null;
+      });
+    }
+    
+    // Helper function to draw a bar chart
+    function drawBarChart(canvasId, data, config) {
+      const canvas = document.getElementById(canvasId);
+      const ctx = canvas.getContext('2d');
+      const tooltipEl = document.getElementById(config.tooltipId);
+      
+      // Set canvas dimensions
+      canvas.width = canvas.parentNode.clientWidth;
+      canvas.height = canvas.parentNode.clientHeight;
+      
+      // Calculate chart area
+      const padding = 40;
+      const chartArea = {
+        x: padding,
+        y: padding,
+        width: canvas.width - (padding * 2),
+        height: canvas.height - (padding * 2) - 30 // Extra space for legend
+      };
+      
+      // Find min and max values for Y axis
+      let minY = Infinity;
+      let maxY = -Infinity;
+      
+      data.forEach(item => {
+        if (item[config.dataKey] < minY) minY = item[config.dataKey];
+        if (item[config.dataKey] > maxY) maxY = item[config.dataKey];
+      });
+      
+      // Add some padding to the min/max values
+      const yPadding = (maxY - minY) * 0.1;
+      minY = Math.max(0, minY - yPadding);
+      maxY = maxY + yPadding;
+      
+      // Draw background grid
+      ctx.strokeStyle = colors.border;
+      ctx.lineWidth = 1;
+      
+      // Horizontal grid lines
+      const ySteps = 5;
+      for (let i = 0; i <= ySteps; i++) {
+        const y = chartArea.y + (chartArea.height * (1 - (i / ySteps)));
+        
+        ctx.beginPath();
