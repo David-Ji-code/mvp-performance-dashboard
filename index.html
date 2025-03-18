@@ -3,21 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Service Dashboard</title>
-    <!-- Required Libraries -->
+    <title>Vicious Service Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-gradient"></script>
     <script src="https://cdn.jsdelivr.net/npm/moment@2.29.4/moment.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    
     <style>
         @keyframes pulse {
-            0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4); }
-            70% { box-shadow: 0 0 0 10px rgba(59, 130, 246, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+            0% { box-shadow: 0 0 0 0 rgba(255, 0, 0, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(255, 0, 0, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 0, 0, 0); }
         }
         
         .pulse-animation {
-            animation: pulse 1.5s ease-in-out;
+            animation: pulse 1.5s ease-in-out infinite;
         }
 
         #notificationContainer {
@@ -35,482 +35,524 @@
         
         .data-card {
             transition: all 0.3s ease;
+            background: linear-gradient(145deg, #1a1a1a, #2d2d2d);
+            border: 1px solid #333;
         }
         
         .data-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 10px 15px -3px rgba(255, 0, 0, 0.1);
+            border: 1px solid #ff0000;
+        }
+
+        body {
+            background: #121212;
+            color: #ffffff;
+        }
+
+        .status-pending {
+            color: #ff6b6b;
+        }
+
+        .status-progress {
+            color: #ffd93d;
+        }
+
+        .status-resolved {
+            color: #6bff6b;
+        }
+
+        .status-critical {
+            color: #ff0000;
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
         }
     </style>
 </head>
-<body class="bg-gray-50">
+<body class="bg-gray-900">
     <div id="notificationContainer"></div>
     
     <div class="container mx-auto p-4">
-        <h1 class="text-2xl font-bold mb-6">Service Dashboard</h1>
+        <h1 class="text-3xl font-bold mb-6 text-red-600">CRITICAL SERVICE DASHBOARD</h1>
         
         <!-- Dashboard Overview Section -->
         <div class="mb-6 grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div class="bg-white p-4 rounded-lg border border-gray-200 shadow-sm data-card">
+            <!-- Severe Incidents Card -->
+            <div class="bg-gray-800 p-4 rounded-lg border border-red-900 shadow-lg data-card pulse-animation">
                 <div class="flex justify-between items-center">
-                    <h3 class="text-gray-500 text-sm">Total Faults</h3>
-                    <span class="text-blue-500">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-                        </svg>
-                    </span>
+                    <h3 class="text-red-500 text-sm">Critical Failures</h3>
+                    <span class="text-red-500">⚠️</span>
                 </div>
                 <div class="mt-2">
-                    <h2 class="text-3xl font-bold" id="totalFaults">0</h2>
-                    <p class="text-red-600 text-sm flex items-center mt-1">
-                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
-                        </svg>
-                        <span id="faultGrowth">0%</span> this month
+                    <h2 class="text-3xl font-bold text-red-600" id="criticalFaults">178</h2>
+                    <p class="text-red-400 text-sm flex items-center mt-1">
+                        <span class="mr-1">↑</span>
+                        <span id="criticalGrowth">+89%</span> SEVERE INCREASE
                     </p>
                 </div>
             </div>
-            
-            <div class="bg-white p-4 rounded-lg border border-gray-200 shadow-sm data-card">
+
+            <!-- System Failures Card -->
+            <div class="bg-gray-800 p-4 rounded-lg border border-orange-900 shadow-lg data-card">
                 <div class="flex justify-between items-center">
-                    <h3 class="text-gray-500 text-sm">Power Outages</h3>
-                    <span class="text-yellow-500">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-                        </svg>
-                    </span>
+                    <h3 class="text-orange-500 text-sm">System Failures</h3>
+                    <span class="text-orange-500">🔥</span>
                 </div>
                 <div class="mt-2">
-                    <h2 class="text-3xl font-bold" id="powerOutages">0</h2>
-                    <p class="text-sm text-gray-500 mt-1">
-                        <span id="outagePercentage" class="font-medium">0%</span> of total faults
+                    <h2 class="text-3xl font-bold text-orange-500" id="systemFailures">432</h2>
+                    <p class="text-orange-400 text-sm mt-1">
+                        <span id="failurePercentage" class="font-medium">67%</span> UNRESOLVED
                     </p>
                 </div>
             </div>
-            
-            <div class="bg-white p-4 rounded-lg border border-gray-200 shadow-sm data-card">
+
+                        <!-- Response Time Card -->
+            <div class="bg-gray-800 p-4 rounded-lg border border-purple-900 shadow-lg data-card">
                 <div class="flex justify-between items-center">
-                    <h3 class="text-gray-500 text-sm">Resolution Rate</h3>
-                    <span class="text-green-500">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>
-                    </span>
+                    <h3 class="text-purple-500 text-sm">Response Delay</h3>
+                    <span class="text-purple-500">⏱️</span>
                 </div>
                 <div class="mt-2">
-                    <h2 class="text-3xl font-bold" id="resolutionRate">0%</h2>
-                    <p class="text-green-600 text-sm flex items-center mt-1">
-                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
-                        </svg>
-                        <span id="resolutionGrowth">0%</span> vs last month
-                    </p>
-                </div>
-            </div>
-            
-            <div class="bg-white p-4 rounded-lg border border-gray-200 shadow-sm data-card">
-                <div class="flex justify-between items-center">
-                    <h3 class="text-gray-500 text-sm">Avg. Response Time</h3>
-                    <span class="text-indigo-500">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>
-                    </span>
-                </div>
-                <div class="mt-2">
-                    <h2 class="text-3xl font-bold" id="responseTime">0h</h2>
-                    <div class="w-full bg-gray-200 rounded-full h-2.5 mt-2">
-                        <div class="bg-indigo-600 h-2.5 rounded-full" id="responseTimeBar" style="width: 0%"></div>
+                    <h2 class="text-3xl font-bold text-purple-500" id="responseTime">12.4h</h2>
+                    <div class="w-full bg-gray-700 rounded-full h-2.5 mt-2">
+                        <div class="bg-purple-600 h-2.5 rounded-full animate-pulse" style="width: 89%"></div>
                     </div>
-                    <p class="text-sm text-gray-500 mt-1">
-                        <span id="targetResponseTime">Target: 4h</span>
+                    <p class="text-purple-400 text-sm mt-1">
+                        <span id="targetResponseTime">TARGET EXCEEDED BY 312%</span>
+                    </p>
+                </div>
+            </div>
+
+            <!-- System Health Card -->
+            <div class="bg-gray-800 p-4 rounded-lg border border-yellow-900 shadow-lg data-card">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-yellow-500 text-sm">System Health</h3>
+                    <span class="text-yellow-500">💀</span>
+                </div>
+                <div class="mt-2">
+                    <h2 class="text-3xl font-bold text-yellow-500" id="systemHealth">23%</h2>
+                    <p class="text-yellow-400 text-sm flex items-center mt-1">
+                        <span class="mr-1">↓</span>
+                        <span id="healthDecline">-45%</span> CRITICAL DECLINE
                     </p>
                 </div>
             </div>
         </div>
-        
-        <!-- Data Visualization Section -->
+
+        <!-- Threat Visualization Section -->
         <div class="mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
+            <div class="bg-gray-800 p-4 rounded-lg border border-red-900 shadow-lg">
                 <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-lg font-semibold">Fault Trends</h2>
+                    <h2 class="text-lg font-semibold text-red-500">Attack Vectors</h2>
                     <div class="flex space-x-2">
-                        <button class="px-3 py-1 text-sm rounded-md border border-gray-300 hover:bg-gray-50 bg-blue-100 text-blue-700 border-blue-300" onclick="updateChart('weekly')">Weekly</button>
-                        <button class="px-3 py-1 text-sm rounded-md border border-gray-300 hover:bg-gray-50" onclick="updateChart('monthly')">Monthly</button>
-                        <button class="px-3 py-1 text-sm rounded-md border border-gray-300 hover:bg-gray-50" onclick="updateChart('yearly')">Yearly</button>
+                        <button class="px-3 py-1 text-sm rounded-md border border-red-600 bg-red-900/30 text-red-500 hover:bg-red-900/50" onclick="updateAttackData('realtime')">LIVE</button>
+                        <button class="px-3 py-1 text-sm rounded-md border border-red-600 text-red-500 hover:bg-red-900/30" onclick="updateAttackData('historical')">HISTORY</button>
                     </div>
                 </div>
                 <div class="chart-container">
-                    <canvas id="faultTrendsChart"></canvas>
+                    <canvas id="attackVectorsChart"></canvas>
                 </div>
             </div>
-            
-            <div class="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
+
+            <div class="bg-gray-800 p-4 rounded-lg border border-purple-900 shadow-lg">
                 <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-lg font-semibold">Fault Type Distribution</h2>
+                    <h2 class="text-lg font-semibold text-purple-500">System Degradation</h2>
                     <div class="flex space-x-2">
-                        <button class="px-3 py-1 text-sm rounded-md border border-gray-300 hover:bg-gray-50 bg-blue-100 text-blue-700 border-blue-300" onclick="updateFaultTypeChart('all')">All</button>
-                        <button class="px-3 py-1 text-sm rounded-md border border-gray-300 hover:bg-gray-50" onclick="updateFaultTypeChart('region')">By Region</button>
+                        <button class="px-3 py-1 text-sm rounded-md border border-purple-600 bg-purple-900/30 text-purple-500 hover:bg-purple-900/50" onclick="updateDegradation('critical')">CRITICAL</button>
+                        <button class="px-3 py-1 text-sm rounded-md border border-purple-600 text-purple-500 hover:bg-purple-900/30" onclick="updateDegradation('all')">ALL</button>
                     </div>
                 </div>
                 <div class="chart-container">
-                    <canvas id="faultTypeChart"></canvas>
+                    <canvas id="degradationChart"></canvas>
                 </div>
             </div>
         </div>
-        
-        <!-- Fault Distribution Section -->
-        <div class="mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div class="bg-white p-4 rounded-lg border border-gray-200 shadow-sm col-span-1">
-                <h2 class="text-lg font-semibold mb-4">Fault Status</h2>
-                <div class="chart-container" style="height: 250px;">
-                    <canvas id="faultStatusChart"></canvas>
-                </div>
-            </div>
-            
-            <div class="bg-white p-4 rounded-lg border border-gray-200 shadow-sm col-span-2">
-                <h2 class="text-lg font-semibold mb-4">Hourly Fault Distribution</h2>
-                <div class="chart-container">
-                    <canvas id="hourlyFaultChart"></canvas>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Fault Management Section -->
+
+        <!-- Threat Feed Section -->
         <div class="mb-6">
             <div class="flex justify-between items-center mb-3">
-                <h2 class="text-lg font-semibold">Recent Faults</h2>
+                <h2 class="text-lg font-semibold text-red-500">LIVE THREAT FEED</h2>
                 <div class="flex space-x-2">
                     <div class="relative">
-                        <input id="faultSearch" type="text" placeholder="Search faults..." class="pl-8 pr-3 py-1 border rounded-md" onkeyup="searchFaults()">
-                        <svg class="w-4 h-4 text-gray-400 absolute left-2 top-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <input id="threatSearch" type="text" placeholder="Search threats..." 
+                               class="pl-8 pr-3 py-1 border rounded-md bg-gray-800 border-red-900 text-red-500 placeholder-red-700">
+                        <svg class="w-4 h-4 text-red-500 absolute left-2 top-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                         </svg>
                     </div>
-                    <button onclick="showAddFaultModal()" class="px-3 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm flex items-center">
+                    <button onclick="showEmergencyModal()" 
+                            class="px-3 py-1 bg-red-900 text-red-500 rounded-md hover:bg-red-800 text-sm flex items-center animate-pulse">
                         <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
                         </svg>
-                        Add Fault
+                        REPORT CRITICAL
                     </button>
                 </div>
             </div>
-            
-            <div class="overflow-x-auto bg-white rounded-lg border border-gray-200 shadow-sm">
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-50">
+
+            <!-- Threat Table -->
+            <div class="overflow-x-auto bg-gray-800 rounded-lg border border-red-900 shadow-lg">
+                <table class="min-w-full divide-y divide-red-900">
+                    <thead class="bg-gray-900">
                         <tr>
-                            <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-                            <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
-                            <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fault Type</th>
-                            <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Timestamp</th>
-                            <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                            <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                            <th class="px-3 py-3 text-left text-xs font-medium text-red-500 uppercase tracking-wider">Threat ID</th>
+                            <th class="px-3 py-3 text-left text-xs font-medium text-red-500 uppercase tracking-wider">Vector</th>
+                            <th class="px-3 py-3 text-left text-xs font-medium text-red-500 uppercase tracking-wider">Impact</th>
+                            <th class="px-3 py-3 text-left text-xs font-medium text-red-500 uppercase tracking-wider">Detection Time</th>
+                            <th class="px-3 py-3 text-left text-xs font-medium text-red-500 uppercase tracking-wider">Status</th>
+                            <th class="px-3 py-3 text-left text-xs font-medium text-red-500 uppercase tracking-wider">Action</th>
                         </tr>
                     </thead>
-                    <tbody class="bg-white divide-y divide-gray-200" id="faultTableBody">
-                        <!-- Fault data will appear here -->
-                        <tr>
-                            <td colspan="6" class="px-3 py-4 text-center text-gray-500">Loading faults...</td>
-                        </tr>
+                    <tbody class="bg-gray-800 divide-y divide-red-900" id="threatTableBody">
+                        <!-- Dynamic threat data will be inserted here -->
                     </tbody>
                 </table>
             </div>
-            
-            <div class="mt-3 flex justify-between">
-                <button onclick="refreshFaults()" class="px-3 py-1 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 text-sm flex items-center">
-                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-                    </svg>
-                    Refresh
-                </button>
-                <div class="text-sm text-gray-500">
-                    Showing <span id="faultCount">0</span> faults
+        </div>
+
+        <!-- Emergency Response Section -->
+        <div class="mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="bg-gray-800 p-4 rounded-lg border border-red-900 shadow-lg col-span-1">
+                <h2 class="text-lg font-semibold text-red-500 mb-4">Emergency Protocols</h2>
+                <div class="space-y-2">
+                    <div class="flex items-center justify-between p-2 border border-red-900 rounded">
+                        <span class="text-red-500">Protocol Alpha</span>
+                        <span class="text-red-500 animate-pulse">ACTIVE</span>
+                    </div>
+                    <div class="flex items-center justify-between p-2 border border-yellow-900 rounded">
+                        <span class="text-yellow-500">Protocol Beta</span>
+                        <span class="text-yellow-500">STANDBY</span>
+                    </div>
+                    <div class="flex items-center justify-between p-2 border border-purple-900 rounded">
+                        <span class="text-purple-500">Protocol Gamma</span>
+                        <span class="text-purple-500">READY</span>
+                    </div>
                 </div>
             </div>
-        </div>
-        
-        <!-- Data Insights Section -->
-        <div class="mb-6">
-            <h2 class="text-lg font-semibold mb-3">Fault Insights</h2>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4" id="insightsContainer">
-                <!-- Insights will be generated here -->
-            </div>
-            <div class="mt-4 text-center">
-                <button onclick="generateInsights()" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm flex items-center mx-auto">
-                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-                    </svg>
-                    Generate New Insights
-                </button>
+
+                        <!-- Threat Map -->
+            <div class="bg-gray-800 p-4 rounded-lg border border-red-900 shadow-lg col-span-2">
+                <h2 class="text-lg font-semibold text-red-500 mb-4">Global Threat Map</h2>
+                <div class="chart-container">
+                    <canvas id="threatMapChart"></canvas>
+                </div>
             </div>
         </div>
     </div>
-    
-    <!-- Modal for Add Fault -->
-    <div id="addFaultModal" class="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center hidden z-50">
-        <div class="bg-white rounded-lg p-6 max-w-md w-full">
-            <h3 class="text-lg font-semibold mb-4">Add New Fault</h3>
-            <form id="addFaultForm" class="space-y-4">
+
+    <!-- Emergency Modal -->
+    <div id="emergencyModal" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center hidden z-50">
+        <div class="bg-gray-900 rounded-lg p-6 max-w-md w-full border border-red-600">
+            <h3 class="text-lg font-semibold text-red-500 mb-4">⚠️ CRITICAL THREAT REPORT ⚠️</h3>
+            <form id="emergencyForm" class="space-y-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Customer Name</label>
-                    <input type="text" id="customerName" class="w-full p-2 border rounded-lg">
-                </div>
-                
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                    <input type="email" id="customerEmail" class="w-full p-2 border rounded-lg">
-                </div>
-                
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Address</label>
-                    <input type="text" id="customerAddress" class="w-full p-2 border rounded-lg">
-                </div>
-                
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Fault Type</label>
-                    <select id="faultType" class="w-full p-2 border rounded-lg">
-                        <option value="Power Outage">Power Outage</option>
-                        <option value="Internet Disruption">Internet Disruption</option>
-                        <option value="Cable Damage">Cable Damage</option>
+                    <label class="block text-sm font-medium text-red-500 mb-1">Threat Vector</label>
+                    <select id="threatVector" class="w-full p-2 border rounded-lg bg-gray-800 border-red-900 text-red-500">
+                        <option value="DDOS">DDoS Attack</option>
+                        <option value="MALWARE">Malware Infection</option>
+                        <option value="BREACH">Security Breach</option>
+                        <option value="HARDWARE">Hardware Failure</option>
                     </select>
                 </div>
                 
+                <div>
+                    <label class="block text-sm font-medium text-red-500 mb-1">Impact Level</label>
+                    <select id="impactLevel" class="w-full p-2 border rounded-lg bg-gray-800 border-red-900 text-red-500">
+                        <option value="CRITICAL">CRITICAL - System Shutdown</option>
+                        <option value="SEVERE">SEVERE - Major Disruption</option>
+                        <option value="HIGH">HIGH - Significant Impact</option>
+                        <option value="MODERATE">MODERATE - Limited Impact</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-red-500 mb-1">Affected Systems</label>
+                    <input type="text" id="affectedSystems" class="w-full p-2 border rounded-lg bg-gray-800 border-red-900 text-red-500">
+                </div>
+                
                 <div class="flex justify-end space-x-2">
-                    <button type="button" onclick="hideAddFaultModal()" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300">Cancel</button>
-                    <button type="button" onclick="addFault()" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">Add Fault</button>
+                    <button type="button" onclick="hideEmergencyModal()" 
+                            class="px-4 py-2 bg-gray-700 text-gray-300 rounded-md hover:bg-gray-600">
+                        Cancel
+                    </button>
+                    <button type="button" onclick="reportEmergency()" 
+                            class="px-4 py-2 bg-red-900 text-red-500 rounded-md hover:bg-red-800 animate-pulse">
+                        REPORT CRITICAL
+                    </button>
                 </div>
             </form>
         </div>
     </div>
-    
-    <!-- JavaScript Code -->
+
+    <!-- JavaScript -->
     <script>
-        // Utility Functions
-        function showNotification(message, type = 'info') {
+        // Simulated threat data
+        const threatData = {
+            vectors: [
+                { id: "V001", name: "DDoS Attack", count: 156, severity: "CRITICAL" },
+                { id: "V002", name: "Malware Infection", count: 89, severity: "HIGH" },
+                { id: "V003", name: "Security Breach", count: 234, severity: "SEVERE" },
+                { id: "V004", name: "Hardware Failure", count: 167, severity: "CRITICAL" }
+            ],
+            timeline: generateThreatTimeline(),
+            locations: generateThreatLocations()
+        };
+
+        // Generate random threat timeline
+        function generateThreatTimeline() {
+            const timeline = [];
+            const now = new Date();
+            for (let i = 30; i >= 0; i--) {
+                const date = new Date(now);
+                date.setDate(date.getDate() - i);
+                timeline.push({
+                    date: date.toISOString().split('T')[0],
+                    ddos: Math.floor(Math.random() * 100) + 50,
+                    malware: Math.floor(Math.random() * 80) + 30,
+                    breach: Math.floor(Math.random() * 120) + 40,
+                    hardware: Math.floor(Math.random() * 90) + 60
+                });
+            }
+            return timeline;
+        }
+
+        // Generate random threat locations
+        function generateThreatLocations() {
+            const locations = [
+                { lat: 40.7128, lon: -74.0060, name: "New York", severity: "CRITICAL" },
+                { lat: 51.5074, lon: -0.1278, name: "London", severity: "SEVERE" },
+                { lat: 35.6762, lon: 139.6503, name: "Tokyo", severity: "HIGH" },
+                { lat: 1.3521, lon: 103.8198, name: "Singapore", severity: "CRITICAL" },
+                { lat: -33.8688, lon: 151.2093, name: "Sydney", severity: "SEVERE" }
+            ];
+            return locations;
+        }
+
+        // Initialize charts
+        function initializeCharts() {
+            initializeAttackVectorsChart();
+            initializeDegradationChart();
+            initializeThreatMapChart();
+        }
+
+        // Attack Vectors Chart
+        function initializeAttackVectorsChart() {
+            const ctx = document.getElementById('attackVectorsChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: threatData.timeline.map(t => t.date),
+                    datasets: [{
+                        label: 'DDoS Attacks',
+                        data: threatData.timeline.map(t => t.ddos),
+                        borderColor: '#ef4444',
+                        backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                        tension: 0.4
+                    }, {
+                        label: 'Malware',
+                        data: threatData.timeline.map(t => t.malware),
+                        borderColor: '#8b5cf6',
+                        backgroundColor: 'rgba(139, 92, 246, 0.1)',
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#ef4444'
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            grid: {
+                                color: 'rgba(239, 68, 68, 0.1)'
+                            },
+                            ticks: {
+                                color: '#ef4444'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                color: 'rgba(239, 68, 68, 0.1)'
+                            },
+                            ticks: {
+                                color: '#ef4444'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // System Degradation Chart
+        function initializeDegradationChart() {
+            const ctx = document.getElementById('degradationChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['System A', 'System B', 'System C', 'System D'],
+                    datasets: [{
+                        label: 'Degradation Level',
+                        data: [87, 65, 92, 78],
+                        backgroundColor: [
+                            'rgba(239, 68, 68, 0.8)',
+                            'rgba(139, 92, 246, 0.8)',
+                            'rgba(234, 179, 8, 0.8)',
+                            'rgba(147, 51, 234, 0.8)'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#8b5cf6'
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            grid: {
+                                color: 'rgba(139, 92, 246, 0.1)'
+                            },
+                            ticks: {
+                                color: '#8b5cf6'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                color: 'rgba(139, 92, 246, 0.1)'
+                            },
+                            ticks: {
+                                color: '#8b5cf6'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeCharts();
+            populateThreatTable();
+            startRealTimeUpdates();
+        });
+
+        // Populate threat table
+        function populateThreatTable() {
+            const tbody = document.getElementById('threatTableBody');
+            tbody.innerHTML = '';
+
+            const threats = generateThreats(10);
+            threats.forEach(threat => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="px-3 py-2 text-red-500">${threat.id}</td>
+                    <td class="px-3 py-2 text-red-500">${threat.vector}</td>
+                    <td class="px-3 py-2 text-red-500">${threat.impact}</td>
+                    <td class="px-3 py-2 text-red-500">${threat.time}</td>
+                    <td class="px-3 py-2">
+                        <span class="px-2 py-1 text-xs rounded-full ${getStatusClass(threat.status)}">
+                            ${threat.status}
+                        </span>
+                    </td>
+                    <td class="px-3 py-2">
+                        <button class="text-red-500 hover:text-red-400">RESPOND</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Generate random threats
+        function generateThreats(count) {
+            const threats = [];
+            const vectors = ['DDoS', 'MALWARE', 'BREACH', 'HARDWARE'];
+            const impacts = ['CRITICAL', 'SEVERE', 'HIGH'];
+            const statuses = ['ACTIVE', 'CONTAINED', 'SPREADING'];
+
+            for (let i = 0; i < count; i++) {
+                threats.push({
+                    id: `T${String(i + 1).padStart(3, '0')}`,
+                    vector: vectors[Math.floor(Math.random() * vectors.length)],
+                    impact: impacts[Math.floor(Math.random() * impacts.length)],
+                    time: new Date().toLocaleTimeString(),
+                    status: statuses[Math.floor(Math.random() * statuses.length)]
+                });
+            }
+            return threats;
+        }
+
+        // Get status class for styling
+        function getStatusClass(status) {
+            switch (status) {
+                case 'ACTIVE': return 'bg-red-900/50 text-red-500';
+                case 'CONTAINED': return 'bg-green-900/50 text-green-500';
+                case 'SPREADING': return 'bg-yellow-900/50 text-yellow-500';
+                default: return 'bg-gray-900/50 text-gray-500';
+            }
+        }
+
+        // Real-time updates simulation
+        function startRealTimeUpdates() {
+            setInterval(() => {
+                updateMetrics();
+                updateCharts();
+                showRandomAlert();
+            }, 5000);
+        }
+
+        // Show random alert
+        function showRandomAlert() {
+            if (Math.random() < 0.3) {
+                const alerts = [
+                    "⚠️ NEW CRITICAL THREAT DETECTED",
+                    "🚨 SYSTEM DEGRADATION INCREASING",
+                    "⚡ UNUSUAL NETWORK ACTIVITY DETECTED",
+                    "💀 MULTIPLE SYSTEMS COMPROMISED"
+                ];
+                showNotification(alerts[Math.floor(Math.random() * alerts.length)], 'error');
+            }
+        }
+
+        // Show notification
+        function showNotification(message, type = 'error') {
             const container = document.getElementById('notificationContainer');
             const notification = document.createElement('div');
-            
-            // Set notification style based on type
-            let bgColor, borderColor, textColor;
-            switch (type) {
-                case 'success':
-                    bgColor = 'bg-green-100';
-                    borderColor = 'border-green-400';
-                    textColor = 'text-green-800';
-                    break;
-                case 'error':
-                    bgColor = 'bg-red-100';
-                    borderColor = 'border-red-400';
-                    textColor = 'text-red-800';
-                    break;
-                default:
-                    bgColor = 'bg-blue-100';
-                    borderColor = 'border-blue-400';
-                    textColor = 'text-blue-800';
-            }
-            
-            notification.className = `${bgColor} ${borderColor} ${textColor} border px-4 py-3 rounded mb-2`;
-            notification.innerHTML = message;
-            
+            notification.className = `mb-4 p-4 rounded-lg border ${type === 'error' ? 'bg-red-900/50 border-red-600 text-red-500' : 'bg-yellow-900/50 border-yellow-600 text-yellow-500'} animate-pulse`;
+            notification.textContent = message;
             container.appendChild(notification);
-            
-            // Remove notification after 3 seconds
-            setTimeout(() => {
-                notification.style.opacity = '0';
-                notification.style.transition = 'opacity 0.5s ease';
-                setTimeout(() => {
-                    container.removeChild(notification);
-                }, 500);
-            }, 3000);
-        }
-        
-        function showAddFaultModal() {
-            document.getElementById('addFaultModal').classList.remove('hidden');
-        }
-        
-        function hideAddFaultModal() {
-            document.getElementById('addFaultModal').classList.add('hidden');
-            document.getElementById('addFaultForm').reset();
-        }
-        
-        function getRandomInt(min, max) {
-            return Math.floor(Math.random() * (max - min + 1)) + min;
-        }
-        
-        function createGradient(ctx, colorStart, colorEnd) {
-            const gradient = ctx.createLinearGradient(0, 0, 0, 300);
-            gradient.addColorStop(0, colorStart);
-            gradient.addColorStop(1, colorEnd);
-            return gradient;
+            setTimeout(() => notification.remove(), 3000);
         }
 
-        // Load the provided fault data
-        const initialFaultData = [
-            { id: 1, name: "Tan Wei Ling", email: "tan.weiling@example.com", address: "123 Orchard Road, Singapore 238888", faultId: 101, faultType: "Power Outage", timestamp: "01/03/2025 10:00:00", status: "Pending" },
-            { id: 2, name: "Lim Kai Sheng", email: "lim.kaisheng@example.com", address: "456 Bukit Timah Road, Singapore 259999", faultId: 102, faultType: "Internet Disruption", timestamp: "01/03/2025 11:00:00", status: "Pending" },
-            { id: 3, name: "Ong Mei Hui", email: "ong.meihui@example.com", address: "789 Clementi Avenue 3, Singapore 120789", faultId: 103, faultType: "Cable Damage", timestamp: "01/03/2025 12:00:00", status: "Pending" },
-            { id: 4, name: "Chua Jia Hao", email: "chua.jiahao@example.com", address: "101 Tampines Street 11, Singapore 520101", faultId: 104, faultType: "Power Outage", timestamp: "01/03/2025 13:00:00", status: "Pending" },
-            { id: 5, name: "Lee Xin Yi", email: "lee.xinyi@example.com", address: "202 Bedok North Road, Singapore 460202", faultId: 105, faultType: "Power Outage", timestamp: "01/03/2025 14:00:00", status: "Pending" },
-            { id: 6, name: "Goh Jun Wei", email: "goh.junwei@example.com", address: "303 Yishun Avenue 5, Singapore 760303", faultId: 106, faultType: "Internet Disruption", timestamp: "01/03/2025 15:00:00", status: "Pending" },
-            { id: 7, name: "Ng Wei Jie", email: "ng.weijie@example.com", address: "505 Hougang Avenue 8, Singapore 530505", faultId: 107, faultType: "Cable Damage", timestamp: "01/03/2025 16:00:00", status: "Pending" },
-            { id: 8, name: "Tan Hui Min", email: "tan.huimin@example.com", address: "404 Ang Mo Kio Avenue 10, Singapore 560404", faultId: 108, faultType: "Cable Damage", timestamp: "01/03/2025 17:00:00", status: "Pending" },
-            { id: 9, name: "Lim Shi Ying", email: "lim.shiying@example.com", address: "606 Punggol Walk, Singapore 828606", faultId: 109, faultType: "Internet Disruption", timestamp: "01/03/2025 18:00:00", status: "Pending" },
-            { id: 10, name: "Koh Jia En", email: "koh.jiaen@example.com", address: "707 Sengkang East Way, Singapore 540707", faultId: 110, faultType: "Cable Damage", timestamp: "01/03/2025 19:00:00", status: "Pending" }
-        ];
-        
-        // Generate additional fault data
-        function generateAdditionalFaultData(count = 15) {
-            const names = ["Zhang Wei", "Wang Li", "Liu Xin", "Chen Ming", "Yang Jie", "Zhao Hong", "Wu Fang", "Zhou Yu", "Sun Ling", "Li Yan", "Huang Jun", "Xu Feng", "He Mei", "Zhu Hua", "Gao Ping"];
-            const addresses = [
-                "808 Jurong West Street 81, Singapore 640808",
-                "909 Woodlands Drive 50, Singapore 730909",
-                "111 Bishan Street 12, Singapore 570111",
-                "222 Serangoon Avenue 4, Singapore 550222",
-                "333 Pasir Ris Drive 6, Singapore 510333",
-                "444 Choa Chu Kang Avenue 3, Singapore 680444",
-                "555 Bukit Batok Street 52, Singapore 650555",
-                "666 Toa Payoh Lorong 5, Singapore 310666",
-                "777 Geylang East Avenue 1, Singapore 389777",
-                "888 Marine Parade Central, Singapore 440888",
-                "999 Simei Street 3, Singapore 520999",
-                "123 Bukit Merah View, Singapore 150123",
-                "456 Kallang Bahru, Singapore 330456",
-                "789 Telok Blangah Heights, Singapore 100789",
-                "101 Jalan Besar, Singapore 208801"
-            ];
-            const faultTypes = ["Power Outage", "Internet Disruption", "Cable Damage"];
-            const statuses = ["Pending", "In Progress", "Resolved", "Escalated"];
-            
-            const additionalFaults = [];
-            
-            for (let i = 0; i < count; i++) {
-                const name = names[i % names.length];
-                const email = name.toLowerCase().replace(' ', '.') + '@example.com';
-                const address = addresses[i % addresses.length];
-                const faultType = faultTypes[Math.floor(Math.random() * faultTypes.length)];
-                const status = statuses[Math.floor(Math.random() * statuses.length)];
-                
-                // Generate random date within the last 7 days
-                const days = Math.floor(Math.random() * 7);
-                const hours = Math.floor(Math.random() * 24);
-                const minutes = Math.floor(Math.random() * 60);
-                
-                const date = new Date(2025, 2, 1 + days);
-                date.setHours(hours, minutes, 0);
-                
-                const timestamp = date.toLocaleString('en-US', {
-                    day: '2-digit',
-                    month: '2-digit',
-                    year: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    second: '2-digit',
-                    hour12: false
-                }).replace(',', '');
-                
-                additionalFaults.push({
-                    id: 11 + i,
-                    name: name,
-                    email: email,
-                    address: address,
-                    faultId: 111 + i,
-                    faultType: faultType,
-                    timestamp: timestamp,
-                    status: status
-                });
-            }
-            
-            return additionalFaults;
+        // Modal functions
+        function showEmergencyModal() {
+            document.getElementById('emergencyModal').classList.remove('hidden');
         }
-        
-        // Chart Variables
-        let faultTrendsChart;
-        let faultTypeChart;
-        let faultStatusChart;
-        let hourlyFaultChart;
-        
-        // Data Variables
-        let faultData = [...initialFaultData];
-        let timeSeriesData = {
-            weekly: [],
-            monthly: [],
-            yearly: []
-        };
-        
-        // Initialize Dashboard
-        function initializeDashboard() {
-            // Add additional fault data
-            const additionalFaults = generateAdditionalFaultData(15);
-            faultData = [...faultData, ...additionalFaults];
-            
-            // Generate time series data
-            generateTimeSeriesData();
-            
-            // Update dashboard metrics
-            updateDashboardMetrics();
-            
-            // Populate tables
-            populateFaultTable();
-            
-            // Initialize charts
-            initializeCharts();
-            
-            // Generate initial insights
-            generateInsights();
-            
-            // Show success notification
-            showNotification('Dashboard data loaded successfully!', 'success');
+
+        function hideEmergencyModal() {
+            document.getElementById('emergencyModal').classList.add('hidden');
         }
-        
-        function generateTimeSeriesData() {
-            // Generate weekly data (last 7 days)
-            for (let i = 6; i >= 0; i--) {
-                const date = new Date(2025, 2, 1 + i);
-                
-                timeSeriesData.weekly.push({
-                    date: date.toISOString().split('T')[0],
-                    powerOutage: getRandomInt(3, 8),
-                    internetDisruption: getRandomInt(2, 7),
-                    cableDamage: getRandomInt(1, 6)
-                });
-            }
-            
-            // Generate monthly data (last 30 days)
-            for (let i = 29; i >= 0; i--) {
-                const date = new Date(2025, 1, 1 + i);
-                
-                timeSeriesData.monthly.push({
-                    date: date.toISOString().split('T')[0],
-                    powerOutage: getRandomInt(10, 25),
-                    internetDisruption: getRandomInt(8, 20),
-                    cableDamage: getRandomInt(5, 15)
-                });
-            }
-            
-            // Generate yearly data (last 12 months)
-            for (let i = 11; i >= 0; i--) {
-                const date = new Date(2024, i, 1);
-                
-                timeSeriesData.yearly.push({
-                    date: date.toISOString().split('T')[0],
-                    powerOutage: getRandomInt(50, 100),
-                    internetDisruption: getRandomInt(40, 90),
-                    cableDamage: getRandomInt(30, 80)
-                });
-            }
+
+        function reportEmergency() {
+            const vector = document.getElementById('threatVector').value;
+            const impact = document.getElementById('impactLevel').value;
+            showNotification(`🚨 CRITICAL ALERT: ${vector} - ${impact}`, 'error');
+            hideEmergencyModal();
+            populateThreatTable();
         }
-        
-        function updateDashboardMetrics() {
-            // Calculate total faults
-            document.
+    </script>
+</body>
+</html>
 
 
-
-
-
-
-
-
-
-                
