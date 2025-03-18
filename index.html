@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Service Fault Dashboard</title>
+    <title>MVP Performance Dashboard</title>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -44,14 +44,14 @@
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
         }
         
-        .critical-alert {
-            animation: criticalPulse 2s infinite;
+        .highlight {
+            animation: highlightPulse 2s infinite;
         }
         
-        @keyframes criticalPulse {
-            0% { background-color: rgba(239, 68, 68, 0.2); }
-            50% { background-color: rgba(239, 68, 68, 0.4); }
-            100% { background-color: rgba(239, 68, 68, 0.2); }
+        @keyframes highlightPulse {
+            0% { background-color: rgba(59, 130, 246, 0.1); }
+            50% { background-color: rgba(59, 130, 246, 0.2); }
+            100% { background-color: rgba(59, 130, 246, 0.1); }
         }
     </style>
 </head>
@@ -61,69 +61,18 @@
     
     <div class="container mx-auto p-4">
         <div class="flex justify-between items-center mb-6">
-            <h1 class="text-2xl font-bold">Service Fault Dashboard</h1>
-            <button onclick="simulateCriticalFault()" class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">
-                Simulate Critical Fault
+            <h1 class="text-2xl font-bold">MVP Performance Dashboard</h1>
+            <button onclick="refreshMetrics()" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+                Refresh Metrics
             </button>
         </div>
         
         <!-- Dashboard Overview Section -->
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-            <div class="bg-white p-4 rounded-lg shadow-sm data-card" id="totalFaultsCard">
+            <!-- Average Resolution Time -->
+            <div class="bg-white p-4 rounded-lg shadow-sm data-card" id="resolutionTimeCard">
                 <div class="flex justify-between items-center">
-                    <h3 class="text-gray-500 text-sm">Total Active Faults</h3>
-                    <span class="text-red-500">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-                        </svg>
-                    </span>
-                </div>
-                <div class="mt-2">
-                    <h2 class="text-3xl font-bold text-red-600" id="totalFaults">0</h2>
-                    <p class="text-red-600 text-sm flex items-center mt-1">
-                        <span id="faultTrend" class="mr-1">↑</span>
-                        <span id="faultGrowth">0%</span> increase
-                    </p>
-                </div>
-            </div>
-            
-            <div class="bg-white p-4 rounded-lg shadow-sm data-card">
-                <div class="flex justify-between items-center">
-                    <h3 class="text-gray-500 text-sm">Critical Systems</h3>
-                    <span class="text-yellow-500">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
-                        </svg>
-                    </span>
-                </div>
-                <div class="mt-2">
-                    <h2 class="text-3xl font-bold" id="criticalSystems">0</h2>
-                    <div class="w-full bg-gray-200 rounded-full h-2 mt-2">
-                        <div class="bg-yellow-500 h-2 rounded-full" id="criticalSystemsBar" style="width: 0%"></div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="bg-white p-4 rounded-lg shadow-sm data-card">
-                <div class="flex justify-between items-center">
-                    <h3 class="text-gray-500 text-sm">System Uptime</h3>
-                    <span class="text-green-500">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                        </svg>
-                    </span>
-                </div>
-                <div class="mt-2">
-                    <h2 class="text-3xl font-bold" id="systemUptime">0%</h2>
-                    <p class="text-red-600 text-sm mt-1" id="uptimeTrend">
-                        Degrading
-                    </p>
-                </div>
-            </div>
-            
-            <div class="bg-white p-4 rounded-lg shadow-sm data-card">
-                <div class="flex justify-between items-center">
-                    <h3 class="text-gray-500 text-sm">Response Time</h3>
+                    <h3 class="text-gray-500 text-sm">Average Resolution Time</h3>
                     <span class="text-blue-500">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
@@ -131,9 +80,62 @@
                     </span>
                 </div>
                 <div class="mt-2">
-                    <h2 class="text-3xl font-bold" id="avgResponseTime">0m</h2>
+                    <h2 class="text-3xl font-bold text-blue-600" id="avgResolutionTime">15m</h2>
+                    <p class="text-blue-600 text-sm flex items-center mt-1">
+                        <span id="resolutionTrend" class="mr-1">↓</span>
+                        <span id="resolutionImprovement">12%</span> improvement
+                    </p>
+                </div>
+            </div>
+            
+            <!-- First Call Resolution -->
+            <div class="bg-white p-4 rounded-lg shadow-sm data-card">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-gray-500 text-sm">First Call Resolution</h3>
+                    <span class="text-green-500">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    </span>
+                </div>
+                <div class="mt-2">
+                    <h2 class="text-3xl font-bold" id="firstCallResolution">85%</h2>
                     <div class="w-full bg-gray-200 rounded-full h-2 mt-2">
-                        <div class="bg-blue-500 h-2 rounded-full" id="responseTimeBar" style="width: 0%"></div>
+                        <div class="bg-green-500 h-2 rounded-full" id="fcrBar" style="width: 85%"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Customer Satisfaction -->
+            <div class="bg-white p-4 rounded-lg shadow-sm data-card">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-gray-500 text-sm">Customer Satisfaction</h3>
+                    <span class="text-yellow-500">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>
+                        </svg>
+                    </span>
+                </div>
+                <div class="mt-2">
+                    <h2 class="text-3xl font-bold" id="custSatisfaction">4.5</h2>
+                    <p class="text-sm mt-1">Out of 5.0</p>
+                </div>
+            </div>
+            
+            <!-- Detection-to-Notify Time -->
+            <div class="bg-white p-4 rounded-lg shadow-sm data-card">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-gray-500 text-sm">Detection-to-Notify Time</h3>
+                    <span class="text-purple-500">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    </span>
+                </div>
+                <div class="mt-2">
+                    <h2 class="text-3xl font-bold" id="detectionTime">3m</h2>
+                    <div class="w-full bg-gray-200 rounded-full h-2 mt-2">
+                        <div class="bg-purple-500 h-2 rounded-full" id="detectionTimeBar" style="width: 75%"></div>
                     </div>
                 </div>
             </div>
@@ -142,30 +144,30 @@
         <!-- Charts Section -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
             <div class="bg-white p-4 rounded-lg shadow-sm">
-                <h3 class="text-lg font-semibold mb-4">Fault Trend Analysis</h3>
+                <h3 class="text-lg font-semibold mb-4">Resolution Time Trend</h3>
                 <div class="chart-container">
-                    <canvas id="faultTrendChart"></canvas>
+                    <canvas id="resolutionTrendChart"></canvas>
                 </div>
             </div>
             
             <div class="bg-white p-4 rounded-lg shadow-sm">
-                <h3 class="text-lg font-semibold mb-4">System Health Distribution</h3>
+                <h3 class="text-lg font-semibold mb-4">KPI Distribution</h3>
                 <div class="chart-container">
-                    <canvas id="systemHealthChart"></canvas>
+                    <canvas id="kpiDistributionChart"></canvas>
                 </div>
             </div>
         </div>
         
-        <!-- Active Faults Table -->
+        <!-- Performance Metrics History -->
         <div class="bg-white p-4 rounded-lg shadow-sm mb-6">
             <div class="flex justify-between items-center mb-4">
-                <h3 class="text-lg font-semibold">Active Faults</h3>
+                <h3 class="text-lg font-semibold">Performance Metrics History</h3>
                 <div class="flex space-x-2">
-                    <button onclick="refreshFaults()" class="px-3 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600">
+                    <button onclick="refreshMetrics()" class="px-3 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600">
                         Refresh
                     </button>
-                    <button onclick="showAddFaultModal()" class="px-3 py-1 text-sm bg-green-500 text-white rounded hover:bg-green-600">
-                        Add Fault
+                    <button onclick="showAddMetricModal()" class="px-3 py-1 text-sm bg-green-500 text-white rounded hover:bg-green-600">
+                        Add Metric
                     </button>
                 </div>
             </div>
@@ -174,205 +176,252 @@
                 <table class="min-w-full">
                     <thead class="bg-gray-50">
                         <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">System</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Metric</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Value</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Change</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Duration</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                         </tr>
                     </thead>
-                    <tbody id="faultTableBody" class="bg-white divide-y divide-gray-200">
-                        <!-- Fault data will be inserted here -->
+                    <tbody id="metricsTableBody" class="bg-white divide-y divide-gray-200">
+                        <!-- Metrics data will be inserted here -->
                     </tbody>
                 </table>
             </div>
         </div>
     </div>
     
-    <!-- Add Fault Modal -->
-    <div id="addFaultModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden">
+    <!-- Add Metric Modal -->
+    <div id="addMetricModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden">
         <div class="flex items-center justify-center min-h-screen">
             <div class="bg-white rounded-lg p-8 max-w-md w-full">
-                <h3 class="text-lg font-semibold mb-4">Add New Fault</h3>
-                <form id="addFaultForm">
+                <h3 class="text-lg font-semibold mb-4">Add New Metric</h3>
+                <form id="addMetricForm">
                     <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700">System</label>
-                        <input type="text" id="faultSystem" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
-                    </div>
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700">Type</label>
-                        <select id="faultType" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
-                            <option value="Critical">Critical</option>
-                            <option value="Major">Major</option>
-                            <option value="Minor">Minor</option>
+                        <label class="block text-sm font-medium text-gray-700">Metric Type</label>
+                        <select id="metricType" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+                            <option value="resolution">Resolution Time</option>
+                            <option value="fcr">First Call Resolution</option>
+                            <option value="csat">Customer Satisfaction</option>
+                            <option value="detection">Detection Time</option>
                         </select>
                     </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700">Value</label>
+                        <input type="number" id="metricValue" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" step="0.1">
+                    </div>
                     <div class="flex justify-end space-x-2">
-                        <button type="button" onclick="hideAddFaultModal()" class="px-4 py-2 text-sm text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200">
+                        <button type="button" onclick="hideAddMetricModal()" class="px-4 py-2 text-sm text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200">
                             Cancel
                         </button>
-                        <button type="button" onclick="addNewFault()" class="px-4 py-2 text-sm text-white bg-blue-500 rounded-md hover:bg-blue-600">
-                            Add Fault
+                        <button type="button" onclick="addNewMetric()" class="px-4 py-2 text-sm text-white bg-blue-500 rounded-md hover:bg-blue-600">
+                            Add Metric
                         </button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
-    
-    <script>
+
+        <script>
         // Initialize variables
-        let faults = [];
-        let faultTrendChart;
-        let systemHealthChart;
+        let metrics = [];
+        let resolutionTrendChart;
+        let kpiDistributionChart;
         
         // Simulated data generation
-        function generateRandomFaults() {
-            const systems = ['Database', 'Network', 'Storage', 'Application', 'Security'];
-            const types = ['Critical', 'Major', 'Minor'];
-            const statuses = ['Active', 'Investigating', 'Contained'];
-            
-            return Array.from({length: 10}, (_, i) => ({
-                id: i + 1,
-                system: systems[Math.floor(Math.random() * systems.length)],
-                type: types[Math.floor(Math.random() * types.length)],
-                status: statuses[Math.floor(Math.random() * statuses.length)],
-                duration: Math.floor(Math.random() * 120) + 'm',
-                timestamp: new Date(Date.now() - Math.random() * 86400000)
-            }));
+        function generateRandomMetrics() {
+            return {
+                resolutionTime: Math.floor(Math.random() * 20 + 10),
+                firstCallResolution: Math.floor(Math.random() * 20 + 75),
+                customerSatisfaction: (Math.random() * 1 + 4).toFixed(1),
+                detectionTime: Math.floor(Math.random() * 5 + 1),
+                improvement: Math.floor(Math.random() * 15 + 5)
+            };
         }
         
         // Initialize charts
         function initializeCharts() {
-            // Fault Trend Chart
-            const trendCtx = document.getElementById('faultTrendChart').getContext('2d');
-            faultTrendChart = new Chart(trendCtx, {
+            // Resolution Time Trend Chart
+            const trendCtx = document.getElementById('resolutionTrendChart').getContext('2d');
+            resolutionTrendChart = new Chart(trendCtx, {
                 type: 'line',
                 data: {
-                    labels: Array.from({length: 24}, (_, i) => `${i}:00`),
+                    labels: Array.from({length: 12}, (_, i) => `Month ${i+1}`),
                     datasets: [{
-                        label: 'Faults',
-                        data: Array.from({length: 24}, () => Math.floor(Math.random() * 20)),
-                        borderColor: 'rgb(239, 68, 68)',
+                        label: 'Average Resolution Time (minutes)',
+                        data: Array.from({length: 12}, () => Math.floor(Math.random() * 20 + 10)),
+                        borderColor: 'rgb(59, 130, 246)',
                         tension: 0.4
                     }]
                 },
                 options: {
                     responsive: true,
-                    maintainAspectRatio: false
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
                 }
             });
             
-            // System Health Chart
-            const healthCtx = document.getElementById('systemHealthChart').getContext('2d');
-            systemHealthChart = new Chart(healthCtx, {
+            // KPI Distribution Chart
+            const kpiCtx = document.getElementById('kpiDistributionChart').getContext('2d');
+            kpiDistributionChart = new Chart(kpiCtx, {
                 type: 'doughnut',
                 data: {
-                    labels: ['Healthy', 'Degraded', 'Critical'],
+                    labels: ['Excellent', 'Good', 'Average', 'Needs Improvement'],
                     datasets: [{
-                        data: [60, 30, 10],
-                        backgroundColor: ['rgb(34, 197, 94)', 'rgb(234, 179, 8)', 'rgb(239, 68, 68)']
+                        data: [40, 30, 20, 10],
+                        backgroundColor: [
+                            'rgb(34, 197, 94)',
+                            'rgb(59, 130, 246)',
+                            'rgb(234, 179, 8)',
+                            'rgb(239, 68, 68)'
+                        ]
                     }]
                 },
                 options: {
                     responsive: true,
-                    maintainAspectRatio: false
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
                 }
             });
         }
         
         // Update dashboard metrics
         function updateMetrics() {
-            document.getElementById('totalFaults').textContent = faults.length;
-            document.getElementById('criticalSystems').textContent = Math.floor(Math.random() * 5);
-            document.getElementById('systemUptime').textContent = `${(Math.random() * 10 + 90).toFixed(2)}%`;
-            document.getElementById('avgResponseTime').textContent = `${Math.floor(Math.random() * 30 + 10)}m`;
+            const newMetrics = generateRandomMetrics();
+            
+            document.getElementById('avgResolutionTime').textContent = `${newMetrics.resolutionTime}m`;
+            document.getElementById('firstCallResolution').textContent = `${newMetrics.firstCallResolution}%`;
+            document.getElementById('custSatisfaction').textContent = newMetrics.customerSatisfaction;
+            document.getElementById('detectionTime').textContent = `${newMetrics.detectionTime}m`;
+            
+            document.getElementById('resolutionImprovement').textContent = `${newMetrics.improvement}%`;
             
             // Update progress bars
-            document.getElementById('criticalSystemsBar').style.width = `${Math.random() * 100}%`;
-            document.getElementById('responseTimeBar').style.width = `${Math.random() * 100}%`;
-        }
-        
-        // Populate fault table
-        function populateFaultTable() {
-            const tbody = document.getElementById('faultTableBody');
-            tbody.innerHTML = '';
+            document.getElementById('fcrBar').style.width = `${newMetrics.firstCallResolution}%`;
+            document.getElementById('detectionTimeBar').style.width = `${(newMetrics.detectionTime/5)*100}%`;
             
-            faults.forEach(fault => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td class="px-6 py-4 whitespace-nowrap">${fault.id}</td>
-                    <td class="px-6 py-4 whitespace-nowrap">${fault.system}</td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <span class="px-2 py-1 text-xs rounded-full ${getFaultTypeClass(fault.type)}">
-                            ${fault.type}
-                        </span>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap">${fault.status}</td>
-                    <td class="px-6 py-4 whitespace-nowrap">${fault.duration}</td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <button onclick="resolveFault(${fault.id})" class="text-blue-600 hover:text-blue-900">
-                            Resolve
-                        </button>
-                    </td>
-                `;
-                tbody.appendChild(tr);
-            });
+            // Update metrics history
+            addMetricToHistory(newMetrics);
         }
         
-        function getFaultTypeClass(type) {
-            switch(type) {
-                case 'Critical': return 'bg-red-100 text-red-800';
-                case 'Major': return 'bg-yellow-100 text-yellow-800';
-                case 'Minor': return 'bg-green-100 text-green-800';
+        // Add metric to history table
+        function addMetricToHistory(metrics) {
+            const tbody = document.getElementById('metricsTableBody');
+            const date = new Date().toLocaleDateString();
+            
+            // Add resolution time entry
+            addMetricRow(tbody, {
+                date: date,
+                metric: 'Resolution Time',
+                value: `${metrics.resolutionTime}m`,
+                change: `-${metrics.improvement}%`,
+                status: 'Improved'
+            });
+            
+            // Add FCR entry
+            addMetricRow(tbody, {
+                date: date,
+                metric: 'First Call Resolution',
+                value: `${metrics.firstCallResolution}%`,
+                change: `+${Math.floor(Math.random() * 5)}%`,
+                status: 'On Track'
+            });
+            
+            // Limit table to last 10 entries
+            while (tbody.children.length > 10) {
+                tbody.removeChild(tbody.lastChild);
+            }
+        }
+        
+        function addMetricRow(tbody, data) {
+            const tr = document.createElement('tr');
+            const statusClass = getStatusClass(data.status);
+            
+            tr.innerHTML = `
+                <td class="px-6 py-4 whitespace-nowrap">${data.date}</td>
+                <td class="px-6 py-4 whitespace-nowrap">${data.metric}</td>
+                <td class="px-6 py-4 whitespace-nowrap">${data.value}</td>
+                <td class="px-6 py-4 whitespace-nowrap">${data.change}</td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <span class="px-2 py-1 text-xs rounded-full ${statusClass}">
+                        ${data.status}
+                    </span>
+                </td>
+            `;
+            
+            tbody.insertBefore(tr, tbody.firstChild);
+        }
+        
+        function getStatusClass(status) {
+            switch(status) {
+                case 'Improved': return 'bg-green-100 text-green-800';
+                case 'On Track': return 'bg-blue-100 text-blue-800';
+                case 'At Risk': return 'bg-yellow-100 text-yellow-800';
                 default: return 'bg-gray-100 text-gray-800';
             }
         }
         
-        // Show/hide add fault modal
-        function showAddFaultModal() {
-            document.getElementById('addFaultModal').classList.remove('hidden');
+        // Show/hide add metric modal
+        function showAddMetricModal() {
+            document.getElementById('addMetricModal').classList.remove('hidden');
         }
         
-        function hideAddFaultModal() {
-            document.getElementById('addFaultModal').classList.add('hidden');
+        function hideAddMetricModal() {
+            document.getElementById('addMetricModal').classList.add('hidden');
         }
         
-        // Add new fault
-        function addNewFault() {
-            const system = document.getElementById('faultSystem').value;
-            const type = document.getElementById('faultType').value;
+        // Add new metric
+        function addNewMetric() {
+            const type = document.getElementById('metricType').value;
+            const value = document.getElementById('metricValue').value;
             
-            if (!system) {
-                alert('Please enter a system name');
+            if (!value) {
+                showNotification('Please enter a value', 'error');
                 return;
             }
             
-            const newFault = {
-                id: faults.length + 1,
-                system: system,
-                type: type,
-                status: 'Active',
-                duration: '0m',
-                timestamp: new Date()
+            const metricData = {
+                date: new Date().toLocaleDateString(),
+                metric: type.charAt(0).toUpperCase() + type.slice(1),
+                value: type === 'csat' ? value : `${value}${type === 'resolution' || type === 'detection' ? 'm' : '%'}`,
+                change: `${Math.random() < 0.5 ? '+' : '-'}${Math.floor(Math.random() * 5)}%`,
+                status: Math.random() < 0.7 ? 'On Track' : 'At Risk'
             };
             
-            faults.unshift(newFault);
-            hideAddFaultModal();
-            populateFaultTable();
-            updateMetrics();
-            
-            // Show notification
-            showNotification(`New fault added: ${system}`, 'info');
+            addMetricRow(document.getElementById('metricsTableBody'), metricData);
+            hideAddMetricModal();
+            showNotification('New metric added successfully', 'success');
         }
         
-        // Resolve fault
-        function resolveFault(id) {
-            faults = faults.filter(f => f.id !== id);
-            populateFaultTable();
+        // Refresh metrics
+        function refreshMetrics() {
             updateMetrics();
-            showNotification('Fault resolved successfully', 'success');
+            
+            // Update charts
+            resolutionTrendChart.data.datasets[0].data = Array.from(
+                {length: 12}, 
+                () => Math.floor(Math.random() * 20 + 10)
+            );
+            resolutionTrendChart.update();
+            
+            kpiDistributionChart.data.datasets[0].data = [
+                Math.floor(Math.random() * 30 + 30),
+                Math.floor(Math.random() * 20 + 20),
+                Math.floor(Math.random() * 20 + 10),
+                Math.floor(Math.random() * 10 + 5)
+            ];
+            kpiDistributionChart.update();
+            
+            showNotification('Dashboard refreshed', 'info');
         }
         
         // Show notification
@@ -393,44 +442,14 @@
             setTimeout(() => notification.remove(), 3000);
         }
         
-        // Simulate critical fault
-        function simulateCriticalFault() {
-            const criticalFault = {
-                id: faults.length + 1,
-                system: 'Core Database',
-                type: 'Critical',
-                status: 'Active',
-                duration: '0m',
-                timestamp: new Date()
-            };
-            
-            faults.unshift(criticalFault);
-            populateFaultTable();
-            updateMetrics();
-            
-            // Show critical notification
-            showNotification('⚠️ CRITICAL FAULT DETECTED: Core Database Failure', 'error');
-            
-            // Animate metrics
-            document.getElementById('totalFaultsCard').classList.add('critical-alert');
-            setTimeout(() => {
-                document.getElementById('totalFaultsCard').classList.remove('critical-alert');
-            }, 5000);
-        }
-        
         // Initialize dashboard
         function initializeDashboard() {
-            faults = generateRandomFaults();
             initializeCharts();
             updateMetrics();
-            populateFaultTable();
             
             // Start periodic updates
             setInterval(() => {
                 updateMetrics();
-                if (Math.random() < 0.3) {
-                    simulateCriticalFault();
-                }
             }, 30000);
         }
         
@@ -439,3 +458,4 @@
     </script>
 </body>
 </html>
+
