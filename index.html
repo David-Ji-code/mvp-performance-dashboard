@@ -7,13 +7,12 @@
     <!-- Required Libraries -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/moment@2.29.4/moment.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @keyframes pulse {
-            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
-            70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+            0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(59, 130, 246, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
         }
         
         .pulse-animation {
@@ -26,6 +25,21 @@
             right: 20px;
             z-index: 1000;
         }
+        
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+        }
+        
+        .data-card {
+            transition: all 0.3s ease;
+        }
+        
+        .data-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
     </style>
 </head>
 <body class="bg-gray-50">
@@ -34,86 +48,162 @@
     <div class="container mx-auto p-4">
         <h1 class="text-2xl font-bold mb-6">Monica Dashboard</h1>
         
-        <!-- API Status Section -->
-        <div class="mb-6">
-            <h2 class="text-lg font-semibold mb-3">API Connections</h2>
-            <div id="apiStatusContainer" class="space-y-3">
-                <!-- Monica API -->
-                <div class="p-3 rounded-lg border bg-green-100 border-green-300">
-                    <div class="flex items-center">
-                        <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+        <!-- Dashboard Overview Section -->
+        <div class="mb-6 grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div class="bg-white p-4 rounded-lg border border-gray-200 shadow-sm data-card">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-gray-500 text-sm">Total Contacts</h3>
+                    <span class="text-blue-500">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
                         </svg>
-                        <span class="font-medium">Monica API</span>
-                    </div>
-                    <p class="text-sm text-green-700 mt-1">Connected successfully</p>
+                    </span>
                 </div>
-
-                <!-- Connect New API Button -->
-                <div class="p-3 rounded-lg border border-dashed border-gray-300 flex items-center justify-center cursor-pointer hover:bg-gray-50" onclick="showConnectApiModal()">
-                    <svg class="w-5 h-5 text-gray-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                    </svg>
-                    <span class="text-gray-600">Connect New API</span>
+                <div class="mt-2">
+                    <h2 class="text-3xl font-bold" id="totalContacts">0</h2>
+                    <p class="text-green-600 text-sm flex items-center mt-1">
+                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                        </svg>
+                        <span id="contactGrowth">0%</span> this month
+                    </p>
+                </div>
+            </div>
+            
+            <div class="bg-white p-4 rounded-lg border border-gray-200 shadow-sm data-card">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-gray-500 text-sm">Active Workflows</h3>
+                    <span class="text-purple-500">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+                        </svg>
+                    </span>
+                </div>
+                <div class="mt-2">
+                    <h2 class="text-3xl font-bold" id="activeWorkflows">0</h2>
+                    <p class="text-sm text-gray-500 mt-1">
+                        <span id="workflowsRunToday" class="font-medium">0</span> runs today
+                    </p>
+                </div>
+            </div>
+            
+            <div class="bg-white p-4 rounded-lg border border-gray-200 shadow-sm data-card">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-gray-500 text-sm">Engagement Rate</h3>
+                    <span class="text-green-500">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </span>
+                </div>
+                <div class="mt-2">
+                    <h2 class="text-3xl font-bold" id="engagementRate">0%</h2>
+                    <p class="text-green-600 text-sm flex items-center mt-1">
+                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                        </svg>
+                        <span id="engagementGrowth">0%</span> vs last month
+                    </p>
+                </div>
+            </div>
+            
+            <div class="bg-white p-4 rounded-lg border border-gray-200 shadow-sm data-card">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-gray-500 text-sm">Tasks Completed</h3>
+                    <span class="text-indigo-500">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
+                        </svg>
+                    </span>
+                </div>
+                <div class="mt-2">
+                    <h2 class="text-3xl font-bold" id="tasksCompleted">0</h2>
+                    <div class="w-full bg-gray-200 rounded-full h-2.5 mt-2">
+                        <div class="bg-indigo-600 h-2.5 rounded-full" id="taskProgressBar" style="width: 0%"></div>
+                    </div>
+                    <p class="text-sm text-gray-500 mt-1">
+                        <span id="taskCompletionRate">0%</span> completion rate
+                    </p>
                 </div>
             </div>
         </div>
         
-        <!-- Workflow Management Section -->
-        <div class="mb-6">
-            <h2 class="text-lg font-semibold mb-3">Workflow Management</h2>
-            <div class="mt-4 overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead>
-                        <tr>
-                            <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                            <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Trigger</th>
-                            <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Last Run</th>
-                            <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                            <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody class="bg-white divide-y divide-gray-200" id="workflowTableBody">
-                        <!-- Workflow data will appear here -->
-                    </tbody>
-                </table>
+        <!-- Data Visualization Section -->
+        <div class="mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-lg font-semibold">Contact Growth</h2>
+                    <div class="flex space-x-2">
+                        <button class="px-3 py-1 text-sm rounded-md border border-gray-300 hover:bg-gray-50" onclick="updateChart('weekly')">Weekly</button>
+                        <button class="px-3 py-1 text-sm rounded-md border border-gray-300 hover:bg-gray-50" onclick="updateChart('monthly')">Monthly</button>
+                        <button class="px-3 py-1 text-sm rounded-md border border-gray-300 hover:bg-gray-50" onclick="updateChart('yearly')">Yearly</button>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="contactGrowthChart"></canvas>
+                </div>
             </div>
             
-            <div class="mt-4">
-                <div class="p-3 border rounded-lg bg-gray-50">
-                    <h4 class="font-medium mb-2">Generate New Workflow</h4>
-                    <textarea class="w-full p-2 border rounded-lg mb-2" rows="3" placeholder="Describe the workflow you want to create..."></textarea>
-                    <button class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm">Generate Workflow</button>
+            <div class="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-lg font-semibold">Engagement Analytics</h2>
+                    <div class="flex space-x-2">
+                        <button class="px-3 py-1 text-sm rounded-md border border-gray-300 hover:bg-gray-50" onclick="updateEngagementChart('email')">Email</button>
+                        <button class="px-3 py-1 text-sm rounded-md border border-gray-300 hover:bg-gray-50" onclick="updateEngagementChart('call')">Calls</button>
+                        <button class="px-3 py-1 text-sm rounded-md border border-gray-300 hover:bg-gray-50" onclick="updateEngagementChart('meeting')">Meetings</button>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="engagementChart"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Contact Distribution Section -->
+        <div class="mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="bg-white p-4 rounded-lg border border-gray-200 shadow-sm col-span-1">
+                <h2 class="text-lg font-semibold mb-4">Contact Status</h2>
+                <div class="chart-container" style="height: 250px;">
+                    <canvas id="contactStatusChart"></canvas>
+                </div>
+            </div>
+            
+            <div class="bg-white p-4 rounded-lg border border-gray-200 shadow-sm col-span-2">
+                <h2 class="text-lg font-semibold mb-4">Activity Timeline</h2>
+                <div class="chart-container">
+                    <canvas id="activityTimelineChart"></canvas>
                 </div>
             </div>
         </div>
         
         <!-- Contact Management Section -->
         <div class="mb-6">
-            <h2 class="text-lg font-semibold mb-3">Contact Management</h2>
             <div class="flex justify-between items-center mb-3">
-                <div class="relative">
-                    <input id="contactSearch" type="text" placeholder="Search contacts..." class="pl-8 pr-3 py-1 border rounded-md" onkeyup="searchContacts()">
-                    <svg class="w-4 h-4 text-gray-400 absolute left-2 top-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                    </svg>
+                <h2 class="text-lg font-semibold">Recent Contacts</h2>
+                <div class="flex space-x-2">
+                    <div class="relative">
+                        <input id="contactSearch" type="text" placeholder="Search contacts..." class="pl-8 pr-3 py-1 border rounded-md" onkeyup="searchContacts()">
+                        <svg class="w-4 h-4 text-gray-400 absolute left-2 top-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        </svg>
+                    </div>
+                    <button onclick="showAddContactModal()" class="px-3 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm flex items-center">
+                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                        </svg>
+                        Add Contact
+                    </button>
                 </div>
-                <button onclick="showAddContactModal()" class="px-3 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm flex items-center">
-                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                    </svg>
-                    Add Contact
-                </button>
             </div>
             
-            <div class="overflow-x-auto">
+            <div class="overflow-x-auto bg-white rounded-lg border border-gray-200 shadow-sm">
                 <table class="min-w-full divide-y divide-gray-200">
-                    <thead>
+                    <thead class="bg-gray-50">
                         <tr>
-                            <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                            <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Last Contact</th>
-                            <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                            <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                            <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                            <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Last Contact</th>
+                            <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                            <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200" id="contactTableBody">
@@ -132,67 +222,61 @@
                     </svg>
                     Refresh
                 </button>
-            </div>
-            
-            <div class="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div class="md:col-span-1 p-4 bg-white rounded-lg border">
-                    <h3 class="font-semibold mb-3">Contact Details</h3>
-                    <div id="contactDetails" class="text-gray-500 text-sm">
-                        Select a contact to view details
-                    </div>
-                    
-                    <div class="mt-4">
-                        <h3 class="font-semibold mb-2">Recent Activities</h3>
-                        <ul id="contactActivities" class="space-y-2">
-                            <!-- Activities will appear here -->
-                            <li class="text-gray-500">No activities to show</li>
-                        </ul>
-                    </div>
-                    
-                    <div class="mt-4">
-                        <h3 class="font-semibold mb-2">Quick Actions</h3>
-                        <div class="flex flex-wrap gap-2">
-                            <button class="px-3 py-1 bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 text-sm" disabled>Log Call</button>
-                            <button class="px-3 py-1 bg-green-100 text-green-700 rounded-md hover:bg-green-200 text-sm" disabled>Send Email</button>
-                            <button class="px-3 py-1 bg-purple-100 text-purple-700 rounded-md hover:bg-purple-200 text-sm" disabled>Schedule Meeting</button>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="md:col-span-2 p-4 bg-white rounded-lg border">
-                    <h3 class="font-semibold mb-3">Contact Analytics</h3>
-                    <div id="visualizationContainer" style="height: 300px;">
-                        <div class="flex items-center justify-center h-full text-gray-400">
-                            <p>Select "Generate Data" to view contact analytics</p>
-                        </div>
-                    </div>
-                    <div class="mt-3">
-                        <textarea class="w-full p-2 border rounded-lg mb-2" rows="2" placeholder="Describe the data you want to visualize..."></textarea>
-                        <button class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm">Generate Data</button>
-                    </div>
+                <div class="text-sm text-gray-500">
+                    Showing <span id="contactCount">0</span> contacts
                 </div>
             </div>
         </div>
         
-        <!-- AI Insights Section -->
+        <!-- Workflow Management Section -->
         <div class="mb-6">
-            <h2 class="text-lg font-semibold mb-3">AI-Generated Insights</h2>
-            <div id="insightsContainer" class="mb-3">
-                <div class="p-4 border border-gray-200 bg-white rounded-lg flex items-center justify-center">
-                    <p class="text-gray-400">Generate insights to see AI recommendations</p>
-                </div>
+            <div class="flex justify-between items-center mb-3">
+                <h2 class="text-lg font-semibold">Active Workflows</h2>
+                <button onclick="generateWorkflow()" class="px-3 py-1 bg-purple-600 text-white rounded-md hover:bg-purple-700 text-sm flex items-center">
+                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                    </svg>
+                    New Workflow
+                </button>
             </div>
-            <button onclick="generateInsights()" class="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 text-sm flex items-center">
-                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-                </svg>
-                Generate Insights
-            </button>
+            
+            <div class="overflow-x-auto bg-white rounded-lg border border-gray-200 shadow-sm">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                            <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Trigger</th>
+                            <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Last Run</th>
+                            <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                            <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200" id="workflowTableBody">
+                        <!-- Workflow data will appear here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- Data Insights Section -->
+        <div class="mb-6">
+            <h2 class="text-lg font-semibold mb-3">Data Insights</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4" id="insightsContainer">
+                <!-- Insights will be generated here -->
+            </div>
+            <div class="mt-4 text-center">
+                <button onclick="generateInsights()" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm flex items-center mx-auto">
+                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                    </svg>
+                    Generate New Insights
+                </button>
+            </div>
         </div>
     </div>
     
     <!-- Modal for Add Contact -->
-    <div id="addContactModal" class="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center hidden">
+    <div id="addContactModal" class="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center hidden z-50">
         <div class="bg-white rounded-lg p-6 max-w-md w-full">
             <h3 class="text-lg font-semibold mb-4">Add New Contact</h3>
             <form id="addContactForm" class="space-y-4">
@@ -219,35 +303,6 @@
                 <div class="flex justify-end space-x-2">
                     <button type="button" onclick="hideAddContactModal()" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300">Cancel</button>
                     <button type="button" onclick="addContact()" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">Add Contact</button>
-                </div>
-            </form>
-        </div>
-    </div>
-    
-    <!-- Modal for Connect API -->
-    <div id="connectApiModal" class="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center hidden">
-        <div class="bg-white rounded-lg p-6 max-w-md w-full">
-            <h3 class="text-lg font-semibold mb-4">Connect New API</h3>
-            <form id="connectApiForm" class="space-y-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">API Type</label>
-                    <select id="apiType" class="w-full p-2 border rounded-lg">
-                        <option value="">Select API Type</option>
-                        <option value="openai">OpenAI</option>
-                        <option value="google">Google</option>
-                        <option value="salesforce">Salesforce</option>
-                        <option value="hubspot">HubSpot</option>
-                    </select>
-                </div>
-                
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">API Key</label>
-                    <input type="password" id="apiKey" class="w-full p-2 border rounded-lg">
-                </div>
-                
-                <div class="flex justify-end space-x-2">
-                    <button type="button" onclick="hideConnectApiModal()" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300">Cancel</button>
-                    <button type="button" onclick="connectApi()" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">Connect</button>
                 </div>
             </form>
         </div>
@@ -303,161 +358,608 @@
             document.getElementById('addContactForm').reset();
         }
         
-        function showConnectApiModal() {
-            document.getElementById('connectApiModal').classList.remove('hidden');
+        function getRandomInt(min, max) {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
         }
         
-        function hideConnectApiModal() {
-            document.getElementById('connectApiModal').classList.add('hidden');
-            document.getElementById('connectApiForm').reset();
+        function getRandomColor(opacity = 1) {
+            const colors = [
+                `rgba(59, 130, 246, ${opacity})`,   // blue
+                `rgba(16, 185, 129, ${opacity})`,   // green
+                `rgba(239, 68, 68, ${opacity})`,    // red
+                `rgba(245, 158, 11, ${opacity})`,   // amber
+                `rgba(139, 92, 246, ${opacity})`,   // purple
+                `rgba(236, 72, 153, ${opacity})`,   // pink
+                `rgba(14, 165, 233, ${opacity})`,   // sky
+                `rgba(168, 85, 247, ${opacity})`,   // violet
+                `rgba(249, 115, 22, ${opacity})`,   // orange
+                `rgba(20, 184, 166, ${opacity})`    // teal
+            ];
+            return colors[Math.floor(Math.random() * colors.length)];
         }
-        
-        function addContact() {
-            const firstName = document.getElementById('firstName').value;
-            const lastName = document.getElementById('lastName').value;
-            const email = document.getElementById('email').value;
-            const phone = document.getElementById('phone').value;
+
+        // Sample Data Generation
+        function generateContactData(count = 20) {
+            const firstNames = ['John', 'Sarah', 'Michael', 'Emma', 'David', 'Lisa', 'Robert', 'Jennifer', 'William', 'Maria', 'James', 'Linda', 'Thomas', 'Elizabeth', 'Daniel', 'Patricia', 'Matthew', 'Susan', 'Anthony', 'Jessica'];
+            const lastNames = ['Smith', 'Johnson', 'Williams', 'Brown', 'Jones', 'Garcia', 'Miller', 'Davis', 'Rodriguez', 'Martinez', 'Wilson', 'Anderson', 'Taylor', 'Thomas', 'Moore', 'Jackson', 'Martin', 'Lee', 'Thompson', 'White'];
+            const companies = ['Acme Inc.', 'TechCorp', 'Global Solutions', 'Innovative Systems', 'NextGen Tech', 'Digital Dynamics', 'Strategic Partners', 'Elite Enterprises', 'Prime Industries', 'Visionary Ventures'];
+            const statuses = ['Active', 'Inactive', 'New Lead', 'Qualified', 'Proposal', 'Negotiation', 'Closed Won', 'Closed Lost'];
+            const activityTypes = ['email', 'call', 'meeting', 'note', 'task'];
             
-            if (!firstName || !lastName || !email) {
-                showNotification('Please fill in all required fields', 'error');
-                return;
-            }
+            const contacts = [];
             
-            // Simulate API call to add contact
-            setTimeout(() => {
-                // Add new contact to data
-                const newContact = {
-                    id: contactData.length + 1,
+            for (let i = 1; i <= count; i++) {
+                const firstName = firstNames[Math.floor(Math.random() * firstNames.length)];
+                const lastName = lastNames[Math.floor(Math.random() * lastNames.length)];
+                const company = companies[Math.floor(Math.random() * companies.length)];
+                const status = statuses[Math.floor(Math.random() * statuses.length)];
+                
+                // Generate random date within the last 30 days
+                const lastContactDays = Math.floor(Math.random() * 30);
+                const lastContact = new Date();
+                lastContact.setDate(lastContact.getDate() - lastContactDays);
+                
+                // Generate random activities (0-5 per contact)
+                const activityCount = Math.floor(Math.random() * 6);
+                const activities = [];
+                
+                for (let j = 0; j < activityCount; j++) {
+                    const activityType = activityTypes[Math.floor(Math.random() * activityTypes.length)];
+                    const activityDays = Math.floor(Math.random() * 30);
+                    const activityDate = new Date();
+                    activityDate.setDate(activityDate.getDate() - activityDays);
+                    
+                    let description;
+                    switch (activityType) {
+                        case 'email':
+                            description = `Sent ${Math.random() > 0.5 ? 'follow-up' : 'introduction'} email`;
+                            break;
+                        case 'call':
+                            description = `${Math.random() > 0.5 ? 'Scheduled' : 'Had'} phone call to discuss ${Math.random() > 0.5 ? 'project details' : 'next steps'}`;
+                            break;
+                        case 'meeting':
+                            description = `${Math.random() > 0.5 ? 'Virtual' : 'In-person'} meeting about ${Math.random() > 0.5 ? 'product demo' : 'proposal'}`;
+                            break;
+                        case 'note':
+                            description = `Added note about ${Math.random() > 0.5 ? 'client preferences' : 'contact information'}`;
+                            break;
+                        case 'task':
+                            description = `Created ${Math.random() > 0.5 ? 'follow-up' : 'research'} task`;
+                            break;
+                    }
+                    
+                    activities.push({
+                        type: activityType,
+                        date: activityDate.toISOString(),
+                        description
+                    });
+                }
+                
+                // Sort activities by date (newest first)
+                activities.sort((a, b) => new Date(b.date) - new Date(a.date));
+                
+                contacts.push({
+                    id: i,
                     name: `${firstName} ${lastName}`,
-                    lastContact: new Date().toISOString(),
-                    status: 'Active',
-                    email: email,
-                    phone: phone || 'Not provided',
-                    company: 'Not specified',
-                    notes: '',
-                    activities: []
-                };
-                
-                contactData.push(newContact);
-                populateContactTable();
-                hideAddContactModal();
-                
-                showNotification('Contact added successfully!', 'success');
-            }, 500);
-        }
-        
-        function connectApi() {
-            const apiType = document.getElementById('apiType').value;
-            const apiKey = document.getElementById('apiKey').value;
-            
-            if (!apiType || !apiKey) {
-                showNotification('Please fill in all required fields', 'error');
-                return;
+                    email: `${firstName.toLowerCase()}.${lastName.toLowerCase()}@example.com`,
+                    phone: `+1 (${getRandomInt(100, 999)}) ${getRandomInt(100, 999)}-${getRandomInt(1000, 9999)}`,
+                    company,
+                    status,
+                    lastContact: lastContact.toISOString(),
+                    notes: Math.random() > 0.7 ? `Important contact for ${Math.random() > 0.5 ? 'new project' : 'ongoing partnership'}` : '',
+                    activities
+                });
             }
             
-            // Show loading state
-            const connectButton = document.querySelector('#connectApiForm button:last-child');
-            const originalText = connectButton.textContent;
-            connectButton.innerHTML = `
-                <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                Connecting...
-            `;
+            return contacts;
+        }
+
+        function generateWorkflowData() {
+            const workflowNames = ['Email Follow-up', 'Weekly Report', 'Data Backup', 'Customer Survey', 'Lead Nurturing', 'Birthday Wishes', 'Renewal Reminder', 'Welcome Sequence', 'Feedback Collection', 'Engagement Recovery'];
+            const triggerTypes = ['Contact Added', 'Schedule (Daily)', 'Schedule (Weekly)', 'Schedule (Monthly)', 'Contact Status Change', 'Form Submission', 'Website Visit', 'Email Opened', 'Custom Trigger'];
             
-            // Simulate API connection
-            setTimeout(() => {
-                hideConnectApiModal();
+            const workflows = [];
+            
+            for (let i = 1; i <= 8; i++) {
+                const name = workflowNames[i - 1];
+                const trigger = triggerTypes[Math.floor(Math.random() * triggerTypes.length)];
                 
-                // Add new API connection to the list
-                const apiStatusContainer = document.getElementById('apiStatusContainer');
-                const newApiElement = document.createElement('div');
-                newApiElement.className = 'p-3 rounded-lg border bg-green-100 border-green-300';
-                newApiElement.innerHTML = `
-                    <div class="flex items-center">
-                        <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                        </svg>
-                        <span class="font-medium">${apiType} API</span>
-                    </div>
-                    <p class="text-sm text-green-700 mt-1">Connected successfully</p>
-                `;
+                // Generate random date within the last 7 days
+                const lastRunDays = Math.floor(Math.random() * 7);
+                const lastRun = new Date();
+                lastRun.setDate(lastRun.getDate() - lastRunDays);
                 
-                // Insert before the "Connect New API" button
-                apiStatusContainer.insertBefore(newApiElement, apiStatusContainer.lastElementChild);
+                // 80% chance of being active
+                const status = Math.random() > 0.2 ? 'Active' : 'Paused';
                 
-                // Reset button state
-                connectButton.innerHTML = originalText;
-                
-                showNotification(`${apiType} API connected successfully!`, 'success');
-            }, 1500);
+                workflows.push({
+                    id: i,
+                    name,
+                    trigger,
+                    lastRun: lastRun.toISOString(),
+                    status,
+                    runCount: getRandomInt(5, 50)
+                });
+            }
+            
+            return workflows;
         }
         
-        // API Status Section Animation
-        document.addEventListener('DOMContentLoaded', function() {
-            // Animate API status indicators
-            const apiStatusItems = document.querySelectorAll('#apiStatusContainer > div');
+        function generateTimeSeriesData(days = 30, trend = 'up', volatility = 'medium') {
+            const data = [];
+            let value = getRandomInt(10, 30);
             
-            apiStatusItems.forEach((item, index) => {
-                // Add fade-in animation with delay based on index
-                item.style.opacity = '0';
-                setTimeout(() => {
-                    item.style.transition = 'opacity 0.5s ease-in-out';
-                    item.style.opacity = '1';
-                }, 300 * index);
+            for (let i = days; i >= 0; i--) {
+                const date = new Date();
+                date.setDate(date.getDate() - i);
                 
-                // Add hover effect for all items
-                item.addEventListener('mouseenter', () => {
-                    item.style.transform = 'translateY(-3px)';
-                    item.style.transition = 'transform 0.3s ease';
+                // Apply trend
+                let trendFactor;
+                switch (trend) {
+                    case 'up':
+                        trendFactor = 0.05;
+                        break;
+                    case 'down':
+                        trendFactor = -0.05;
+                        break;
+                    default:
+                        trendFactor = 0;
+                }
+                
+                // Apply volatility
+                let volatilityFactor;
+                switch (volatility) {
+                    case 'high':
+                        volatilityFactor = 0.2;
+                        break;
+                    case 'low':
+                        volatilityFactor = 0.05;
+                        break;
+                    default:
+                        volatilityFactor = 0.1;
+                }
+                
+                // Calculate new value with trend and random volatility
+                const randomFactor = (Math.random() - 0.5) * 2 * volatilityFactor;
+                value = Math.max(0, value * (1 + trendFactor + randomFactor));
+                
+                data.push({
+                    date: date.toISOString().split('T')[0],
+                    value: Math.round(value)
                 });
-                
-                item.addEventListener('mouseleave', () => {
-                    item.style.transform = 'translateY(0)';
+            }
+            
+            return data;
+        }
+        
+        // Chart Variables
+        let contactGrowthChart;
+        let engagementChart;
+        let contactStatusChart;
+        let activityTimelineChart;
+        
+        // Data Variables
+        let contactData = [];
+        let workflowData = [];
+        let timeSeriesData = {
+            contactGrowth: {
+                weekly: generateTimeSeriesData(7, 'up', 'low'),
+                monthly: generateTimeSeriesData(30, 'up', 'medium'),
+                yearly: generateTimeSeriesData(365, 'up', 'high')
+            },
+            engagement: {
+                email: generateTimeSeriesData(30, 'up', 'medium'),
+                call: generateTimeSeriesData(30, 'down', 'high'),
+                meeting: generateTimeSeriesData(30, 'up', 'low')
+            },
+            activities: generateTimeSeriesData(14, 'up', 'high')
+        };
+        
+        // Initialize Dashboard
+        function initializeDashboard() {
+            // Generate sample data
+            contactData = generateContactData(25);
+            workflowData = generateWorkflowData();
+            
+            // Update dashboard metrics
+            updateDashboardMetrics();
+            
+            // Populate tables
+            populateContactTable();
+            populateWorkflowTable();
+            
+            // Initialize charts
+            initializeCharts();
+            
+            // Generate initial insights
+            generateInsights();
+            
+            // Show success notification
+            showNotification('Dashboard data loaded successfully!', 'success');
+        }
+        
+        function updateDashboardMetrics() {
+            // Update total contacts
+            document.getElementById('totalContacts').textContent = contactData.length;
+            document.getElementById('contactGrowth').textContent = '12%';
+            document.getElementById('contactCount').textContent = contactData.length;
+            
+            // Update active workflows
+            const activeWorkflows = workflowData.filter(w => w.status === 'Active').length;
+            document.getElementById('activeWorkflows').textContent = activeWorkflows;
+            document.getElementById('workflowsRunToday').textContent = getRandomInt(3, 15);
+            
+            // Update engagement rate
+            document.getElementById('engagementRate').textContent = `${getRandomInt(65, 85)}%`;
+            document.getElementById('engagementGrowth').textContent = `${getRandomInt(5, 15)}%`;
+            
+            // Update tasks completed
+            const tasksCompleted = getRandomInt(18, 28);
+            const totalTasks = getRandomInt(30, 40);
+            const completionRate = Math.round((tasksCompleted / totalTasks) * 100);
+            
+            document.getElementById('tasksCompleted').textContent = tasksCompleted;
+            document.getElementById('taskCompletionRate').textContent = `${completionRate}%`;
+            document.getElementById('taskProgressBar').style.width = `${completionRate}%`;
+        }
+        
+        function initializeCharts() {
+            // Initialize Contact Growth Chart
+            const contactGrowthCtx = document.getElementById('contactGrowthChart').getContext('2d');
+            contactGrowthChart = createLineChart(
+                contactGrowthCtx, 
+                'Contact Growth', 
+                timeSeriesData.contactGrowth.monthly.map(d => d.date), 
+                [
+                    {
+                        label: 'New Contacts',
+                        data: timeSeriesData.contactGrowth.monthly.map(d => d.value),
+                        borderColor: 'rgb(59, 130, 246)',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        fill: true
+                    }
+                ]
+            );
+            
+            // Initialize Engagement Chart
+            const engagementCtx = document.getElementById('engagementChart').getContext('2d');
+            engagementChart = createLineChart(
+                engagementCtx, 
+                'Engagement Rate', 
+                timeSeriesData.engagement.email.map(d => d.date), 
+                [
+                    {
+                        label: 'Email Engagement',
+                        data: timeSeriesData.engagement.email.map(d => d.value),
+                        borderColor: 'rgb(59, 130, 246)',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        fill: false
+                    }
+                ]
+            );
+            
+            // Initialize Contact Status Chart
+            const contactStatusCtx = document.getElementById('contactStatusChart').getContext('2d');
+            const statusCounts = {};
+            contactData.forEach(contact => {
+                statusCounts[contact.status] = (statusCounts[contact.status] || 0) + 1;
+            });
+            
+            const statusLabels = Object.keys(statusCounts);
+            const statusData = Object.values(statusCounts);
+            const statusColors = statusLabels.map(() => getRandomColor(0.7));
+            
+            contactStatusChart = new Chart(contactStatusCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: statusLabels,
+                    datasets: [{
+                        data: statusData,
+                        backgroundColor: statusColors,
+                        borderColor: statusColors.map(color => color.replace(/[\d\.]+\)$/, '1)')),
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: {
+                                boxWidth: 12,
+                                font: {
+                                    size: 11
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // Initialize Activity Timeline Chart
+            const activityTimelineCtx = document.getElementById('activityTimelineChart').getContext('2d');
+            
+            // Get last 14 days
+            const dates = [];
+            for (let i = 13; i >= 0; i--) {
+                const date = new Date();
+                date.setDate(date.getDate() - i);
+                dates.push(date.toISOString().split('T')[0]);
+            }
+            
+            // Count activities by type for each day
+            const activityTypes = ['email', 'call', 'meeting', 'note', 'task'];
+            const activityData = {};
+            
+            activityTypes.forEach(type => {
+                activityData[type] = Array(14).fill(0);
+            });
+            
+            contactData.forEach(contact => {
+                contact.activities.forEach(activity => {
+                    const activityDate = activity.date.split('T')[0];
+                    const dateIndex = dates.indexOf(activityDate);
+                    if (dateIndex !== -1) {
+                        activityData[activity.type][dateIndex]++;
+                    }
                 });
             });
             
-            // Add pulsing effect to error status
-            const errorStatus = document.querySelector('.bg-red-100');
-            if (errorStatus) {
-                setInterval(() => {
-                    errorStatus.classList.add('pulse-animation');
-                    setTimeout(() => {
-                        errorStatus.classList.remove('pulse-animation');
-                    }, 1000);
-                }, 5000);
+            const datasets = activityTypes.map((type, index) => {
+                const colors = [
+                    'rgb(59, 130, 246)',  // blue
+                    'rgb(16, 185, 129)',  // green
+                    'rgb(139, 92, 246)',  // purple
+                    'rgb(249, 115, 22)',  // orange
+                    'rgb(236, 72, 153)'   // pink
+                ];
+                
+                return {
+                    label: type.charAt(0).toUpperCase() + type.slice(1) + 's',
+                    data: activityData[type],
+                    backgroundColor: colors[index],
+                    borderColor: colors[index],
+                    borderWidth: 1
+                };
+            });
+            
+            activityTimelineChart = new Chart(activityTimelineCtx, {
+                type: 'bar',
+                data: {
+                    labels: dates.map(date => {
+                        const d = new Date(date);
+                        return `${d.getMonth() + 1}/${d.getDate()}`;
+                    }),
+                    datasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        title: {
+                            display: true,
+                            text: 'Activity Timeline (Last 14 Days)'
+                        }
+                    },
+                    scales: {
+                        x: {
+                            stacked: true,
+                        },
+                        y: {
+                            stacked: true,
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Number of Activities'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function createLineChart(ctx, title, labels, datasets) {
+            return new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels,
+                    datasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        title: {
+                            display: true,
+                            text: title
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false
+                        }
+                    },
+                    hover: {
+                        mode: 'nearest',
+                        intersect: true
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Count'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function updateChart(timeframe) {
+            const data = timeSeriesData.contactGrowth[timeframe];
+            
+            contactGrowthChart.data.labels = data.map(d => d.date);
+            contactGrowthChart.data.datasets[0].data = data.map(d => d.value);
+            
+            // Add second dataset for comparison if it's monthly or yearly
+            if (timeframe !== 'weekly') {
+                const prevPeriodData = data.map(d => Math.round(d.value * (0.8 + Math.random() * 0.3)));
+                
+                if (contactGrowthChart.data.datasets.length < 2) {
+                    contactGrowthChart.data.datasets.push({
+                        label: 'Previous Period',
+                        data: prevPeriodData,
+                        borderColor: 'rgb(156, 163, 175)',
+                        backgroundColor: 'rgba(156, 163, 175, 0.1)',
+                        borderDash: [5, 5],
+                        fill: false
+                    });
+                } else {
+                    contactGrowthChart.data.datasets[1].data = prevPeriodData;
+                }
+            } else if (contactGrowthChart.data.datasets.length > 1) {
+                // Remove comparison dataset for weekly view
+                contactGrowthChart.data.datasets.pop();
             }
-        });
-
-        // Workflow Status Section - Sample Data and Table Population
-        const workflowData = [
-            { 
-                name: 'Email Follow-up', 
-                trigger: 'Contact Added', 
-                lastRun: '2025-03-16T14:30:00', 
-                status: 'Active'
-            },
-            { 
-                name: 'Weekly Report', 
-                trigger: 'Schedule (Monday)', 
-                lastRun: '2025-03-11T08:00:00', 
-                status: 'Active' 
-            },
-            { 
-                name: 'Data Backup', 
-                trigger: 'Daily at 00:00', 
-                lastRun: '2025-03-17T00:00:00', 
-                status: 'Active' 
-            },
-            { 
-                name: 'Customer Survey', 
-                trigger: '30 Days After Purchase', 
-                lastRun: '2025-03-10T09:15:00', 
-                status: 'Paused' 
+            
+            contactGrowthChart.update();
+            
+            // Update buttons to show active state
+            const buttons = document.querySelectorAll('button[onclick^="updateChart"]');
+            buttons.forEach(button => {
+                if (button.getAttribute('onclick').includes(timeframe)) {
+                    button.classList.add('bg-blue-100', 'text-blue-700', 'border-blue-300');
+                } else {
+                    button.classList.remove('bg-blue-100', 'text-blue-700', 'border-blue-300');
+                }
+            });
+        }
+        
+        function updateEngagementChart(type) {
+            const data = timeSeriesData.engagement[type];
+            
+            engagementChart.data.labels = data.map(d => d.date);
+            engagementChart.data.datasets[0].data = data.map(d => d.value);
+            
+            // Update dataset styling based on type
+            let color;
+            switch (type) {
+                case 'email':
+                    color = 'rgb(59, 130, 246)'; // blue
+                    engagementChart.data.datasets[0].label = 'Email Engagement';
+                    break;
+                case 'call':
+                    color = 'rgb(16, 185, 129)'; // green
+                    engagementChart.data.datasets[0].label = 'Call Engagement';
+                    break;
+                case 'meeting':
+                    color = 'rgb(139, 92, 246)'; // purple
+                    engagementChart.data.datasets[0].label = 'Meeting Engagement';
+                    break;
             }
-        ];
-
+            
+            engagementChart.data.datasets[0].borderColor = color;
+            engagementChart.data.datasets[0].backgroundColor = color.replace('rgb', 'rgba').replace(')', ', 0.1)');
+            
+            engagementChart.update();
+            
+            // Update buttons to show active state
+            const buttons = document.querySelectorAll('button[onclick^="updateEngagementChart"]');
+            buttons.forEach(button => {
+                if (button.getAttribute('onclick').includes(type)) {
+                    button.classList.add('bg-blue-100', 'text-blue-700', 'border-blue-300');
+                } else {
+                    button.classList.remove('bg-blue-100', 'text-blue-700', 'border-blue-300');
+                }
+            });
+        }
+        
+        function populateContactTable() {
+            const tableBody = document.getElementById('contactTableBody');
+            tableBody.innerHTML = '';
+            
+            // Sort contacts by last contact date (newest first)
+            const sortedContacts = [...contactData].sort((a, b) => new Date(b.lastContact) - new Date(a.lastContact));
+            
+            sortedContacts.forEach(contact => {
+                const row = document.createElement('tr');
+                row.dataset.contactId = contact.id;
+                
+                // Format the date
+                const formattedDate = moment(contact.lastContact).format('MMM D, YYYY');
+                const daysAgo = moment().diff(moment(contact.lastContact), 'days');
+                
+                // Create status badge with appropriate color
+                let statusClass;
+                switch (contact.status) {
+                    case 'Active':
+                    case 'Qualified':
+                    case 'Closed Won':
+                        statusClass = 'bg-green-100 text-green-800 border-green-200';
+                        break;
+                    case 'Inactive':
+                    case 'Closed Lost':
+                        statusClass = 'bg-gray-100 text-gray-800 border-gray-200';
+                        break;
+                    case 'New Lead':
+                        statusClass = 'bg-blue-100 text-blue-800 border-blue-200';
+                        break;
+                    case 'Proposal':
+                    case 'Negotiation':
+                        statusClass = 'bg-yellow-100 text-yellow-800 border-yellow-200';
+                        break;
+                    default:
+                        statusClass = 'bg-gray-100 text-gray-800 border-gray-200';
+                }
+                
+                row.innerHTML = `
+                    <td class="px-3 py-3 whitespace-nowrap">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0 h-8 w-8 rounded-full bg-blue-500 flex items-center justify-center text-white font-medium">
+                                ${contact.name.charAt(0)}
+                            </div>
+                            <div class="ml-3">
+                                <div class="font-medium text-gray-900">${contact.name}</div>
+                                <div class="text-xs text-gray-500">${contact.company}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-3 py-3 whitespace-nowrap">
+                        <div class="text-sm text-gray-500">${formattedDate} (${daysAgo} days ago)</div>
+                    </td>
+                    <td class="px-3 py-3 whitespace-nowrap">
+                        <span class="px-2 py-1 text-xs rounded-full ${statusClass} border">
+                            ${contact.status}
+                        </span>
+                    </td>
+                    <td class="px-3 py-3 whitespace-nowrap text-sm text-gray-500">
+                        <button class="text-blue-600 hover:text-blue-800 mr-2" onclick="viewContactDetails(${contact.id})">View</button>
+                        <button class="text-red-600 hover:text-red-800" onclick="deleteContact(${contact.id})">Delete</button>
+                    </td>
+                `;
+                
+                tableBody.appendChild(row);
+            });
+            
+            // Add row hover effect
+            const rows = tableBody.querySelectorAll('tr');
+            rows.forEach(row => {
+                row.addEventListener('mouseenter', () => {
+                    row.classList.add('bg-gray-50', 'cursor-pointer');
+                });
+                row.addEventListener('mouseleave', () => {
+                    row.classList.remove('bg-gray-50');
+                });
+            });
+        }
+        
         function populateWorkflowTable() {
             const tableBody = document.getElementById('workflowTableBody');
             tableBody.innerHTML = '';
@@ -489,8 +991,10 @@
                         </span>
                     </td>
                     <td class="px-3 py-3 whitespace-nowrap text-sm text-gray-500">
-                        <button class="text-blue-600 hover:text-blue-800 mr-2">Edit</button>
-                        <button class="text-red-600 hover:text-red-800">Delete</button>
+                        <button class="text-blue-600 hover:text-blue-800 mr-2" onclick="toggleWorkflowStatus(${workflow.id})">
+                            ${workflow.status === 'Active' ? 'Pause' : 'Activate'}
+                        </button>
+                        <button class="text-red-600 hover:text-red-800" onclick="deleteWorkflow(${workflow.id})">Delete</button>
                     </td>
                 `;
                 
@@ -508,220 +1012,119 @@
                 });
             });
         }
-
-        // Contact Management Section
-        const contactData = [
-            { 
-                id: 1,
-                name: 'John Smith', 
-                lastContact: '2025-03-15T10:30:00', 
-                status: 'Active',
-                email: 'john.smith@example.com',
-                phone: '+1 (555) 123-4567',
-                company: 'Acme Inc.',
-                notes: 'Key decision maker for the enterprise project',
-                activities: [
-                    { type: 'email', date: '2025-03-15T10:30:00', description: 'Sent follow-up email about new features' },
-                    { type: 'call', date: '2025-03-10T14:15:00', description: 'Discussed contract renewal options' },
-                    { type: 'meeting', date: '2025-03-05T09:00:00', description: 'Product demo with team' }
-                ]
-            },
-            { 
-                id: 2,
-                name: 'Sarah Johnson', 
-                lastContact: '2025-03-16T15:45:00', 
-                status: 'Active',
-                email: 'sarah.j@example.com',
-                phone: '+1 (555) 987-6543',
-                company: 'TechCorp',
-                notes: 'Interested in premium subscription',
-                activities: [
-                    { type: 'email', date: '2025-03-16T15:45:00', description: 'Sent pricing information' },
-                    { type: 'meeting', date: '2025-03-12T11:00:00', description: 'Virtual meeting to discuss requirements' }
-                ]
-            },
-            { 
-                id: 3,
-                name: 'Michael Wong', 
-                lastContact: '2025-03-05T09:20:00', 
-                status: 'Inactive',
-                email: 'm.wong@example.com',
-                phone: '+1 (555) 234-5678',
-                company: 'Global Solutions',
-                notes: 'Need to follow up about project timeline',
-                activities: [
-                    { type: 'call', date: '2025-03-05T09:20:00', description: 'Left voicemail about project status' },
-                    { type: 'email', date: '2025-02-28T16:30:00', description: 'Sent project timeline document' }
-                ]
+        
+        function toggleWorkflowStatus(workflowId) {
+            const workflow = workflowData.find(w => w.id === workflowId);
+            if (workflow) {
+                workflow.status = workflow.status === 'Active' ? 'Paused' : 'Active';
+                populateWorkflowTable();
+                updateDashboardMetrics();
+                
+                showNotification(`Workflow "${workflow.name}" ${workflow.status === 'Active' ? 'activated' : 'paused'} successfully!`, 'success');
             }
-        ];
-
-        function populateContactTable() {
-            const tableBody = document.getElementById('contactTableBody');
-            tableBody.innerHTML = '';
-            
+        }
+        
+        function deleteWorkflow(workflowId) {
+            const workflowIndex = workflowData.findIndex(w => w.id === workflowId);
+            if (workflowIndex !== -1) {
+                const workflowName = workflowData[workflowIndex].name;
+                workflowData.splice(workflowIndex, 1);
+                populateWorkflowTable();
+                updateDashboardMetrics();
+                
+                showNotification(`Workflow "${workflowName}" deleted successfully!`, 'success');
+            }
+        }
+        
+        function deleteContact(contactId) {
+            const contactIndex = contactData.findIndex(c => c.id === contactId);
+            if (contactIndex !== -1) {
+                const contactName = contactData[contactIndex].name;
+                contactData.splice(contactIndex, 1);
+                populateContactTable();
+                updateDashboardMetrics();
+                
+                // Update contact status chart
+                updateContactStatusChart();
+                
+                showNotification(`Contact "${contactName}" deleted successfully!`, 'success');
+            }
+        }
+        
+        function updateContactStatusChart() {
+            const statusCounts = {};
             contactData.forEach(contact => {
-                const row = document.createElement('tr');
-                row.dataset.contactId = contact.id;
-                
-                // Format the date
-                const formattedDate = moment(contact.lastContact).format('MMM D, YYYY');
-                const daysAgo = moment().diff(moment(contact.lastContact), 'days');
-                
-                // Create status badge with appropriate color
-                const statusClass = contact.status === 'Active' 
-                    ? 'bg-green-100 text-green-800 border-green-200' 
-                    : 'bg-gray-100 text-gray-800 border-gray-200';
-                
-                row.innerHTML = `
-                    <td class="px-3 py-3 whitespace-nowrap">
-                        <div class="font-medium text-gray-900">${contact.name}</div>
-                    </td>
-                    <td class="px-3 py-3 whitespace-nowrap">
-                        <div class="text-sm text-gray-500">${formattedDate} (${daysAgo} days ago)</div>
-                    </td>
-                    <td class="px-3 py-3 whitespace-nowrap">
-                        <span class="px-2 py-1 text-xs rounded-full ${statusClass} border">
-                            ${contact.status}
-                        </span>
-                    </td>
-                    <td class="px-3 py-3 whitespace-nowrap text-sm text-gray-500">
-                        <button class="text-blue-600 hover:text-blue-800 mr-2" onclick="viewContactDetails(${contact.id})">View</button>
-                        <button class="text-red-600 hover:text-red-800">Delete</button>
-                    </td>
-                `;
-                
-                tableBody.appendChild(row);
-                
-                // Add click event to view contact details
-                row.addEventListener('click', () => {
-                    viewContactDetails(contact.id);
-                });
+                statusCounts[contact.status] = (statusCounts[contact.status] || 0) + 1;
             });
             
-            // Add row hover effect
-            const rows = tableBody.querySelectorAll('tr');
-            rows.forEach(row => {
-                row.addEventListener('mouseenter', () => {
-                    row.classList.add('bg-gray-50', 'cursor-pointer');
-                });
-                row.addEventListener('mouseleave', () => {
-                    row.classList.remove('bg-gray-50');
-                });
-            });
+            const statusLabels = Object.keys(statusCounts);
+            const statusData = Object.values(statusCounts);
+            
+            contactStatusChart.data.labels = statusLabels;
+            contactStatusChart.data.datasets[0].data = statusData;
+            
+            contactStatusChart.update();
         }
-
-        function viewContactDetails(contactId) {
-            const contact = contactData.find(c => c.id === contactId);
-            if (!contact) return;
+        
+        function addContact() {
+            const firstName = document.getElementById('firstName').value;
+            const lastName = document.getElementById('lastName').value;
+            const email = document.getElementById('email').value;
+            const phone = document.getElementById('phone').value;
             
-            // Update contact details section
-            const detailsContainer = document.getElementById('contactDetails');
-            detailsContainer.innerHTML = `
-                <div class="flex items-center mb-4">
-                    <div class="w-12 h-12 rounded-full bg-blue-500 flex items-center justify-center text-white text-xl font-bold">
-                        ${contact.name.charAt(0)}
-                    </div>
-                    <div class="ml-4">
-                        <h3 class="font-bold text-lg">${contact.name}</h3>
-                        <p class="text-gray-600">${contact.company}</p>
-                    </div>
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    <div>
-                        <p class="text-sm text-gray-500">Email</p>
-                        <p class="font-medium">${contact.email}</p>
-                    </div>
-                    <div>
-                        <p class="text-sm text-gray-500">Phone</p>
-                        <p class="font-medium">${contact.phone}</p>
-                    </div>
-                    <div class="col-span-1 md:col-span-2">
-                        <p class="text-sm text-gray-500">Notes</p>
-                        <p>${contact.notes}</p>
-                    </div>
-                </div>
-            `;
-            
-            // Update activities list
-            const activitiesList = document.getElementById('contactActivities');
-            activitiesList.innerHTML = '';
-            
-            if (contact.activities && contact.activities.length > 0) {
-                contact.activities.forEach(activity => {
-                    const activityItem = document.createElement('li');
-                    const formattedDate = moment(activity.date).format('MMM D, YYYY h:mm A');
-                    
-                    let icon;
-                    switch (activity.type) {
-                        case 'email':
-                            icon = '<svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>';
-                            break;
-                        case 'call':
-                            icon = '<svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path></svg>';
-                            break;
-                        case 'meeting':
-                            icon = '<svg class="w-4 h-4 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>';
-                            break;
-                        default:
-                            icon = '<svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>';
-                    }
-                    
-                    activityItem.innerHTML = `
-                        <div class="flex items-start">
-                            <div class="flex-shrink-0 mt-0.5">
-                                ${icon}
-                            </div>
-                            <div class="ml-2">
-                                <p class="text-sm font-medium">${activity.description}</p>
-                                <p class="text-xs text-gray-500">${formattedDate}</p>
-                            </div>
-                        </div>
-                    `;
-                    
-                    activitiesList.appendChild(activityItem);
-                });
-            } else {
-                activitiesList.innerHTML = '<li class="text-gray-500">No recent activities</li>';
+            if (!firstName || !lastName || !email) {
+                showNotification('Please fill in all required fields', 'error');
+                return;
             }
             
-            // Enable quick action buttons
-            const quickActionButtons = document.querySelectorAll('#contactDetails + div + div button');
-            quickActionButtons.forEach(button => {
-                button.disabled = false;
-            });
+            // Create new contact
+            const newContact = {
+                id: contactData.length > 0 ? Math.max(...contactData.map(c => c.id)) + 1 : 1,
+                name: `${firstName} ${lastName}`,
+                email: email,
+                phone: phone || `+1 (${getRandomInt(100, 999)}) ${getRandomInt(100, 999)}-${getRandomInt(1000, 9999)}`,
+                company: 'New Company',
+                status: 'New Lead',
+                lastContact: new Date().toISOString(),
+                notes: '',
+                activities: []
+            };
             
-            // Highlight the selected contact in the table
-            const rows = document.querySelectorAll('#contactTableBody tr');
-            rows.forEach(row => {
-                if (parseInt(row.dataset.contactId) === contactId) {
-                    row.classList.add('bg-blue-50');
-                } else {
-                    row.classList.remove('bg-blue-50');
-                }
-            });
+            contactData.push(newContact);
+            populateContactTable();
+            updateDashboardMetrics();
+            updateContactStatusChart();
+            hideAddContactModal();
+            
+            showNotification('Contact added successfully!', 'success');
         }
-
-        // Search contacts functionality
+        
         function searchContacts() {
             const searchInput = document.getElementById('contactSearch').value.toLowerCase();
             const tableBody = document.getElementById('contactTableBody');
             const rows = tableBody.querySelectorAll('tr');
             
             rows.forEach(row => {
-                const nameCell = row.querySelector('td:first-child div');
-                if (nameCell) {
+                const nameCell = row.querySelector('td:first-child div.font-medium');
+                const companyCell = row.querySelector('td:first-child div.text-xs');
+                
+                if (nameCell && companyCell) {
                     const name = nameCell.textContent.toLowerCase();
-                    if (name.includes(searchInput)) {
+                    const company = companyCell.textContent.toLowerCase();
+                    
+                    if (name.includes(searchInput) || company.includes(searchInput)) {
                         row.style.display = '';
                     } else {
                         row.style.display = 'none';
                     }
                 }
             });
+            
+            // Update count of displayed contacts
+            const visibleRows = [...rows].filter(row => row.style.display !== 'none').length;
+            document.getElementById('contactCount').textContent = visibleRows;
         }
-
-        // Refresh contacts functionality
+        
         function refreshContacts() {
             const refreshButton = document.querySelector('button[onclick="refreshContacts()"]');
             
@@ -736,7 +1139,11 @@
             
             // Simulate API call delay
             setTimeout(() => {
+                // Generate new contact data
+                contactData = generateContactData(25);
                 populateContactTable();
+                updateDashboardMetrics();
+                updateContactStatusChart();
                 
                 refreshButton.innerHTML = `
                     <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -749,291 +1156,260 @@
                 showNotification('Contacts refreshed successfully!', 'success');
             }, 1000);
         }
-
-        // Data Visualization Section
-        function createContactVisualization() {
-            const container = document.getElementById('visualizationContainer');
-            container.innerHTML = '';
+        
+        function generateWorkflow() {
+            const workflowNames = [
+                'Customer Onboarding',
+                'Lead Qualification',
+                'Feedback Collection',
+                'Renewal Process',
+                'Re-engagement Campaign',
+                'Upsell Opportunity',
+                'Support Escalation',
+                'NPS Survey'
+            ];
             
-            // Create canvas for Chart.js
-            const canvas = document.createElement('canvas');
-            canvas.id = 'contactChart';
-            canvas.style.width = '100%';
-            canvas.style.height = '100%';
-            container.appendChild(canvas);
+            const triggerTypes = [
+                'Contact Added',
+                'Status Change',
+                'Schedule (Weekly)',
+                'Form Submission',
+                'Custom Trigger'
+            ];
             
-            // Sample data for visualization
-            const labels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
-            const newContacts = [12, 19, 15, 25, 22, 30];
-            const activeContacts = [15, 20, 25, 27, 32, 35];
-            const inactiveContacts = [5, 8, 10, 8, 6, 5];
+            // Get a random workflow name that doesn't exist yet
+            let newName;
+            do {
+                newName = workflowNames[Math.floor(Math.random() * workflowNames.length)];
+            } while (workflowData.some(w => w.name === newName));
             
-            // Create chart
-            new Chart(canvas, {
-                type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: [
-                        {
-                            label: 'New Contacts',
-                            data: newContacts,
-                            borderColor: 'rgb(59, 130, 246)',
-                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                            tension: 0.3,
-                            fill: true
-                        },
-                        {
-                            label: 'Active Contacts',
-                            data: activeContacts,
-                            borderColor: 'rgb(16, 185, 129)',
-                            backgroundColor: 'rgba(16, 185, 129, 0.1)',
-                            tension: 0.3,
-                            fill: true
-                        },
-                        {
-                            label: 'Inactive Contacts',
-                            data: inactiveContacts,
-                            borderColor: 'rgb(239, 68, 68)',
-                            backgroundColor: 'rgba(239, 68, 68, 0.1)',
-                            tension: 0.3,
-                            fill: true
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'top',
-                        },
-                        title: {
-                            display: true,
-                            text: 'Contact Growth Trends'
-                        },
-                        tooltip: {
-                            mode: 'index',
-                            intersect: false
-                        }
-                    },
-                    hover: {
-                        mode: 'nearest',
-                        intersect: true
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            title: {
-                                display: true,
-                                text: 'Number of Contacts'
-                            }
-                        },
-                        x: {
-                            title: {
-                                display: true,
-                                text: 'Month (2025)'
-                            }
-                        }
-                    }
-                }
-            });
+            // Create new workflow
+            const newWorkflow = {
+                id: workflowData.length > 0 ? Math.max(...workflowData.map(w => w.id)) + 1 : 1,
+                name: newName,
+                trigger: triggerTypes[Math.floor(Math.random() * triggerTypes.length)],
+                lastRun: new Date().toISOString(),
+                status: 'Active',
+                runCount: 0
+            };
+            
+            workflowData.push(newWorkflow);
+            populateWorkflowTable();
+            updateDashboardMetrics();
+            
+            showNotification(`New workflow "${newName}" created successfully!`, 'success');
         }
-
-        // AI-Generated Insights Section
+        
         function generateInsights() {
             const insightsContainer = document.getElementById('insightsContainer');
             
-            // Sample AI-generated insights
-            const insights = [
-                {
-                    title: 'Contact Engagement Analysis',
-                    content: 'Based on your contact data, 65% of your contacts have been engaged within the last 30 days. This is a 15% improvement from the previous month.',
-                    type: 'info'
-                },
-                {
-                    title: 'Workflow Optimization',
-                    content: 'The "Email Follow-up" workflow has a 78% success rate in receiving responses. Consider implementing similar automation for other contact types.',
-                    type: 'success'
-                },
-                {
-                    title: 'Attention Required',
-                    content: '8 contacts have been inactive for more than 60 days. Consider reaching out with a personalized message to re-engage them.',
-                    type: 'warning'
-                }
-            ];
-            
-            // Clear previous insights
-            insightsContainer.innerHTML = '';
-            
-            // Create insights cards
-            insights.forEach(insight => {
-                const card = document.createElement('div');
-                
-                // Set card style based on insight type
-                let borderColor, bgColor, iconColor, icon;
-                switch (insight.type) {
-                    case 'info':
-                        borderColor = 'border-blue-200';
-                        bgColor = 'bg-blue-50';
-                        iconColor = 'text-blue-500';
-                        icon = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>';
-                        break;
-                    case 'success':
-                        borderColor = 'border-green-200';
-                        bgColor = 'bg-green-50';
-                        iconColor = 'text-green-500';
-                        icon = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>';
-                        break;
-                    case 'warning':
-                        borderColor = 'border-yellow-200';
-                        bgColor = 'bg-yellow-50';
-                        iconColor = 'text-yellow-500';
-                        icon = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>';
-                        break;
-                }
-                
-                card.className = `mb-4 p-4 border ${borderColor} ${bgColor} rounded-lg`;
-                card.innerHTML = `
-                    <div class="flex items-center mb-2">
-                        <div class="flex-shrink-0 ${iconColor}">
-                            ${icon}
-                        </div>
-                        <h4 class="ml-2 font-semibold">${insight.title}</h4>
-                    </div>
-                    <p>${insight.content}</p>
-                `;
-                
-                insightsContainer.appendChild(card);
-                
-                // Add fade-in animation
-                card.style.opacity = '0';
-                setTimeout(() => {
-                    card.style.transition = 'opacity 0.5s ease-in-out';
-                    card.style.opacity = '1';
-                }, 300 * insightsContainer.children.length);
-            });
-            
-            // Add data visualization to insights
-            const visualContainer = document.createElement('div');
-            visualContainer.className = 'mt-6';
-            visualContainer.innerHTML = `
-                <h4 class="font-semibold mb-2">Contact Engagement Distribution</h4>
-                <div id="insightChart" style="height: 200px;"></div>
+            // Show loading state
+            insightsContainer.innerHTML = `
+                <div class="col-span-1 md:col-span-3 flex justify-center items-center p-8">
+                    <svg class="animate-spin w-8 h-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <span class="ml-3 text-gray-600">Generating insights...</span>
+                </div>
             `;
-            insightsContainer.appendChild(visualContainer);
             
-            // Create donut chart for insights
+            // Generate insights based on data
             setTimeout(() => {
-                const canvas = document.createElement('canvas');
-                canvas.id = 'insightDonutChart';
-                document.getElementById('insightChart').appendChild(canvas);
+                insightsContainer.innerHTML = '';
                 
-                new Chart(canvas, {
-                    type: 'doughnut',
-                    data: {
-                        labels: ['Active (< 30 days)', 'Semi-active (30-60 days)', 'Inactive (> 60 days)'],
-                        datasets: [{
-                            data: [65, 27, 8],
-                            backgroundColor: [
-                                'rgba(16, 185, 129, 0.7)',
-                                'rgba(245, 158, 11, 0.7)',
-                                'rgba(239, 68, 68, 0.7)'
-                            ],
-                            borderColor: [
-                                'rgb(16, 185, 129)',
-                                'rgb(245, 158, 11)',
-                                'rgb(239, 68, 68)'
-                            ],
-                            borderWidth: 1
-                        }]
+                // Calculate active vs inactive contacts
+                const activeContacts = contactData.filter(c => c.status === 'Active' || c.status === 'New Lead' || c.status === 'Qualified').length;
+                const totalContacts = contactData.length;
+                const activeRate = Math.round((activeContacts / totalContacts) * 100);
+                
+                // Calculate contacts without recent activity
+                const inactiveThreshold = new Date();
+                inactiveThreshold.setDate(inactiveThreshold.getDate() - 30);
+                const inactiveContacts = contactData.filter(c => new Date(c.lastContact) < inactiveThreshold).length;
+                
+                // Calculate most common status
+                const statusCounts = {};
+                contactData.forEach(contact => {
+                    statusCounts[contact.status] = (statusCounts[contact.status] || 0) + 1;
+                });
+                const mostCommonStatus = Object.keys(statusCounts).reduce((a, b) => statusCounts[a] > statusCounts[b] ? a : b);
+                
+                // Create insight cards
+                const insights = [
+                    {
+                        title: 'Contact Engagement',
+                        content: `${activeRate}% of your contacts are currently active. ${inactiveContacts} contacts haven't been engaged in the last 30 days.`,
+                        type: activeRate > 70 ? 'success' : activeRate > 50 ? 'info' : 'warning',
+                        icon: 'users'
                     },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: {
-                                position: 'right',
-                            }
-                        }
+                    {
+                        title: 'Workflow Performance',
+                        content: `Your "${workflowData[0].name}" workflow has been the most active this month with ${workflowData[0].runCount} runs.`,
+                        type: 'info',
+                        icon: 'workflow'
+                    },
+                    {
+                        title: 'Contact Distribution',
+                        content: `Most of your contacts are in the "${mostCommonStatus}" stage. Consider focusing on moving these contacts to the next stage.`,
+                        type: 'info',
+                        icon: 'chart'
                     }
+                ];
+                
+                // Add insights that need attention
+                if (inactiveContacts > 5) {
+                    insights.push({
+                        title: 'Attention Required',
+                        content: `${inactiveContacts} contacts have been inactive for over 30 days. Consider running a re-engagement campaign.`,
+                        type: 'warning',
+                        icon: 'alert'
+                    });
+                }
+                
+                // Create insight cards
+                insights.forEach(insight => {
+                    const card = document.createElement('div');
+                    
+                    // Set card style based on insight type
+                    let borderColor, bgColor, iconColor, iconSvg;
+                    
+                    switch (insight.type) {
+                        case 'success':
+                            borderColor = 'border-green-200';
+                            bgColor = 'bg-green-50';
+                            iconColor = 'text-green-500';
+                            break;
+                        case 'warning':
+                            borderColor = 'border-yellow-200';
+                            bgColor = 'bg-yellow-50';
+                            iconColor = 'text-yellow-500';
+                            break;
+                        default:
+                            borderColor = 'border-blue-200';
+                            bgColor = 'bg-blue-50';
+                            iconColor = 'text-blue-500';
+                    }
+                    
+                    // Set icon based on insight category
+                    switch (insight.icon) {
+                        case 'users':
+                            iconSvg = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>';
+                            break;
+                        case 'workflow':
+                            iconSvg = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>';
+                            break;
+                        case 'chart':
+                            iconSvg = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>';
+                            break;
+                        case 'alert':
+                            iconSvg = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>';
+                            break;
+                        default:
+                            iconSvg = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>';
+                    }
+                    
+                    card.className = `p-4 border ${borderColor} ${bgColor} rounded-lg data-card`;
+                    card.innerHTML = `
+                        <div class="flex items-center mb-2">
+                            <div class="flex-shrink-0 ${iconColor}">
+                                ${iconSvg}
+                            </div>
+                            <h4 class="ml-2 font-semibold">${insight.title}</h4>
+                        </div>
+                        <p class="text-gray-600">${insight.content}</p>
+                    `;
+                    
+                    insightsContainer.appendChild(card);
+                    
+                    // Add fade-in animation
+                    card.style.opacity = '0';
+                    setTimeout(() => {
+                        card.style.transition = 'opacity 0.5s ease-in-out';
+                        card.style.opacity = '1';
+                    }, 100 * insightsContainer.children.length);
                 });
-            }, 1000);
-        }
-
-        // Initialize event listeners for buttons
-        document.addEventListener('DOMContentLoaded', function() {
-            // Initialize tables
-            populateWorkflowTable();
-            populateContactTable();
-            
-            // Setup workflow generation button
-            const generateWorkflowButton = document.querySelector('button:contains("Generate Workflow")');
-            if (generateWorkflowButton) {
-                generateWorkflowButton.addEventListener('click', function() {
-                    const textarea = this.previousElementSibling;
-                    if (textarea.value.trim() !== '') {
-                        // Show loading state
-                        this.innerHTML = `
-                            <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                            </svg>
-                            Generating...
-                        `;
+                
+                // Add data visualization insight
+                if (insightsContainer.children.length < 3) {
+                    const visualInsight = document.createElement('div');
+                    visualInsight.className = 'p-4 border border-blue-200 bg-blue-50 rounded-lg data-card';
+                    visualInsight.innerHTML = `
+                        <div class="flex items-center mb-2">
+                            <div class="flex-shrink-0 text-blue-500">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                                </svg>
+                            </div>
+                            <h4 class="ml-2 font-semibold">Contact Growth Trend</h4>
+                        </div>
+                        <p class="text-gray-600 mb-3">Your contact growth has increased by 12% over the past month. Continue your current acquisition strategies.</p>
+                        <div id="miniChart" style="height: 100px;"></div>
+                    `;
+                    
+                    insightsContainer.appendChild(visualInsight);
+                    
+                    // Add fade-in animation
+                    visualInsight.style.opacity = '0';
+                    setTimeout(() => {
+                        visualInsight.style.transition = 'opacity 0.5s ease-in-out';
+                        visualInsight.style.opacity = '1';
                         
-                        // Simulate API call delay
+                        // Create mini chart
                         setTimeout(() => {
-                            // Add new workflow
-                            workflowData.push({
-                                name: 'New ' + textarea.value.split(' ').slice(0, 3).join(' ') + '...',
-                                trigger: 'Custom',
-                                lastRun: new Date().toISOString(),
-                                status: 'Active'
+                            const miniChartCanvas = document.createElement('canvas');
+                            document.getElementById('miniChart').appendChild(miniChartCanvas);
+                            
+                            new Chart(miniChartCanvas, {
+                                type: 'line',
+                                data: {
+                                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                                    datasets: [{
+                                        label: 'Contacts',
+                                        data: [12, 19, 15, 25, 22, 30],
+                                        borderColor: 'rgb(59, 130, 246)',
+                                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                                        tension: 0.3,
+                                        fill: true
+                                    }]
+                                },
+                                options: {
+                                    responsive: true,
+                                    maintainAspectRatio: false,
+                                    plugins: {
+                                        legend: {
+                                            display: false
+                                        }
+                                    },
+                                    scales: {
+                                        x: {
+                                            display: true,
+                                            grid: {
+                                                display: false
+                                            }
+                                        },
+                                        y: {
+                                            display: true,
+                                            beginAtZero: true,
+                                            grid: {
+                                                display: false
+                                            }
+                                        }
+                                    }
+                                }
                             });
-                            
-                            populateWorkflowTable();
-                            this.textContent = 'Generate Workflow';
-                            textarea.value = '';
-                            
-                            // Show success notification
-                            showNotification('Workflow generated successfully!', 'success');
-                        }, 1500);
-                    } else {
-                        // Show error notification
-                        showNotification('Please enter a workflow description', 'error');
-                    }
-                });
-            }
-            
-            // Setup data visualization button
-            const generateDataButton = document.querySelector('button:contains("Generate Data")');
-            if (generateDataButton) {
-                generateDataButton.addEventListener('click', function() {
-                    const textarea = this.previousElementSibling;
-                    if (textarea.value.trim() !== '') {
-                        // Show loading state
-                        this.innerHTML = `
-                            <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                            </svg>
-                            Generating...
-                        `;
-                        
-                        // Simulate API call delay
-                        setTimeout(() => {
-                            createContactVisualization();
-                            this.textContent = 'Generate Data';
-                            
-                            // Show success notification
-                            showNotification('Visualization generated successfully!', 'success');
-                        }, 1500);
-                    } else {
-                        // Show error notification
-                        showNotification('Please enter a data description', 'error');
-                    }
-                });
-            }
+                        }, 300);
+                    }, 100 * insightsContainer.children.length);
+                }
+                
+                // Show success notification
+                showNotification('Insights generated successfully!', 'success');
+            }, 1500);
+        }
+        
+        // Initialize dashboard on load
+        window.addEventListener('DOMContentLoaded', function() {
+            initializeDashboard();
         });
     </script>
 </body>
