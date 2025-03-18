@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Telco Service Monitoring Dashboard</title>
+    <title>Service Fault Dashboard</title>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -53,14 +53,6 @@
             50% { background-color: rgba(239, 68, 68, 0.4); }
             100% { background-color: rgba(239, 68, 68, 0.2); }
         }
-
-        .region-indicator {
-            display: inline-block;
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            margin-right: 5px;
-        }
     </style>
 </head>
 <body class="bg-gray-100">
@@ -69,22 +61,17 @@
     
     <div class="container mx-auto p-4">
         <div class="flex justify-between items-center mb-6">
-            <h1 class="text-2xl font-bold">Telco Service Monitoring Dashboard</h1>
-            <div class="flex space-x-2">
-                <button onclick="togglePIIMode()" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
-                    Toggle PII Mode
-                </button>
-                <button onclick="simulateCriticalFault()" class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">
-                    Simulate Critical Fault
-                </button>
-            </div>
+            <h1 class="text-2xl font-bold">Service Fault Dashboard</h1>
+            <button onclick="simulateCriticalFault()" class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">
+                Simulate Critical Fault
+            </button>
         </div>
         
         <!-- Dashboard Overview Section -->
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
             <div class="bg-white p-4 rounded-lg shadow-sm data-card" id="totalFaultsCard">
                 <div class="flex justify-between items-center">
-                    <h3 class="text-gray-500 text-sm">Active Service Issues</h3>
+                    <h3 class="text-gray-500 text-sm">Total Active Faults</h3>
                     <span class="text-red-500">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
@@ -93,15 +80,16 @@
                 </div>
                 <div class="mt-2">
                     <h2 class="text-3xl font-bold text-red-600" id="totalFaults">0</h2>
-                    <p class="text-sm mt-1">
-                        <span id="impactedCustomers" class="font-semibold">0</span> Customers Affected
+                    <p class="text-red-600 text-sm flex items-center mt-1">
+                        <span id="faultTrend" class="mr-1">↑</span>
+                        <span id="faultGrowth">0%</span> increase
                     </p>
                 </div>
             </div>
             
             <div class="bg-white p-4 rounded-lg shadow-sm data-card">
                 <div class="flex justify-between items-center">
-                    <h3 class="text-gray-500 text-sm">Network Status</h3>
+                    <h3 class="text-gray-500 text-sm">Critical Systems</h3>
                     <span class="text-yellow-500">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
@@ -109,16 +97,16 @@
                     </span>
                 </div>
                 <div class="mt-2">
-                    <h2 class="text-3xl font-bold" id="networkStatus">99.99%</h2>
+                    <h2 class="text-3xl font-bold" id="criticalSystems">0</h2>
                     <div class="w-full bg-gray-200 rounded-full h-2 mt-2">
-                        <div class="bg-green-500 h-2 rounded-full" id="networkStatusBar" style="width: 99.99%"></div>
+                        <div class="bg-yellow-500 h-2 rounded-full" id="criticalSystemsBar" style="width: 0%"></div>
                     </div>
                 </div>
             </div>
             
             <div class="bg-white p-4 rounded-lg shadow-sm data-card">
                 <div class="flex justify-between items-center">
-                    <h3 class="text-gray-500 text-sm">Service Uptime</h3>
+                    <h3 class="text-gray-500 text-sm">System Uptime</h3>
                     <span class="text-green-500">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
@@ -127,13 +115,15 @@
                 </div>
                 <div class="mt-2">
                     <h2 class="text-3xl font-bold" id="systemUptime">0%</h2>
-                    <p class="text-sm mt-1" id="uptimeSLA">SLA: 99.9%</p>
+                    <p class="text-red-600 text-sm mt-1" id="uptimeTrend">
+                        Degrading
+                    </p>
                 </div>
             </div>
             
             <div class="bg-white p-4 rounded-lg shadow-sm data-card">
                 <div class="flex justify-between items-center">
-                    <h3 class="text-gray-500 text-sm">Avg Resolution Time</h3>
+                    <h3 class="text-gray-500 text-sm">Response Time</h3>
                     <span class="text-blue-500">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
@@ -142,43 +132,40 @@
                 </div>
                 <div class="mt-2">
                     <h2 class="text-3xl font-bold" id="avgResponseTime">0m</h2>
-                    <p class="text-sm mt-1" id="slaStatus">Within SLA</p>
+                    <div class="w-full bg-gray-200 rounded-full h-2 mt-2">
+                        <div class="bg-blue-500 h-2 rounded-full" id="responseTimeBar" style="width: 0%"></div>
+                    </div>
                 </div>
             </div>
         </div>
         
-        <!-- Regional Impact Map -->
+        <!-- Charts Section -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
             <div class="bg-white p-4 rounded-lg shadow-sm">
-                <h3 class="text-lg font-semibold mb-4">Regional Impact</h3>
-                <div class="grid grid-cols-2 gap-4">
-                    <div id="regionStats" class="space-y-2">
-                        <!-- Region stats will be inserted here -->
-                    </div>
-                    <div id="serviceTypeStats" class="space-y-2">
-                        <!-- Service type stats will be inserted here -->
-                    </div>
+                <h3 class="text-lg font-semibold mb-4">Fault Trend Analysis</h3>
+                <div class="chart-container">
+                    <canvas id="faultTrendChart"></canvas>
                 </div>
             </div>
             
             <div class="bg-white p-4 rounded-lg shadow-sm">
-                <h3 class="text-lg font-semibold mb-4">Service Health Distribution</h3>
+                <h3 class="text-lg font-semibold mb-4">System Health Distribution</h3>
                 <div class="chart-container">
-                    <canvas id="serviceHealthChart"></canvas>
+                    <canvas id="systemHealthChart"></canvas>
                 </div>
             </div>
         </div>
         
-        <!-- Active Issues Table -->
+        <!-- Active Faults Table -->
         <div class="bg-white p-4 rounded-lg shadow-sm mb-6">
             <div class="flex justify-between items-center mb-4">
-                <h3 class="text-lg font-semibold">Active Service Issues</h3>
+                <h3 class="text-lg font-semibold">Active Faults</h3>
                 <div class="flex space-x-2">
                     <button onclick="refreshFaults()" class="px-3 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600">
                         Refresh
                     </button>
                     <button onclick="showAddFaultModal()" class="px-3 py-1 text-sm bg-green-500 text-white rounded hover:bg-green-600">
-                        Report Issue
+                        Add Fault
                     </button>
                 </div>
             </div>
@@ -191,8 +178,7 @@
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">System</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Region</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Impact</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Duration</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                         </tr>
                     </thead>
@@ -208,36 +194,18 @@
     <div id="addFaultModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden">
         <div class="flex items-center justify-center min-h-screen">
             <div class="bg-white rounded-lg p-8 max-w-md w-full">
-                <h3 class="text-lg font-semibold mb-4">Report Service Issue</h3>
+                <h3 class="text-lg font-semibold mb-4">Add New Fault</h3>
                 <form id="addFaultForm">
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700">System</label>
-                        <select id="faultSystem" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
-                            <option value="Mobile Network">Mobile Network</option>
-                            <option value="Fiber Broadband">Fiber Broadband</option>
-                            <option value="CRM Systems">CRM Systems</option>
-                            <option value="Billing Services">Billing Services</option>
-                            <option value="Network Infrastructure">Network Infrastructure</option>
-                        </select>
+                        <input type="text" id="faultSystem" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
                     </div>
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700">Type</label>
                         <select id="faultType" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
-                            <option value="Service Outage">Service Outage</option>
-                            <option value="Network Degradation">Network Degradation</option>
-                            <option value="System Performance">System Performance</option>
-                            <option value="API Integration">API Integration</option>
-                            <option value="Customer Data">Customer Data</option>
-                        </select>
-                    </div>
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700">Region</label>
-                        <select id="faultRegion" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
-                            <option value="North">North</option>
-                            <option value="South">South</option>
-                            <option value="East">East</option>
-                            <option value="West">West</option>
-                            <option value="Central">Central</option>
+                            <option value="Critical">Critical</option>
+                            <option value="Major">Major</option>
+                            <option value="Minor">Minor</option>
                         </select>
                     </div>
                     <div class="flex justify-end space-x-2">
@@ -245,7 +213,7 @@
                             Cancel
                         </button>
                         <button type="button" onclick="addNewFault()" class="px-4 py-2 text-sm text-white bg-blue-500 rounded-md hover:bg-blue-600">
-                            Report Issue
+                            Add Fault
                         </button>
                     </div>
                 </form>
@@ -256,58 +224,54 @@
     <script>
         // Initialize variables
         let faults = [];
-        let serviceHealthChart;
-        let piiMode = false;
+        let faultTrendChart;
+        let systemHealthChart;
         
         // Simulated data generation
         function generateRandomFaults() {
-            const systems = [
-                'Mobile Network', 
-                'Fiber Broadband',
-                'CRM Systems',
-                'Billing Services',
-                'Network Infrastructure'
-            ];
-            
-            const types = [
-                'Service Outage',
-                'Network Degradation',
-                'System Performance',
-                'API Integration',
-                'Customer Data'
-            ];
-            
-            const statuses = [
-                'Active', 
-                'Investigating', 
-                'Contained',
-                'Customer Notified',
-                'Pending Resolution'
-            ];
-            
-            const regions = ['North', 'South', 'East', 'West', 'Central'];
+            const systems = ['Database', 'Network', 'Storage', 'Application', 'Security'];
+            const types = ['Critical', 'Major', 'Minor'];
+            const statuses = ['Active', 'Investigating', 'Contained'];
             
             return Array.from({length: 10}, (_, i) => ({
                 id: i + 1,
                 system: systems[Math.floor(Math.random() * systems.length)],
                 type: types[Math.floor(Math.random() * types.length)],
                 status: statuses[Math.floor(Math.random() * statuses.length)],
-                region: regions[Math.floor(Math.random() * regions.length)],
                 duration: Math.floor(Math.random() * 120) + 'm',
-                impactedCustomers: Math.floor(Math.random() * 1000) + 100,
                 timestamp: new Date(Date.now() - Math.random() * 86400000)
             }));
         }
         
         // Initialize charts
         function initializeCharts() {
-            const healthCtx = document.getElementById('serviceHealthChart').getContext('2d');
-            serviceHealthChart = new Chart(healthCtx, {
+            // Fault Trend Chart
+            const trendCtx = document.getElementById('faultTrendChart').getContext('2d');
+            faultTrendChart = new Chart(trendCtx, {
+                type: 'line',
+                data: {
+                    labels: Array.from({length: 24}, (_, i) => `${i}:00`),
+                    datasets: [{
+                        label: 'Faults',
+                        data: Array.from({length: 24}, () => Math.floor(Math.random() * 20)),
+                        borderColor: 'rgb(239, 68, 68)',
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+            
+            // System Health Chart
+            const healthCtx = document.getElementById('systemHealthChart').getContext('2d');
+            systemHealthChart = new Chart(healthCtx, {
                 type: 'doughnut',
                 data: {
-                    labels: ['Operational', 'Degraded', 'Critical'],
+                    labels: ['Healthy', 'Degraded', 'Critical'],
                     datasets: [{
-                        data: [70, 20, 10],
+                        data: [60, 30, 10],
                         backgroundColor: ['rgb(34, 197, 94)', 'rgb(234, 179, 8)', 'rgb(239, 68, 68)']
                     }]
                 },
@@ -318,72 +282,16 @@
             });
         }
         
-        // Update metrics
+        // Update dashboard metrics
         function updateMetrics() {
-            const totalFaults = faults.length;
-            const totalImpacted = faults.reduce((sum, fault) => sum + fault.impactedCustomers, 0);
+            document.getElementById('totalFaults').textContent = faults.length;
+            document.getElementById('criticalSystems').textContent = Math.floor(Math.random() * 5);
+            document.getElementById('systemUptime').textContent = `${(Math.random() * 10 + 90).toFixed(2)}%`;
+            document.getElementById('avgResponseTime').textContent = `${Math.floor(Math.random() * 30 + 10)}m`;
             
-            document.getElementById('totalFaults').textContent = totalFaults;
-            document.getElementById('impactedCustomers').textContent = totalImpacted.toLocaleString();
-            
-            // Network status (based on fault severity)
-            const networkStatus = (99.99 - (totalFaults * 0.01)).toFixed(2);
-            document.getElementById('networkStatus').textContent = `${networkStatus}%`;
-            document.getElementById('networkStatusBar').style.width = `${networkStatus}%`;
-            
-            // System uptime
-            const uptime = (99.9 + Math.random() * 0.099).toFixed(3);
-            document.getElementById('systemUptime').textContent = `${uptime}%`;
-            
-            // Average resolution time
-            const avgTime = Math.floor(Math.random() * 15 + 5);
-            document.getElementById('avgResponseTime').textContent = `${avgTime}m`;
-            document.getElementById('slaStatus').textContent = avgTime <= 15 ? 'Within SLA' : 'Exceeding SLA';
-            document.getElementById('slaStatus').className = 
-                avgTime <= 15 ? 'text-sm mt-1 text-green-600' : 'text-sm mt-1 text-red-600';
-            
-            // Update regional stats
-            updateRegionalStats();
-        }
-        
-        // Update regional statistics
-        function updateRegionalStats() {
-            const regionStats = document.getElementById('regionStats');
-            const serviceStats = document.getElementById('serviceTypeStats');
-            
-            // Count faults by region
-            const regionCounts = {};
-            faults.forEach(fault => {
-                regionCounts[fault.region] = (regionCounts[fault.region] || 0) + 1;
-            });
-            
-            // Count faults by service type
-            const serviceCounts = {};
-            faults.forEach(fault => {
-                serviceCounts[fault.system] = (serviceCounts[fault.system] || 0) + 1;
-            });
-            
-            // Update region stats
-            regionStats.innerHTML = `
-                <h4 class="font-semibold mb-2">Regional Distribution</h4>
-                ${Object.entries(regionCounts).map(([region, count]) => `
-                    <div class="flex justify-between items-center">
-                        <span>${region}</span>
-                        <span class="font-semibold">${count}</span>
-                    </div>
-                `).join('')}
-            `;
-            
-            // Update service stats
-            serviceStats.innerHTML = `
-                <h4 class="font-semibold mb-2">Service Distribution</h4>
-                ${Object.entries(serviceCounts).map(([service, count]) => `
-                    <div class="flex justify-between items-center">
-                        <span>${service}</span>
-                        <span class="font-semibold">${count}</span>
-                    </div>
-                `).join('')}
-            `;
+            // Update progress bars
+            document.getElementById('criticalSystemsBar').style.width = `${Math.random() * 100}%`;
+            document.getElementById('responseTimeBar').style.width = `${Math.random() * 100}%`;
         }
         
         // Populate fault table
@@ -402,13 +310,7 @@
                         </span>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">${fault.status}</td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <span class="region-indicator" style="background-color: ${getRegionColor(fault.region)}"></span>
-                        ${fault.region}
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        ${piiMode ? '***' : fault.impactedCustomers.toLocaleString()} customers
-                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">${fault.duration}</td>
                     <td class="px-6 py-4 whitespace-nowrap">
                         <button onclick="resolveFault(${fault.id})" class="text-blue-600 hover:text-blue-900">
                             Resolve
@@ -419,35 +321,13 @@
             });
         }
         
-        // Get color for fault type
         function getFaultTypeClass(type) {
             switch(type) {
-                case 'Service Outage': return 'bg-red-100 text-red-800';
-                case 'Network Degradation': return 'bg-yellow-100 text-yellow-800';
-                case 'System Performance': return 'bg-orange-100 text-orange-800';
-                case 'API Integration': return 'bg-blue-100 text-blue-800';
-                case 'Customer Data': return 'bg-purple-100 text-purple-800';
+                case 'Critical': return 'bg-red-100 text-red-800';
+                case 'Major': return 'bg-yellow-100 text-yellow-800';
+                case 'Minor': return 'bg-green-100 text-green-800';
                 default: return 'bg-gray-100 text-gray-800';
             }
-        }
-        
-        // Get color for region
-        function getRegionColor(region) {
-            const colors = {
-                'North': '#4CAF50',
-                'South': '#2196F3',
-                'East': '#FFC107',
-                'West': '#9C27B0',
-                'Central': '#F44336'
-            };
-            return colors[region] || '#999';
-        }
-        
-        // Toggle PII mode
-        function togglePIIMode() {
-            piiMode = !piiMode;
-            populateFaultTable();
-            showNotification(`PII Mode ${piiMode ? 'Enabled' : 'Disabled'}`, 'info');
         }
         
         // Show/hide add fault modal
@@ -463,33 +343,36 @@
         function addNewFault() {
             const system = document.getElementById('faultSystem').value;
             const type = document.getElementById('faultType').value;
-            const region = document.getElementById('faultRegion').value;
+            
+            if (!system) {
+                alert('Please enter a system name');
+                return;
+            }
             
             const newFault = {
                 id: faults.length + 1,
                 system: system,
                 type: type,
                 status: 'Active',
-                region: region,
                 duration: '0m',
-                impactedCustomers: Math.floor(Math.random() * 1000) + 100,
                 timestamp: new Date()
             };
             
             faults.unshift(newFault);
             hideAddFaultModal();
-            updateMetrics();
             populateFaultTable();
+            updateMetrics();
             
-            showNotification(`New service issue reported: ${system} in ${region}`, 'info');
+            // Show notification
+            showNotification(`New fault added: ${system}`, 'info');
         }
         
         // Resolve fault
         function resolveFault(id) {
             faults = faults.filter(f => f.id !== id);
-            updateMetrics();
             populateFaultTable();
-            showNotification('Service issue resolved successfully', 'success');
+            updateMetrics();
+            showNotification('Fault resolved successfully', 'success');
         }
         
         // Show notification
@@ -512,37 +395,27 @@
         
         // Simulate critical fault
         function simulateCriticalFault() {
-            const systems = ['Mobile Network', 'Fiber Broadband'];
-            const regions = ['North', 'South', 'East', 'West', 'Central'];
-            
             const criticalFault = {
                 id: faults.length + 1,
-                system: systems[Math.floor(Math.random() * systems.length)],
-                type: 'Service Outage',
+                system: 'Core Database',
+                type: 'Critical',
                 status: 'Active',
-                region: regions[Math.floor(Math.random() * regions.length)],
                 duration: '0m',
-                impactedCustomers: Math.floor(Math.random() * 5000) + 1000,
                 timestamp: new Date()
             };
             
             faults.unshift(criticalFault);
-            updateMetrics();
             populateFaultTable();
+            updateMetrics();
             
-            showNotification(`⚠️ CRITICAL SERVICE OUTAGE: ${criticalFault.system} in ${criticalFault.region}`, 'error');
+            // Show critical notification
+            showNotification('⚠️ CRITICAL FAULT DETECTED: Core Database Failure', 'error');
             
+            // Animate metrics
             document.getElementById('totalFaultsCard').classList.add('critical-alert');
             setTimeout(() => {
                 document.getElementById('totalFaultsCard').classList.remove('critical-alert');
             }, 5000);
-        }
-        
-        // Refresh faults
-        function refreshFaults() {
-            updateMetrics();
-            populateFaultTable();
-            showNotification('Dashboard refreshed', 'info');
         }
         
         // Initialize dashboard
