@@ -1,328 +1,441 @@
-// Add this just before the closing </body> tag:
-<script>
-    // Simulated threat data
-    const threatData = {
-        vectors: [
-            { id: "V001", name: "DDoS Attack", count: 156, severity: "CRITICAL" },
-            { id: "V002", name: "Malware Infection", count: 89, severity: "HIGH" },
-            { id: "V003", name: "Security Breach", count: 234, severity: "SEVERE" },
-            { id: "V004", name: "Hardware Failure", count: 167, severity: "CRITICAL" }
-        ],
-        timeline: generateThreatTimeline(),
-        locations: generateThreatLocations()
-    };
-
-    // Generate random threat timeline
-    function generateThreatTimeline() {
-        const timeline = [];
-        const now = new Date();
-        for (let i = 30; i >= 0; i--) {
-            const date = new Date(now);
-            date.setDate(date.getDate() - i);
-            timeline.push({
-                date: date.toISOString().split('T')[0],
-                ddos: Math.floor(Math.random() * 100) + 50,
-                malware: Math.floor(Math.random() * 80) + 30,
-                breach: Math.floor(Math.random() * 120) + 40,
-                hardware: Math.floor(Math.random() * 90) + 60
-            });
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Service Fault Dashboard</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        .pulse-animation {
+            animation: pulse 1.5s ease-in-out infinite;
         }
-        return timeline;
-    }
-
-    // Generate random threat locations
-    function generateThreatLocations() {
-        return [
-            { lat: 40.7128, lon: -74.0060, name: "New York", severity: "CRITICAL" },
-            { lat: 51.5074, lon: -0.1278, name: "London", severity: "SEVERE" },
-            { lat: 35.6762, lon: 139.6503, name: "Tokyo", severity: "HIGH" },
-            { lat: 1.3521, lon: 103.8198, name: "Singapore", severity: "CRITICAL" },
-            { lat: -33.8688, lon: 151.2093, name: "Sydney", severity: "SEVERE" }
-        ];
-    }
-
-    // Initialize charts
-    function initializeCharts() {
-        initializeAttackVectorsChart();
-        initializeDegradationChart();
-        initializeThreatMapChart();
-    }
-
-    // Attack Vectors Chart
-    function initializeAttackVectorsChart() {
-        const ctx = document.getElementById('attackVectorsChart');
-        if (!ctx) return;
-
-        new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: threatData.timeline.slice(-7).map(t => t.date),
-                datasets: [{
-                    label: 'DDoS Attacks',
-                    data: threatData.timeline.slice(-7).map(t => t.ddos),
-                    borderColor: '#ef4444',
-                    backgroundColor: 'rgba(239, 68, 68, 0.1)',
-                    tension: 0.4,
-                    fill: true
-                }, {
-                    label: 'Malware',
-                    data: threatData.timeline.slice(-7).map(t => t.malware),
-                    borderColor: '#8b5cf6',
-                    backgroundColor: 'rgba(139, 92, 246, 0.1)',
-                    tension: 0.4,
-                    fill: true
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        labels: {
-                            color: '#ef4444'
-                        }
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        grid: {
-                            color: 'rgba(239, 68, 68, 0.1)'
-                        },
-                        ticks: {
-                            color: '#ef4444'
-                        }
-                    },
-                    x: {
-                        grid: {
-                            color: 'rgba(239, 68, 68, 0.1)'
-                        },
-                        ticks: {
-                            color: '#ef4444'
-                        }
-                    }
-                }
-            }
-        });
-    }
-
-    // System Degradation Chart
-    function initializeDegradationChart() {
-        const ctx = document.getElementById('degradationChart');
-        if (!ctx) return;
-
-        new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: ['System A', 'System B', 'System C', 'System D'],
-                datasets: [{
-                    label: 'Degradation Level',
-                    data: [87, 65, 92, 78],
-                    backgroundColor: [
-                        'rgba(239, 68, 68, 0.8)',
-                        'rgba(139, 92, 246, 0.8)',
-                        'rgba(234, 179, 8, 0.8)',
-                        'rgba(147, 51, 234, 0.8)'
-                    ]
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        labels: {
-                            color: '#8b5cf6'
-                        }
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        grid: {
-                            color: 'rgba(139, 92, 246, 0.1)'
-                        },
-                        ticks: {
-                            color: '#8b5cf6'
-                        }
-                    },
-                    x: {
-                        grid: {
-                            color: 'rgba(139, 92, 246, 0.1)'
-                        },
-                        ticks: {
-                            color: '#8b5cf6'
-                        }
-                    }
-                }
-            }
-        });
-    }
-
-    // Threat Map Chart
-    function initializeThreatMapChart() {
-        const ctx = document.getElementById('threatMapChart');
-        if (!ctx) return;
-
-        new Chart(ctx, {
-            type: 'bubble',
-            data: {
-                datasets: [{
-                    label: 'Threat Locations',
-                    data: threatData.locations.map(loc => ({
-                        x: loc.lon,
-                        y: loc.lat,
-                        r: loc.severity === 'CRITICAL' ? 15 : 10
-                    })),
-                    backgroundColor: 'rgba(239, 68, 68, 0.6)',
-                    borderColor: 'rgba(239, 68, 68, 1)',
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    y: {
-                        beginAtZero: false,
-                        grid: {
-                            color: 'rgba(239, 68, 68, 0.1)'
-                        },
-                        ticks: {
-                            color: '#ef4444'
-                        }
-                    },
-                    x: {
-                        beginAtZero: false,
-                        grid: {
-                            color: 'rgba(239, 68, 68, 0.1)'
-                        },
-                        ticks: {
-                            color: '#ef4444'
-                        }
-                    }
-                }
-            }
-        });
-    }
-
-    // Update metrics randomly
-    function updateMetrics() {
-        document.getElementById('criticalFaults').textContent = Math.floor(Math.random() * 100 + 150);
-        document.getElementById('systemFailures').textContent = Math.floor(Math.random() * 200 + 300);
-        document.getElementById('systemHealth').textContent = Math.floor(Math.random() * 30) + '%';
-    }
-
-    // Populate threat table
-    function populateThreatTable() {
-        const tbody = document.getElementById('threatTableBody');
-        if (!tbody) return;
-
-        tbody.innerHTML = '';
-        const threats = generateThreats(10);
-        threats.forEach(threat => {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td class="px-3 py-2 text-red-500">${threat.id}</td>
-                <td class="px-3 py-2 text-red-500">${threat.vector}</td>
-                <td class="px-3 py-2 text-red-500">${threat.impact}</td>
-                <td class="px-3 py-2 text-red-500">${threat.time}</td>
-                <td class="px-3 py-2">
-                    <span class="px-2 py-1 text-xs rounded-full ${getStatusClass(threat.status)}">
-                        ${threat.status}
-                    </span>
-                </td>
-                <td class="px-3 py-2">
-                    <button class="text-red-500 hover:text-red-400">RESPOND</button>
-                </td>
-            `;
-            tbody.appendChild(tr);
-        });
-    }
-
-    // Generate random threats
-    function generateThreats(count) {
-        const threats = [];
-        const vectors = ['DDoS', 'MALWARE', 'BREACH', 'HARDWARE'];
-        const impacts = ['CRITICAL', 'SEVERE', 'HIGH'];
-        const statuses = ['ACTIVE', 'CONTAINED', 'SPREADING'];
-
-        for (let i = 0; i < count; i++) {
-            threats.push({
-                id: `T${String(i + 1).padStart(3, '0')}`,
-                vector: vectors[Math.floor(Math.random() * vectors.length)],
-                impact: impacts[Math.floor(Math.random() * impacts.length)],
-                time: new Date().toLocaleTimeString(),
-                status: statuses[Math.floor(Math.random() * statuses.length)]
-            });
-        }
-        return threats;
-    }
-
-    // Get status class for styling
-    function getStatusClass(status) {
-        switch (status) {
-            case 'ACTIVE': return 'bg-red-900/50 text-red-500';
-            case 'CONTAINED': return 'bg-green-900/50 text-green-500';
-            case 'SPREADING': return 'bg-yellow-900/50 text-yellow-500';
-            default: return 'bg-gray-900/50 text-gray-500';
-        }
-    }
-
-    // Show notification
-    function showNotification(message, type = 'error') {
-        const container = document.getElementById('notificationContainer');
-        if (!container) return;
-
-        const notification = document.createElement('div');
-        notification.className = `mb-4 p-4 rounded-lg border ${type === 'error' ? 'bg-red-900/50 border-red-600 text-red-500' : 'bg-yellow-900/50 border-yellow-600 text-yellow-500'} animate-pulse`;
-        notification.textContent = message;
-        container.appendChild(notification);
-        setTimeout(() => notification.remove(), 3000);
-    }
-
-    // Modal functions
-    function showEmergencyModal() {
-        const modal = document.getElementById('emergencyModal');
-        if (modal) modal.classList.remove('hidden');
-    }
-
-    function hideEmergencyModal() {
-        const modal = document.getElementById('emergencyModal');
-        if (modal) modal.classList.add('hidden');
-    }
-
-    function reportEmergency() {
-        const vector = document.getElementById('threatVector').value;
-        const impact = document.getElementById('impactLevel').value;
-        showNotification(`🚨 CRITICAL ALERT: ${vector} - ${impact}`, 'error');
-        hideEmergencyModal();
-        populateThreatTable();
-    }
-
-    // Initialize dashboard
-    document.addEventListener('DOMContentLoaded', function() {
-        initializeCharts();
-        populateThreatTable();
-        updateMetrics();
         
-        // Start real-time updates
-        setInterval(() => {
-            updateMetrics();
-            showRandomAlert();
-        }, 5000);
-    });
-
-    // Show random alert
-    function showRandomAlert() {
-        if (Math.random() < 0.3) {
-            const alerts = [
-                "⚠️ NEW CRITICAL THREAT DETECTED",
-                "🚨 SYSTEM DEGRADATION INCREASING",
-                "⚡ UNUSUAL NETWORK ACTIVITY DETECTED",
-                "💀 MULTIPLE SYSTEMS COMPROMISED"
-            ];
-            showNotification(alerts[Math.floor(Math.random() * alerts.length)], 'error');
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
         }
-    }
-</script>
+        
+        #notificationContainer {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+        }
+        
+        .data-card {
+            transition: all 0.3s ease;
+        }
+        
+        .data-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .critical-alert {
+            animation: criticalPulse 2s infinite;
+        }
+        
+        @keyframes criticalPulse {
+            0% { background-color: rgba(239, 68, 68, 0.2); }
+            50% { background-color: rgba(239, 68, 68, 0.4); }
+            100% { background-color: rgba(239, 68, 68, 0.2); }
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <!-- Notification Container -->
+    <div id="notificationContainer"></div>
+    
+    <div class="container mx-auto p-4">
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-2xl font-bold">Service Fault Dashboard</h1>
+            <button onclick="simulateCriticalFault()" class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">
+                Simulate Critical Fault
+            </button>
+        </div>
+        
+        <!-- Dashboard Overview Section -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+            <div class="bg-white p-4 rounded-lg shadow-sm data-card" id="totalFaultsCard">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-gray-500 text-sm">Total Active Faults</h3>
+                    <span class="text-red-500">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                        </svg>
+                    </span>
+                </div>
+                <div class="mt-2">
+                    <h2 class="text-3xl font-bold text-red-600" id="totalFaults">0</h2>
+                    <p class="text-red-600 text-sm flex items-center mt-1">
+                        <span id="faultTrend" class="mr-1">↑</span>
+                        <span id="faultGrowth">0%</span> increase
+                    </p>
+                </div>
+            </div>
+            
+            <div class="bg-white p-4 rounded-lg shadow-sm data-card">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-gray-500 text-sm">Critical Systems</h3>
+                    <span class="text-yellow-500">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                        </svg>
+                    </span>
+                </div>
+                <div class="mt-2">
+                    <h2 class="text-3xl font-bold" id="criticalSystems">0</h2>
+                    <div class="w-full bg-gray-200 rounded-full h-2 mt-2">
+                        <div class="bg-yellow-500 h-2 rounded-full" id="criticalSystemsBar" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white p-4 rounded-lg shadow-sm data-card">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-gray-500 text-sm">System Uptime</h3>
+                    <span class="text-green-500">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    </span>
+                </div>
+                <div class="mt-2">
+                    <h2 class="text-3xl font-bold" id="systemUptime">0%</h2>
+                    <p class="text-red-600 text-sm mt-1" id="uptimeTrend">
+                        Degrading
+                    </p>
+                </div>
+            </div>
+            
+            <div class="bg-white p-4 rounded-lg shadow-sm data-card">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-gray-500 text-sm">Response Time</h3>
+                    <span class="text-blue-500">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    </span>
+                </div>
+                <div class="mt-2">
+                    <h2 class="text-3xl font-bold" id="avgResponseTime">0m</h2>
+                    <div class="w-full bg-gray-200 rounded-full h-2 mt-2">
+                        <div class="bg-blue-500 h-2 rounded-full" id="responseTimeBar" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Charts Section -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+            <div class="bg-white p-4 rounded-lg shadow-sm">
+                <h3 class="text-lg font-semibold mb-4">Fault Trend Analysis</h3>
+                <div class="chart-container">
+                    <canvas id="faultTrendChart"></canvas>
+                </div>
+            </div>
+            
+            <div class="bg-white p-4 rounded-lg shadow-sm">
+                <h3 class="text-lg font-semibold mb-4">System Health Distribution</h3>
+                <div class="chart-container">
+                    <canvas id="systemHealthChart"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Active Faults Table -->
+        <div class="bg-white p-4 rounded-lg shadow-sm mb-6">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-semibold">Active Faults</h3>
+                <div class="flex space-x-2">
+                    <button onclick="refreshFaults()" class="px-3 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600">
+                        Refresh
+                    </button>
+                    <button onclick="showAddFaultModal()" class="px-3 py-1 text-sm bg-green-500 text-white rounded hover:bg-green-600">
+                        Add Fault
+                    </button>
+                </div>
+            </div>
+            
+            <div class="overflow-x-auto">
+                <table class="min-w-full">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">System</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Duration</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="faultTableBody" class="bg-white divide-y divide-gray-200">
+                        <!-- Fault data will be inserted here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Add Fault Modal -->
+    <div id="addFaultModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden">
+        <div class="flex items-center justify-center min-h-screen">
+            <div class="bg-white rounded-lg p-8 max-w-md w-full">
+                <h3 class="text-lg font-semibold mb-4">Add New Fault</h3>
+                <form id="addFaultForm">
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700">System</label>
+                        <input type="text" id="faultSystem" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700">Type</label>
+                        <select id="faultType" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+                            <option value="Critical">Critical</option>
+                            <option value="Major">Major</option>
+                            <option value="Minor">Minor</option>
+                        </select>
+                    </div>
+                    <div class="flex justify-end space-x-2">
+                        <button type="button" onclick="hideAddFaultModal()" class="px-4 py-2 text-sm text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200">
+                            Cancel
+                        </button>
+                        <button type="button" onclick="addNewFault()" class="px-4 py-2 text-sm text-white bg-blue-500 rounded-md hover:bg-blue-600">
+                            Add Fault
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Initialize variables
+        let faults = [];
+        let faultTrendChart;
+        let systemHealthChart;
+        
+        // Simulated data generation
+        function generateRandomFaults() {
+            const systems = ['Database', 'Network', 'Storage', 'Application', 'Security'];
+            const types = ['Critical', 'Major', 'Minor'];
+            const statuses = ['Active', 'Investigating', 'Contained'];
+            
+            return Array.from({length: 10}, (_, i) => ({
+                id: i + 1,
+                system: systems[Math.floor(Math.random() * systems.length)],
+                type: types[Math.floor(Math.random() * types.length)],
+                status: statuses[Math.floor(Math.random() * statuses.length)],
+                duration: Math.floor(Math.random() * 120) + 'm',
+                timestamp: new Date(Date.now() - Math.random() * 86400000)
+            }));
+        }
+        
+        // Initialize charts
+        function initializeCharts() {
+            // Fault Trend Chart
+            const trendCtx = document.getElementById('faultTrendChart').getContext('2d');
+            faultTrendChart = new Chart(trendCtx, {
+                type: 'line',
+                data: {
+                    labels: Array.from({length: 24}, (_, i) => `${i}:00`),
+                    datasets: [{
+                        label: 'Faults',
+                        data: Array.from({length: 24}, () => Math.floor(Math.random() * 20)),
+                        borderColor: 'rgb(239, 68, 68)',
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+            
+            // System Health Chart
+            const healthCtx = document.getElementById('systemHealthChart').getContext('2d');
+            systemHealthChart = new Chart(healthCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Healthy', 'Degraded', 'Critical'],
+                    datasets: [{
+                        data: [60, 30, 10],
+                        backgroundColor: ['rgb(34, 197, 94)', 'rgb(234, 179, 8)', 'rgb(239, 68, 68)']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+        }
+        
+        // Update dashboard metrics
+        function updateMetrics() {
+            document.getElementById('totalFaults').textContent = faults.length;
+            document.getElementById('criticalSystems').textContent = Math.floor(Math.random() * 5);
+            document.getElementById('systemUptime').textContent = `${(Math.random() * 10 + 90).toFixed(2)}%`;
+            document.getElementById('avgResponseTime').textContent = `${Math.floor(Math.random() * 30 + 10)}m`;
+            
+            // Update progress bars
+            document.getElementById('criticalSystemsBar').style.width = `${Math.random() * 100}%`;
+            document.getElementById('responseTimeBar').style.width = `${Math.random() * 100}%`;
+        }
+        
+        // Populate fault table
+        function populateFaultTable() {
+            const tbody = document.getElementById('faultTableBody');
+            tbody.innerHTML = '';
+            
+            faults.forEach(fault => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap">${fault.id}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">${fault.system}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="px-2 py-1 text-xs rounded-full ${getFaultTypeClass(fault.type)}">
+                            ${fault.type}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">${fault.status}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">${fault.duration}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <button onclick="resolveFault(${fault.id})" class="text-blue-600 hover:text-blue-900">
+                            Resolve
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+        
+        function getFaultTypeClass(type) {
+            switch(type) {
+                case 'Critical': return 'bg-red-100 text-red-800';
+                case 'Major': return 'bg-yellow-100 text-yellow-800';
+                case 'Minor': return 'bg-green-100 text-green-800';
+                default: return 'bg-gray-100 text-gray-800';
+            }
+        }
+        
+        // Show/hide add fault modal
+        function showAddFaultModal() {
+            document.getElementById('addFaultModal').classList.remove('hidden');
+        }
+        
+        function hideAddFaultModal() {
+            document.getElementById('addFaultModal').classList.add('hidden');
+        }
+        
+        // Add new fault
+        function addNewFault() {
+            const system = document.getElementById('faultSystem').value;
+            const type = document.getElementById('faultType').value;
+            
+            if (!system) {
+                alert('Please enter a system name');
+                return;
+            }
+            
+            const newFault = {
+                id: faults.length + 1,
+                system: system,
+                type: type,
+                status: 'Active',
+                duration: '0m',
+                timestamp: new Date()
+            };
+            
+            faults.unshift(newFault);
+            hideAddFaultModal();
+            populateFaultTable();
+            updateMetrics();
+            
+            // Show notification
+            showNotification(`New fault added: ${system}`, 'info');
+        }
+        
+        // Resolve fault
+        function resolveFault(id) {
+            faults = faults.filter(f => f.id !== id);
+            populateFaultTable();
+            updateMetrics();
+            showNotification('Fault resolved successfully', 'success');
+        }
+        
+        // Show notification
+        function showNotification(message, type = 'info') {
+            const container = document.getElementById('notificationContainer');
+            const notification = document.createElement('div');
+            
+            const colors = {
+                info: 'bg-blue-500',
+                success: 'bg-green-500',
+                error: 'bg-red-500'
+            };
+            
+            notification.className = `${colors[type]} text-white px-4 py-2 rounded shadow-lg mb-2`;
+            notification.textContent = message;
+            
+            container.appendChild(notification);
+            setTimeout(() => notification.remove(), 3000);
+        }
+        
+        // Simulate critical fault
+        function simulateCriticalFault() {
+            const criticalFault = {
+                id: faults.length + 1,
+                system: 'Core Database',
+                type: 'Critical',
+                status: 'Active',
+                duration: '0m',
+                timestamp: new Date()
+            };
+            
+            faults.unshift(criticalFault);
+            populateFaultTable();
+            updateMetrics();
+            
+            // Show critical notification
+            showNotification('⚠️ CRITICAL FAULT DETECTED: Core Database Failure', 'error');
+            
+            // Animate metrics
+            document.getElementById('totalFaultsCard').classList.add('critical-alert');
+            setTimeout(() => {
+                document.getElementById('totalFaultsCard').classList.remove('critical-alert');
+            }, 5000);
+        }
+        
+        // Initialize dashboard
+        function initializeDashboard() {
+            faults = generateRandomFaults();
+            initializeCharts();
+            updateMetrics();
+            populateFaultTable();
+            
+            // Start periodic updates
+            setInterval(() => {
+                updateMetrics();
+                if (Math.random() < 0.3) {
+                    simulateCriticalFault();
+                }
+            }, 30000);
+        }
+        
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', initializeDashboard);
+    </script>
+</body>
+</html>
