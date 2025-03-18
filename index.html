@@ -1,222 +1,1041 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AI-Powered Dynamic Dashboard with Monica API</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monica Dashboard</title>
+    <!-- Required Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/moment@2.29.4/moment.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+        
+        .pulse-animation {
+            animation: pulse 1.5s ease-in-out;
+        }
+
+        #notificationContainer {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+    </style>
 </head>
-<body class="bg-gray-100 min-h-screen">
-  <div class="container mx-auto px-4 py-8">
-    <h1 class="text-3xl font-bold mb-6">AI-Powered Dynamic Dashboard</h1>
+<body class="bg-gray-50">
+    <div id="notificationContainer"></div>
     
-    <!-- API Status Section -->
-    <div class="p-4 bg-white rounded-lg shadow mb-6">
-      <h2 class="text-xl font-bold mb-3">API Connection Status</h2>
-      <div id="apiStatusContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-        <!-- OpenAI API -->
-        <div class="p-3 rounded-lg border bg-red-100 border-red-300">
-          <div class="flex items-center">
-            <svg class="w-5 h-5 text-red-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-            </svg>
-            <span class="font-medium">OpenAI API</span>
-          </div>
-          <p class="text-sm text-red-700 mt-1">Error connecting to OpenAI API</p>
+    <div class="container mx-auto p-4">
+        <h1 class="text-2xl font-bold mb-6">Monica Dashboard</h1>
+        
+        <!-- API Status Section -->
+        <div class="mb-6">
+            <h2 class="text-lg font-semibold mb-3">API Connections</h2>
+            <div id="apiStatusContainer" class="space-y-3">
+                <!-- Monica API -->
+                <div class="p-3 rounded-lg border bg-green-100 border-green-300">
+                    <div class="flex items-center">
+                        <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        <span class="font-medium">Monica API</span>
+                    </div>
+                    <p class="text-sm text-green-700 mt-1">Connected successfully</p>
+                </div>
+
+                <!-- Connect New API Button -->
+                <div class="p-3 rounded-lg border border-dashed border-gray-300 flex items-center justify-center cursor-pointer hover:bg-gray-50" onclick="showConnectApiModal()">
+                    <svg class="w-5 h-5 text-gray-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                    </svg>
+                    <span class="text-gray-600">Connect New API</span>
+                </div>
+            </div>
         </div>
         
-        <!-- Monica API -->
-        <div class="p-3 rounded-lg border bg-green-100 border-green-300">
-          <div class="flex items-center">
-            <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-            </svg>
-            <span class="font-medium">Monica API</span>
-          </div>
-          <p class="text-sm text-green-700 mt-1">Connected successfully</p>
+        <!-- Workflow Management Section -->
+        <div class="mb-6">
+            <h2 class="text-lg font-semibold mb-3">Workflow Management</h2>
+            <div class="mt-4 overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead>
+                        <tr>
+                            <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                            <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Trigger</th>
+                            <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Last Run</th>
+                            <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                            <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200" id="workflowTableBody">
+                        <!-- Workflow data will appear here -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="mt-4">
+                <div class="p-3 border rounded-lg bg-gray-50">
+                    <h4 class="font-medium mb-2">Generate New Workflow</h4>
+                    <textarea class="w-full p-2 border rounded-lg mb-2" rows="3" placeholder="Describe the workflow you want to create..."></textarea>
+                    <button class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm">Generate Workflow</button>
+                </div>
+            </div>
         </div>
         
-        <!-- Connect New API Button -->
-        <div class="p-3 rounded-lg border border-dashed border-gray-300 flex items-center justify-center cursor-pointer hover:bg-gray-50" onclick="showConnectApiModal()">
-          <svg class="w-5 h-5 text-gray-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-          </svg>
-          <span class="text-gray-600">Connect New API</span>
+        <!-- Contact Management Section -->
+        <div class="mb-6">
+            <h2 class="text-lg font-semibold mb-3">Contact Management</h2>
+            <div class="flex justify-between items-center mb-3">
+                <div class="relative">
+                    <input id="contactSearch" type="text" placeholder="Search contacts..." class="pl-8 pr-3 py-1 border rounded-md" onkeyup="searchContacts()">
+                    <svg class="w-4 h-4 text-gray-400 absolute left-2 top-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                </div>
+                <button onclick="showAddContactModal()" class="px-3 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm flex items-center">
+                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                    </svg>
+                    Add Contact
+                </button>
+            </div>
+            
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead>
+                        <tr>
+                            <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                            <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Last Contact</th>
+                            <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                            <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200" id="contactTableBody">
+                        <!-- Contact data will appear here -->
+                        <tr>
+                            <td colspan="4" class="px-3 py-4 text-center text-gray-500">Loading contacts...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="mt-3 flex justify-between">
+                <button onclick="refreshContacts()" class="px-3 py-1 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 text-sm flex items-center">
+                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                    </svg>
+                    Refresh
+                </button>
+            </div>
+            
+            <div class="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="md:col-span-1 p-4 bg-white rounded-lg border">
+                    <h3 class="font-semibold mb-3">Contact Details</h3>
+                    <div id="contactDetails" class="text-gray-500 text-sm">
+                        Select a contact to view details
+                    </div>
+                    
+                    <div class="mt-4">
+                        <h3 class="font-semibold mb-2">Recent Activities</h3>
+                        <ul id="contactActivities" class="space-y-2">
+                            <!-- Activities will appear here -->
+                            <li class="text-gray-500">No activities to show</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <h3 class="font-semibold mb-2">Quick Actions</h3>
+                        <div class="flex flex-wrap gap-2">
+                            <button class="px-3 py-1 bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 text-sm" disabled>Log Call</button>
+                            <button class="px-3 py-1 bg-green-100 text-green-700 rounded-md hover:bg-green-200 text-sm" disabled>Send Email</button>
+                            <button class="px-3 py-1 bg-purple-100 text-purple-700 rounded-md hover:bg-purple-200 text-sm" disabled>Schedule Meeting</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="md:col-span-2 p-4 bg-white rounded-lg border">
+                    <h3 class="font-semibold mb-3">Contact Analytics</h3>
+                    <div id="visualizationContainer" style="height: 300px;">
+                        <div class="flex items-center justify-center h-full text-gray-400">
+                            <p>Select "Generate Data" to view contact analytics</p>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <textarea class="w-full p-2 border rounded-lg mb-2" rows="2" placeholder="Describe the data you want to visualize..."></textarea>
+                        <button class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm">Generate Data</button>
+                    </div>
+                </div>
+            </div>
         </div>
-      </div>
+        
+        <!-- AI Insights Section -->
+        <div class="mb-6">
+            <h2 class="text-lg font-semibold mb-3">AI-Generated Insights</h2>
+            <div id="insightsContainer" class="mb-3">
+                <div class="p-4 border border-gray-200 bg-white rounded-lg flex items-center justify-center">
+                    <p class="text-gray-400">Generate insights to see AI recommendations</p>
+                </div>
+            </div>
+            <button onclick="generateInsights()" class="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 text-sm flex items-center">
+                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                </svg>
+                Generate Insights
+            </button>
+        </div>
     </div>
     
-    <!-- Main Content Grid -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <!-- Workflow Status Section -->
-      <div class="p-4 bg-white rounded-lg shadow">
-        <h2 class="text-xl font-bold mb-3">Workflow Status</h2>
-        <textarea class="w-full p-2 border rounded-lg mb-3" placeholder="Describe the workflows you want to generate (e.g., 'Show me 5 email automation workflows')"></textarea>
-        <button class="px-3 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">Generate Workflows</button>
-        
-        <div class="mt-4 overflow-x-auto">
-          <table class="min-w-full divide-y divide-gray-200">
-            <thead>
-              <tr>
-                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Trigger</th>
-                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Last Run</th>
-                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-              </tr>
-            </thead>
-            <tbody class="bg-white divide-y divide-gray-200" id="workflowTableBody">
-              <!-- Workflow data will appear here -->
-            </tbody>
-          </table>
+    <!-- Modal for Add Contact -->
+    <div id="addContactModal" class="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center hidden">
+        <div class="bg-white rounded-lg p-6 max-w-md w-full">
+            <h3 class="text-lg font-semibold mb-4">Add New Contact</h3>
+            <form id="addContactForm" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">First Name</label>
+                    <input type="text" id="firstName" class="w-full p-2 border rounded-lg">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
+                    <input type="text" id="lastName" class="w-full p-2 border rounded-lg">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                    <input type="email" id="email" class="w-full p-2 border rounded-lg">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+                    <input type="tel" id="phone" class="w-full p-2 border rounded-lg">
+                </div>
+                
+                <div class="flex justify-end space-x-2">
+                    <button type="button" onclick="hideAddContactModal()" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300">Cancel</button>
+                    <button type="button" onclick="addContact()" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">Add Contact</button>
+                </div>
+            </form>
         </div>
-      </div>
-      
-      <!-- Monica Contact Management Section -->
-      <div class="p-4 bg-white rounded-lg shadow">
-        <h2 class="text-xl font-bold mb-3">Monica Contact Management</h2>
-        <div class="flex mb-3">
-          <input type="text" id="contactSearch" placeholder="Search contacts..." class="flex-grow p-2 border rounded-lg rounded-r-none">
-          <button onclick="searchContacts()" class="px-3 py-2 bg-blue-600 text-white rounded-md rounded-l-none hover:bg-blue-700">Search</button>
-        </div>
-        
-        <div class="overflow-x-auto">
-          <table class="min-w-full divide-y divide-gray-200">
-            <thead>
-              <tr>
-                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Last Contact</th>
-                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-              </tr>
-            </thead>
-            <tbody class="bg-white divide-y divide-gray-200" id="contactTableBody">
-              <!-- Contact data will appear here -->
-              <tr>
-                <td colspan="4" class="px-3 py-4 text-center text-gray-500">Loading contacts...</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-        
-        <div class="mt-3 flex justify-between">
-          <button onclick="refreshContacts()" class="px-3 py-1 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 text-sm flex items-center">
-            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-            </svg>
-            Refresh
-          </button>
-          <button onclick="showAddContactModal()" class="px-3 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm flex items-center">
-            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-            </svg>
-            Add Contact
-          </button>
-        </div>
-      </div>
-      
-      <!-- Contact Data Visualization -->
-      <div class="p-4 bg-white rounded-lg shadow">
-        <h2 class="text-xl font-bold mb-3">Contact Data Visualization</h2>
-        <textarea class="w-full p-2 border rounded-lg mb-3" placeholder="Describe the data you want to visualize (e.g., 'Generate customer support metrics for the last month')"></textarea>
-        <button class="px-3 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">Generate Data</button>
-        <div class="mt-4 h-64 bg-gray-50 rounded-lg flex items-center justify-center" id="visualizationContainer">
-          <p class="text-gray-500">Visualization will appear here</p>
-        </div>
-      </div>
-      
-      <!-- Monica Contact Details -->
-      <div class="p-4 bg-white rounded-lg shadow">
-        <h2 class="text-xl font-bold mb-3">Contact Details</h2>
-        <div id="contactDetails" class="bg-gray-50 rounded-lg p-4">
-          <p class="text-gray-500 text-center">Select a contact to view details</p>
-        </div>
-        
-        <div class="mt-4">
-          <h3 class="font-semibold mb-2">Recent Activities</h3>
-          <ul id="contactActivities" class="space-y-2">
-            <!-- Activities will appear here -->
-          </ul>
-        </div>
-        
-        <div class="mt-4">
-          <h3 class="font-semibold mb-2">Quick Actions</h3>
-          <div class="flex flex-wrap gap-2">
-            <button class="px-3 py-1 bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 text-sm" disabled>Log Call</button>
-            <button class="px-3 py-1 bg-green-100 text-green-700 rounded-md hover:bg-green-200 text-sm" disabled>Send Email</button>
-            <button class="px-3 py-1 bg-purple-100 text-purple-700 rounded-md hover:bg-purple-200 text-sm" disabled>Schedule Meeting</button>
-          </div>
-        </div>
-      </div>
     </div>
     
-    <!-- AI-Generated Insights Section -->
-    <div class="mt-6 p-4 bg-white rounded-lg shadow">
-      <h2 class="text-xl font-bold mb-3">AI-Generated Insights</h2>
-      <textarea class="w-full p-2 border rounded-lg mb-3" placeholder="Ask for insights (e.g., 'Analyze the workflow efficiency and suggest improvements')"></textarea>
-      <button class="px-3 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">Generate Insights</button>
-      <div class="mt-4 p-4 bg-gray-50 rounded-lg" id="insightsContainer">
-        <p class="text-gray-500">AI-generated insights will appear here.</p>
-      </div>
-    </div>
-    
-    <!-- Add Contact Modal -->
-    <div id="addContactModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
-      <div class="bg-white rounded-lg p-6 w-full max-w-lg">
-        <div class="flex justify-between items-center mb-4">
-          <h3 class="text-lg font-semibold">Add New Contact</h3>
-          <button onclick="hideAddContactModal()" class="text-gray-400 hover:text-gray-600">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-            </svg>
-          </button>
+    <!-- Modal for Connect API -->
+    <div id="connectApiModal" class="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center hidden">
+        <div class="bg-white rounded-lg p-6 max-w-md w-full">
+            <h3 class="text-lg font-semibold mb-4">Connect New API</h3>
+            <form id="connectApiForm" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">API Type</label>
+                    <select id="apiType" class="w-full p-2 border rounded-lg">
+                        <option value="">Select API Type</option>
+                        <option value="openai">OpenAI</option>
+                        <option value="google">Google</option>
+                        <option value="salesforce">Salesforce</option>
+                        <option value="hubspot">HubSpot</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">API Key</label>
+                    <input type="password" id="apiKey" class="w-full p-2 border rounded-lg">
+                </div>
+                
+                <div class="flex justify-end space-x-2">
+                    <button type="button" onclick="hideConnectApiModal()" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300">Cancel</button>
+                    <button type="button" onclick="connectApi()" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">Connect</button>
+                </div>
+            </form>
         </div>
-        
-        <form id="addContactForm" class="space-y-4">
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">First Name</label>
-            <input type="text" id="firstName" class="w-full p-2 border rounded-lg">
-          </div>
-          
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
-            <input type="text" id="lastName" class="w-full p-2 border rounded-lg">
-          </div>
-          
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-            <input type="email" id="email" class="w-full p-2 border rounded-lg">
-          </div>
-          
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Phone</label>
-            <input type="tel" id="phone" class="w-full p-2 border rounded-lg">
-          </div>
-          
-          <div class="flex justify-end space-x-2">
-            <button type="button" onclick="hideAddContactModal()" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300">Cancel</button>
-            <button type="button" onclick="addContact()" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">Add Contact</button>
-          </div>
-        </form>
-      </div>
     </div>
-    
-    <!-- Connect API Modal -->
-    <div id="connectApiModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
-      <div class="bg-white rounded-lg p-6 w-full max-w-lg">
-        <div class="flex justify-between items-center mb-4">
-          <h3 class="text-lg font-semibold">Connect New API</h3>
-          <button onclick="hideConnectApiModal()" class="text-gray-400 hover:text-gray-600">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-            </svg>
-          </button>
-        </div>
+    <!-- JavaScript Code -->
+    <script>
+        // Utility Functions
+        function showNotification(message, type = 'info') {
+            const container = document.getElementById('notificationContainer');
+            const notification = document.createElement('div');
+            
+            // Set notification style based on type
+            let bgColor, borderColor, textColor;
+            switch (type) {
+                case 'success':
+                    bgColor = 'bg-green-100';
+                    borderColor = 'border-green-400';
+                    textColor = 'text-green-800';
+                    break;
+                case 'error':
+                    bgColor = 'bg-red-100';
+                    borderColor = 'border-red-400';
+                    textColor = 'text-red-800';
+                    break;
+                default:
+                    bgColor = 'bg-blue-100';
+                    borderColor = 'border-blue-400';
+                    textColor = 'text-blue-800';
+            }
+            
+            notification.className = `${bgColor} ${borderColor} ${textColor} border px-4 py-3 rounded mb-2`;
+            notification.innerHTML = message;
+            
+            container.appendChild(notification);
+            
+            // Remove notification after 3 seconds
+            setTimeout(() => {
+                notification.style.opacity = '0';
+                notification.style.transition = 'opacity 0.5s ease';
+                setTimeout(() => {
+                    container.removeChild(notification);
+                }, 500);
+            }, 3000);
+        }
         
-        <form id="connectApiForm" class="space-y-4">
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">API Type</label>
-            <select id="apiType" class="w-full p-2 border rounded-lg">
-              <option value="">Select API Type</option>
-              <option value="openai">OpenAI</option>
-              
+        function showAddContactModal() {
+            document.getElementById('addContactModal').classList.remove('hidden');
+        }
+        
+        function hideAddContactModal() {
+            document.getElementById('addContactModal').classList.add('hidden');
+            document.getElementById('addContactForm').reset();
+        }
+        
+        function showConnectApiModal() {
+            document.getElementById('connectApiModal').classList.remove('hidden');
+        }
+        
+        function hideConnectApiModal() {
+            document.getElementById('connectApiModal').classList.add('hidden');
+            document.getElementById('connectApiForm').reset();
+        }
+        
+        function addContact() {
+            const firstName = document.getElementById('firstName').value;
+            const lastName = document.getElementById('lastName').value;
+            const email = document.getElementById('email').value;
+            const phone = document.getElementById('phone').value;
+            
+            if (!firstName || !lastName || !email) {
+                showNotification('Please fill in all required fields', 'error');
+                return;
+            }
+            
+            // Simulate API call to add contact
+            setTimeout(() => {
+                // Add new contact to data
+                const newContact = {
+                    id: contactData.length + 1,
+                    name: `${firstName} ${lastName}`,
+                    lastContact: new Date().toISOString(),
+                    status: 'Active',
+                    email: email,
+                    phone: phone || 'Not provided',
+                    company: 'Not specified',
+                    notes: '',
+                    activities: []
+                };
+                
+                contactData.push(newContact);
+                populateContactTable();
+                hideAddContactModal();
+                
+                showNotification('Contact added successfully!', 'success');
+            }, 500);
+        }
+        
+        function connectApi() {
+            const apiType = document.getElementById('apiType').value;
+            const apiKey = document.getElementById('apiKey').value;
+            
+            if (!apiType || !apiKey) {
+                showNotification('Please fill in all required fields', 'error');
+                return;
+            }
+            
+            // Show loading state
+            const connectButton = document.querySelector('#connectApiForm button:last-child');
+            const originalText = connectButton.textContent;
+            connectButton.innerHTML = `
+                <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Connecting...
+            `;
+            
+            // Simulate API connection
+            setTimeout(() => {
+                hideConnectApiModal();
+                
+                // Add new API connection to the list
+                const apiStatusContainer = document.getElementById('apiStatusContainer');
+                const newApiElement = document.createElement('div');
+                newApiElement.className = 'p-3 rounded-lg border bg-green-100 border-green-300';
+                newApiElement.innerHTML = `
+                    <div class="flex items-center">
+                        <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        <span class="font-medium">${apiType} API</span>
+                    </div>
+                    <p class="text-sm text-green-700 mt-1">Connected successfully</p>
+                `;
+                
+                // Insert before the "Connect New API" button
+                apiStatusContainer.insertBefore(newApiElement, apiStatusContainer.lastElementChild);
+                
+                // Reset button state
+                connectButton.innerHTML = originalText;
+                
+                showNotification(`${apiType} API connected successfully!`, 'success');
+            }, 1500);
+        }
+        
+        // API Status Section Animation
+        document.addEventListener('DOMContentLoaded', function() {
+            // Animate API status indicators
+            const apiStatusItems = document.querySelectorAll('#apiStatusContainer > div');
+            
+            apiStatusItems.forEach((item, index) => {
+                // Add fade-in animation with delay based on index
+                item.style.opacity = '0';
+                setTimeout(() => {
+                    item.style.transition = 'opacity 0.5s ease-in-out';
+                    item.style.opacity = '1';
+                }, 300 * index);
+                
+                // Add hover effect for all items
+                item.addEventListener('mouseenter', () => {
+                    item.style.transform = 'translateY(-3px)';
+                    item.style.transition = 'transform 0.3s ease';
+                });
+                
+                item.addEventListener('mouseleave', () => {
+                    item.style.transform = 'translateY(0)';
+                });
+            });
+            
+            // Add pulsing effect to error status
+            const errorStatus = document.querySelector('.bg-red-100');
+            if (errorStatus) {
+                setInterval(() => {
+                    errorStatus.classList.add('pulse-animation');
+                    setTimeout(() => {
+                        errorStatus.classList.remove('pulse-animation');
+                    }, 1000);
+                }, 5000);
+            }
+        });
+
+        // Workflow Status Section - Sample Data and Table Population
+        const workflowData = [
+            { 
+                name: 'Email Follow-up', 
+                trigger: 'Contact Added', 
+                lastRun: '2025-03-16T14:30:00', 
+                status: 'Active'
+            },
+            { 
+                name: 'Weekly Report', 
+                trigger: 'Schedule (Monday)', 
+                lastRun: '2025-03-11T08:00:00', 
+                status: 'Active' 
+            },
+            { 
+                name: 'Data Backup', 
+                trigger: 'Daily at 00:00', 
+                lastRun: '2025-03-17T00:00:00', 
+                status: 'Active' 
+            },
+            { 
+                name: 'Customer Survey', 
+                trigger: '30 Days After Purchase', 
+                lastRun: '2025-03-10T09:15:00', 
+                status: 'Paused' 
+            }
+        ];
+
+        function populateWorkflowTable() {
+            const tableBody = document.getElementById('workflowTableBody');
+            tableBody.innerHTML = '';
+            
+            workflowData.forEach(workflow => {
+                const row = document.createElement('tr');
+                
+                // Format the date
+                const formattedDate = moment(workflow.lastRun).format('MMM D, YYYY h:mm A');
+                
+                // Create status badge with appropriate color
+                const statusClass = workflow.status === 'Active' 
+                    ? 'bg-green-100 text-green-800 border-green-200' 
+                    : 'bg-yellow-100 text-yellow-800 border-yellow-200';
+                
+                row.innerHTML = `
+                    <td class="px-3 py-3 whitespace-nowrap">
+                        <div class="font-medium text-gray-900">${workflow.name}</div>
+                    </td>
+                    <td class="px-3 py-3 whitespace-nowrap">
+                        <div class="text-sm text-gray-500">${workflow.trigger}</div>
+                    </td>
+                    <td class="px-3 py-3 whitespace-nowrap">
+                        <div class="text-sm text-gray-500">${formattedDate}</div>
+                    </td>
+                    <td class="px-3 py-3 whitespace-nowrap">
+                        <span class="px-2 py-1 text-xs rounded-full ${statusClass} border">
+                            ${workflow.status}
+                        </span>
+                    </td>
+                    <td class="px-3 py-3 whitespace-nowrap text-sm text-gray-500">
+                        <button class="text-blue-600 hover:text-blue-800 mr-2">Edit</button>
+                        <button class="text-red-600 hover:text-red-800">Delete</button>
+                    </td>
+                `;
+                
+                tableBody.appendChild(row);
+            });
+            
+            // Add row hover effect
+            const rows = tableBody.querySelectorAll('tr');
+            rows.forEach(row => {
+                row.addEventListener('mouseenter', () => {
+                    row.classList.add('bg-gray-50');
+                });
+                row.addEventListener('mouseleave', () => {
+                    row.classList.remove('bg-gray-50');
+                });
+            });
+        }
+
+        // Contact Management Section
+        const contactData = [
+            { 
+                id: 1,
+                name: 'John Smith', 
+                lastContact: '2025-03-15T10:30:00', 
+                status: 'Active',
+                email: 'john.smith@example.com',
+                phone: '+1 (555) 123-4567',
+                company: 'Acme Inc.',
+                notes: 'Key decision maker for the enterprise project',
+                activities: [
+                    { type: 'email', date: '2025-03-15T10:30:00', description: 'Sent follow-up email about new features' },
+                    { type: 'call', date: '2025-03-10T14:15:00', description: 'Discussed contract renewal options' },
+                    { type: 'meeting', date: '2025-03-05T09:00:00', description: 'Product demo with team' }
+                ]
+            },
+            { 
+                id: 2,
+                name: 'Sarah Johnson', 
+                lastContact: '2025-03-16T15:45:00', 
+                status: 'Active',
+                email: 'sarah.j@example.com',
+                phone: '+1 (555) 987-6543',
+                company: 'TechCorp',
+                notes: 'Interested in premium subscription',
+                activities: [
+                    { type: 'email', date: '2025-03-16T15:45:00', description: 'Sent pricing information' },
+                    { type: 'meeting', date: '2025-03-12T11:00:00', description: 'Virtual meeting to discuss requirements' }
+                ]
+            },
+            { 
+                id: 3,
+                name: 'Michael Wong', 
+                lastContact: '2025-03-05T09:20:00', 
+                status: 'Inactive',
+                email: 'm.wong@example.com',
+                phone: '+1 (555) 234-5678',
+                company: 'Global Solutions',
+                notes: 'Need to follow up about project timeline',
+                activities: [
+                    { type: 'call', date: '2025-03-05T09:20:00', description: 'Left voicemail about project status' },
+                    { type: 'email', date: '2025-02-28T16:30:00', description: 'Sent project timeline document' }
+                ]
+            }
+        ];
+
+        function populateContactTable() {
+            const tableBody = document.getElementById('contactTableBody');
+            tableBody.innerHTML = '';
+            
+            contactData.forEach(contact => {
+                const row = document.createElement('tr');
+                row.dataset.contactId = contact.id;
+                
+                // Format the date
+                const formattedDate = moment(contact.lastContact).format('MMM D, YYYY');
+                const daysAgo = moment().diff(moment(contact.lastContact), 'days');
+                
+                // Create status badge with appropriate color
+                const statusClass = contact.status === 'Active' 
+                    ? 'bg-green-100 text-green-800 border-green-200' 
+                    : 'bg-gray-100 text-gray-800 border-gray-200';
+                
+                row.innerHTML = `
+                    <td class="px-3 py-3 whitespace-nowrap">
+                        <div class="font-medium text-gray-900">${contact.name}</div>
+                    </td>
+                    <td class="px-3 py-3 whitespace-nowrap">
+                        <div class="text-sm text-gray-500">${formattedDate} (${daysAgo} days ago)</div>
+                </td>
+                <td class="px-3 py-3 whitespace-nowrap">
+                    <span class="px-2 py-1 text-xs rounded-full ${statusClass} border">
+                        ${contact.status}
+                    </span>
+                </td>
+                <td class="px-3 py-3 whitespace-nowrap text-sm text-gray-500">
+                    <button class="text-blue-600 hover:text-blue-800 mr-2" onclick="viewContactDetails(${contact.id})">View</button>
+                    <button class="text-red-600 hover:text-red-800">Delete</button>
+                </td>
+            `;
+            
+            tableBody.appendChild(row);
+            
+            // Add click event to view contact details
+            row.addEventListener('click', () => {
+                viewContactDetails(contact.id);
+            });
+        });
+        
+        // Add row hover effect
+        const rows = tableBody.querySelectorAll('tr');
+        rows.forEach(row => {
+            row.addEventListener('mouseenter', () => {
+                row.classList.add('bg-gray-50', 'cursor-pointer');
+            });
+            row.addEventListener('mouseleave', () => {
+                row.classList.remove('bg-gray-50');
+            });
+        });
+    }
+
+    function viewContactDetails(contactId) {
+        const contact = contactData.find(c => c.id === contactId);
+        if (!contact) return;
+        
+        // Update contact details section
+        const detailsContainer = document.getElementById('contactDetails');
+        detailsContainer.innerHTML = `
+            <div class="flex items-center mb-4">
+                <div class="w-12 h-12 rounded-full bg-blue-500 flex items-center justify-center text-white text-xl font-bold">
+                    ${contact.name.charAt(0)}
+                </div>
+                <div class="ml-4">
+                    <h3 class="font-bold text-lg">${contact.name}</h3>
+                    <p class="text-gray-600">${contact.company}</p>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div>
+                    <p class="text-sm text-gray-500">Email</p>
+                    <p class="font-medium">${contact.email}</p>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-500">Phone</p>
+                    <p class="font-medium">${contact.phone}</p>
+                </div>
+                <div class="col-span-1 md:col-span-2">
+                    <p class="text-sm text-gray-500">Notes</p>
+                    <p>${contact.notes}</p>
+                </div>
+            </div>
+        `;
+        
+        // Update activities list
+        const activitiesList = document.getElementById('contactActivities');
+        activitiesList.innerHTML = '';
+        
+        if (contact.activities && contact.activities.length > 0) {
+            contact.activities.forEach(activity => {
+                const activityItem = document.createElement('li');
+                const formattedDate = moment(activity.date).format('MMM D, YYYY h:mm A');
+                
+                let icon;
+                switch (activity.type) {
+                    case 'email':
+                        icon = '<svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>';
+                        break;
+                    case 'call':
+                        icon = '<svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path></svg>';
+                        break;
+                    case 'meeting':
+                        icon = '<svg class="w-4 h-4 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>';
+                        break;
+                    default:
+                        icon = '<svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>';
+                }
+                
+                activityItem.innerHTML = `
+                    <div class="flex items-start">
+                        <div class="flex-shrink-0 mt-0.5">
+                            ${icon}
+                        </div>
+                        <div class="ml-2">
+                            <p class="text-sm font-medium">${activity.description}</p>
+                            <p class="text-xs text-gray-500">${formattedDate}</p>
+                        </div>
+                    </div>
+                `;
+                
+                activitiesList.appendChild(activityItem);
+            });
+        } else {
+            activitiesList.innerHTML = '<li class="text-gray-500">No recent activities</li>';
+        }
+        
+        // Enable quick action buttons
+        const quickActionButtons = document.querySelectorAll('#contactDetails + div + div button');
+        quickActionButtons.forEach(button => {
+            button.disabled = false;
+        });
+        
+        // Highlight the selected contact in the table
+        const rows = document.querySelectorAll('#contactTableBody tr');
+        rows.forEach(row => {
+            if (parseInt(row.dataset.contactId) === contactId) {
+                row.classList.add('bg-blue-50');
+            } else {
+                row.classList.remove('bg-blue-50');
+            }
+        });
+    }
+
+    // Search contacts functionality
+    function searchContacts() {
+        const searchInput = document.getElementById('contactSearch').value.toLowerCase();
+        const tableBody = document.getElementById('contactTableBody');
+        const rows = tableBody.querySelectorAll('tr');
+        
+        rows.forEach(row => {
+            const nameCell = row.querySelector('td:first-child div');
+            if (nameCell) {
+                const name = nameCell.textContent.toLowerCase();
+                if (name.includes(searchInput)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            }
+        });
+    }
+
+    // Refresh contacts functionality
+    function refreshContacts() {
+        const refreshButton = document.querySelector('button[onclick="refreshContacts()"]');
+        
+        // Show loading state
+        refreshButton.innerHTML = `
+            <svg class="animate-spin w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            Refreshing...
+        `;
+        
+        // Simulate API call delay
+        setTimeout(() => {
+            populateContactTable();
+            
+            refreshButton.innerHTML = `
+                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                </svg>
+                Refresh
+            `;
+            
+            // Show success notification
+            showNotification('Contacts refreshed successfully!', 'success');
+        }, 1000);
+    }
+
+    // Data Visualization Section
+    function createContactVisualization() {
+        const container = document.getElementById('visualizationContainer');
+        container.innerHTML = '';
+        
+        // Create canvas for Chart.js
+        const canvas = document.createElement('canvas');
+        canvas.id = 'contactChart';
+        canvas.style.width = '100%';
+        canvas.style.height = '100%';
+        container.appendChild(canvas);
+        
+        // Sample data for visualization
+        const labels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
+        const newContacts = [12, 19, 15, 25, 22, 30];
+        const activeContacts = [15, 20, 25, 27, 32, 35];
+        const inactiveContacts = [5, 8, 10, 8, 6, 5];
+        
+        // Create chart
+        new Chart(canvas, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: 'New Contacts',
+                        data: newContacts,
+                        borderColor: 'rgb(59, 130, 246)',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        tension: 0.3,
+                        fill: true
+                    },
+                    {
+                        label: 'Active Contacts',
+                        data: activeContacts,
+                        borderColor: 'rgb(16, 185, 129)',
+                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                        tension: 0.3,
+                        fill: true
+                    },
+                    {
+                        label: 'Inactive Contacts',
+                        data: inactiveContacts,
+                        borderColor: 'rgb(239, 68, 68)',
+                        backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                        tension: 0.3,
+                        fill: true
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    title: {
+                        display: true,
+                        text: 'Contact Growth Trends'
+                    },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false
+                    }
+                },
+                hover: {
+                    mode: 'nearest',
+                    intersect: true
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Number of Contacts'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Month (2025)'
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // AI-Generated Insights Section
+    function generateInsights() {
+        const insightsContainer = document.getElementById('insightsContainer');
+        
+        // Sample AI-generated insights
+        const insights = [
+            {
+                title: 'Contact Engagement Analysis',
+                content: 'Based on your contact data, 65% of your contacts have been engaged within the last 30 days. This is a 15% improvement from the previous month.',
+                type: 'info'
+            },
+            {
+                title: 'Workflow Optimization',
+                content: 'The "Email Follow-up" workflow has a 78% success rate in receiving responses. Consider implementing similar automation for other contact types.',
+                type: 'success'
+            },
+            {
+                title: 'Attention Required',
+                content: '8 contacts have been inactive for more than 60 days. Consider reaching out with a personalized message to re-engage them.',
+                type: 'warning'
+            }
+        ];
+        
+        // Clear previous insights
+        insightsContainer.innerHTML = '';
+        
+        // Create insights cards
+        insights.forEach(insight => {
+            const card = document.createElement('div');
+            
+            // Set card style based on insight type
+            let borderColor, bgColor, iconColor, icon;
+            switch (insight.type) {
+                case 'info':
+                    borderColor = 'border-blue-200';
+                    bgColor = 'bg-blue-50';
+                    iconColor = 'text-blue-500';
+                    icon = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>';
+                    break;
+                case 'success':
+                    borderColor = 'border-green-200';
+                    bgColor = 'bg-green-50';
+                    iconColor = 'text-green-500';
+                    icon = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>';
+                    break;
+                case 'warning':
+                    borderColor = 'border-yellow-200';
+                    bgColor = 'bg-yellow-50';
+                    iconColor = 'text-yellow-500';
+                    icon = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>';
+                    break;
+            }
+            
+            card.className = `mb-4 p-4 border ${borderColor} ${bgColor} rounded-lg`;
+            card.innerHTML = `
+                <div class="flex items-center mb-2">
+                    <div class="flex-shrink-0 ${iconColor}">
+                        ${icon}
+                    </div>
+                    <h4 class="ml-2 font-semibold">${insight.title}</h4>
+                </div>
+                <p>${insight.content}</p>
+            `;
+            
+            insightsContainer.appendChild(card);
+            
+            // Add fade-in animation
+            card.style.opacity = '0';
+            setTimeout(() => {
+                card.style.transition = 'opacity 0.5s ease-in-out';
+                card.style.opacity = '1';
+            }, 300 * insightsContainer.children.length);
+        });
+        
+        // Add data visualization to insights
+        const visualContainer = document.createElement('div');
+        visualContainer.className = 'mt-6';
+        visualContainer.innerHTML = `
+            <h4 class="font-semibold mb-2">Contact Engagement Distribution</h4>
+            <div id="insightChart" style="height: 200px;"></div>
+        `;
+        insightsContainer.appendChild(visualContainer);
+        
+        // Create donut chart for insights
+        setTimeout(() => {
+            const canvas = document.createElement('canvas');
+            canvas.id = 'insightDonutChart';
+            document.getElementById('insightChart').appendChild(canvas);
+            
+            new Chart(canvas, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Active (< 30 days)', 'Semi-active (30-60 days)', 'Inactive (> 60 days)'],
+                    datasets: [{
+                        data: [65, 27, 8],
+                        backgroundColor: [
+                            'rgba(16, 185, 129, 0.7)',
+                            'rgba(245, 158, 11, 0.7)',
+                            'rgba(239, 68, 68, 0.7)'
+                        ],
+                        borderColor: [
+                            'rgb(16, 185, 129)',
+                            'rgb(245, 158, 11)',
+                            'rgb(239, 68, 68)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                        }
+                    }
+                }
+            });
+        }, 1000);
+    }
+
+    // Initialize event listeners for buttons
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize tables
+        populateWorkflowTable();
+        populateContactTable();
+        
+        // Setup workflow generation button
+        const generateWorkflowButton = document.querySelector('button:contains("Generate Workflow")');
+        if (generateWorkflowButton) {
+            generateWorkflowButton.addEventListener('click', function() {
+                const textarea = this.previousElementSibling;
+                if (textarea.value.trim() !== '') {
+                    // Show loading state
+                    this.innerHTML = `
+                        <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Generating...
+                    `;
+                    
+                    // Simulate API call delay
+                    setTimeout(() => {
+                        // Add new workflow
+                        workflowData.push({
+                            name: 'New ' + textarea.value.split(' ').slice(0, 3).join(' ') + '...',
+                            trigger: 'Custom',
+                            lastRun: new Date().toISOString(),
+                            status: 'Active'
+                        });
+                        
+                        populateWorkflowTable();
+                        this.textContent = 'Generate Workflow';
+                        textarea.value = '';
+                        
+                        // Show success notification
+                        showNotification('Workflow generated successfully!', 'success');
+                    }, 1500);
+                } else {
+                    // Show error notification
+                    showNotification('Please enter a workflow description', 'error');
+                }
+            });
+        }
+        
+        // Setup data visualization button
+        const generateDataButton = document.querySelector('button:contains("Generate Data")');
+        if (generateDataButton) {
+            generateDataButton.addEventListener('click', function() {
+                const textarea = this.previousElementSibling;
+                if (textarea.value.trim() !== '') {
+                    // Show loading state
+                    this.innerHTML = `
+                        <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Generating...
+                    `;
+                    
+                    // Simulate API call delay
+                    setTimeout(() => {
+                        createContactVisualization();
+                        this.textContent = 'Generate Data';
+                        
+                        // Show success notification
+                        showNotification('Visualization generated successfully!', 'success');
+                    }, 1500);
+                } else {
+                    // Show error notification
+                    showNotification('Please enter a data description', 'error');
+                }
+            });
+        }
+    });
+    </script>
+</body>
+</html>
+
+                                                             
